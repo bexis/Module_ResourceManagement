@@ -1,0 +1,29 @@
+﻿<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.ResourceStructure">
+  <subclass name="FileValue" extends="ResourceAttributeValue" discriminator-value="FTV" dynamic-update="true">
+
+    <!-- Mapping Entity properties -->
+
+    <property name="Name" type="string">
+      <column name="Name" />
+    </property>
+
+    <property name="Extention" type="string">
+      <column name="Extention" />
+    </property>
+
+    <property name="Minmetype" type="string">
+      <column name="Minmetype" />
+    </property>
+
+    <property name="Data" type="binary">
+      <column name="Data" />
+    </property>
+
+    <property name="NeedConfirmation" type="byte">
+      <column name="NeedConfirmation" />
+    </property>
+
+  </subclass>
+
+</hibernate-mapping>
+

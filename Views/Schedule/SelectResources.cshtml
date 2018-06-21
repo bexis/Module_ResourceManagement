@@ -1,0 +1,119 @@
+﻿@using Telerik.Web.Mvc.UI
+
+@section Information
+{
+    With this interface you are able to filter and choose resource to added to your resource cart.
+    <p>
+        <a href="/RBM/Help/Index/#_Toc434570750" class="bx-informationLink" title="go to help" target="_blank">More</a>
+    </p>
+}
+
+<table id="enterSchedules">
+    <tr>
+        <th>Filter</th>
+        <th>Resources</th>
+        <th><div class="bx bx-shopping-cart"></div> Resource Cart</th>
+    </tr>
+    <tr>
+        <td id="filter" style="width: 20%;"><div id="Content_Filter" class="overlay"></div></td>
+        <td id="resources" style="width: 50%;"><div id="Content_Resources"></div></td>
+        <td id="schedules"><div id="Content_Schedules" onchange="onSchedulesChange()"></div></td>
+    </tr>
+</table>
+    
+ <div class="bx-footer right">
+
+ @Html.ActionLink("Booking", "CreateEvent", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Create event with all selected resources", @tabindex = "5" })
+ @Html.ActionLink("Cancel", "Schedule", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Cancel", @tabindex = "5" })<br />
+ <small>@Html.ValidationMessage("CartEmpty")</small>
+ </div>
+
+
+<style type="text/css">
+
+/*Table*/
+
+#enterSchedules td {
+     vertical-align:top;
+      /*border: none !important;*/
+      border: none !important;
+     
+}
+
+/*#enterSchedules th {
+     vertical-align:top;
+      border: none !important;
+     
+}*/
+
+#filter{
+    border-left:2px solid #e8eef4;
+    border-bottom: 2px solid #e8eef4;
+    border-right:none;
+   
+} 
+#resources{
+    border-right:2px solid #e8eef4;
+    border-bottom: 2px solid #e8eef4;
+    border-left:none;
+}
+#schedules {
+    border:2px solid #e8eef4;
+}
+
+/*Button*/
+#addToEvent {
+    /*margin-left: 78%;*/
+}
+
+/*List*/
+#userList {
+    list-style: none;
+    padding-left: 0em; 
+    margin-left: 0em;
+}
+#userList li {
+   display: block;
+
+}
+
+</style>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        
+    $.get('@Url.Action("ResourceFilter", "Schedule")', function (data) {
+
+        $('#Content_Filter').html(data);
+    }   );
+
+        
+        $.get('@Url.Action("LoadResources", "Schedule")', function (data) {
+
+            $('#Content_Resources').html(data);
+        });
+
+        $.get('@Url.Action("SelectedResources", "Schedule")', {}, function (data) {
+
+            $('#Content_Schedules').html(data);
+        });
+    });
+
+    function onSchedulesChange()
+    {
+        //var d = $('#Content_Schedules').text();
+        //if (d == "") {
+        //    $('#CreateEvent').Attr("disabled", "disabled");
+        //    $('#CreateEvent').AddClass("bx-disabled");
+        //}
+        //else {
+
+        //    $('#CreateEvent').RemoveAttr("disabled", "disabled");
+        //    $('#CreateEvent').RemoveClass("bx-disabled");
+        //}
+    }
+
+    </script> 
+
+

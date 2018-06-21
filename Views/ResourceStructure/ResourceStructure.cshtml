@@ -1,0 +1,20 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
+
+@model ResourceStructureModel
+
+
+@section Scripts{
+    <script src="@Url.Content("~/Scripts/jquery.validate.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/jquery.unobtrusive-ajax.min.js")" type="text/javascript"></script>
+}
+
+@{
+    ViewBag.Title = "ResourceStructure";
+}
+
+<h2>Resource Structure</h2>
+
+
+@Html.Partial("_createResourceStructure", Model)

@@ -1,0 +1,97 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
+
+@model List<ResourceStructureAttributeModel>
+
+@(Html.Telerik().Grid(Model)
+        .Name("Grid_ResourceStructureAttribute")
+        .HtmlAttributes(new { style = "width:700px" })
+        .DataKeys(keys =>
+        {
+            keys.Add(r => r.AttributeId);
+        })
+        .Columns(columns =>
+        {
+
+            columns.Bound(r => r.rsID).HtmlAttributes(new { name = "rsId" }).Hidden();
+            columns.Bound(r => r.AttributeId).Width(50);
+            columns.Bound(r => r.AttributeName).Width(100);
+            columns.Bound(r => r.AttributeDescription).Width(200);
+            columns.Template(
+                         @<text>
+                                <div id="checkboxes">
+                                    @Html.CheckBox("" + item.AttributeId)
+                                </div>
+                         </text>
+                        ).Title(" ")
+                        .Width(80)
+                        .ClientTemplate(
+                            @Html.CheckBox("<#= AttributeId #>", new { id = "AttributeId" }).ToHtmlString()
+                        ).Width(30);
+            columns.Template(
+             @<text>
+                                <div class="fa-plus-circle:before ">
+                                    @Html.ActionLink(" ", "AddResourceAttributeUsages", "ResourceStructure", new { rsId = item.rsID, rsaId = item.AttributeId }, new { @class = "bx bx-grid-function bx-add" })
+                                </div>
+                                <b>@item.rsID</b>
+                                <b>@item.AttributeId</b>
+                         </text>
+            ).Title("Add")
+            .Width(80)
+            .ClientTemplate(
+                @Html.ActionLink(" ", "AddResourceAttributeUsage", "ResourceStructure", new { rsId = "<#= rsID #>", rsaId = "<#= AttributeId #>" }, new { @class = "bx bx-grid-function bx-add" }).ToHtmlString()
+
+            ).Width(50);
+        })
+        .ClientEvents(clientEvents => clientEvents
+            .OnDataBound("onDataBound")
+        )
+                .DataBinding(dataBinding => dataBinding
+                    .Ajax()
+                    .Select("ResourceStructureAttributesAll_Select", "ResourceStructure", (long)ViewData["RSID"])
+                )
+        .Filterable()
+        .Sortable(sortable => sortable
+            .OrderBy(orderby => orderby
+                .Add(r => r.AttributeId).Descending()))
+        //.Scrollable(t => t.Height(250))
+)
+
+
+    <div class="bx-rpm-submit bx-rpm-buttons">
+        <button name="AddResourcesToSet" class="t-button action" onclick="addSelectedResources()">Add attributes to structure</button>
+    </div>
+
+<script type="text/javascript">
+
+    function onDataBound() {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    }
+
+    function addSelectedResources() {
+
+        var selected = [];
+        $('input:checkbox[id^="AttributeId"]:checked').each(function () {
+            selected.push($(this).attr('name'));
+        });
+        var selectedAsString = selected.toString();
+        var rsId = $('td[name=rsId]').html();
+        $.post('@Url.Action("AddResourceAttributeUsages", "ResourceStructure", new RouteValueDictionary { { "area", "RBM" } })', { rsId: rsId, rsaIds: selectedAsString }, function (data) {
+            Window_Creation_OnClose();
+        });
+    }
+
+    function Window_Creation_OnClose() {
+
+        $('#Content_Choose').empty();
+        var window = $('#Window_Choose').data('tWindow');
+        window.close();
+        refreshGrid();
+    }
+
+    function refreshGrid() {
+        $(".t-grid .t-refresh").trigger('click');
+    }
+
+</script>

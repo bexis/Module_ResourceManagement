@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.Booking">
+  <class xmlns="urn:nhibernate-mapping-2.2" name="NotificationDependency" table="NotificationDependencies">
+
+    <!-- Mapping BaseEntity properties -->
+
+    <id name="Id" type="Int64">
+      <column name="Id" />
+      <generator class="native" />
+    </id>
+
+    <!-- Mapping Event Properties -->
+
+    <property name="DomainItem" type="String" />
+
+    <property name="AttributeId" type="Int64" />
+
+    <!-- Mapping Entity Associations -->
+
+    <many-to-one name="Notification" column="NotificationRef" class="BExIS.Rbm.Entities.Booking.Notification, BExIS.Rbm.Entities.Booking"/>
+
+
+
+
+  </class>
+</hibernate-mapping>

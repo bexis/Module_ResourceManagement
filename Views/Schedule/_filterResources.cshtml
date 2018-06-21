@@ -1,0 +1,203 @@
+﻿@using Telerik.Web.Mvc.UI;
+@using BExIS.Web.Shell.Areas.RBM.Models.Booking;
+
+@model ResourceFilterModel
+
+
+@*<b>Filter Resources</b><br /><br />*@
+
+    <table style="width:400px; border: none !important;"class="overlay">
+        <tr>
+            <td style="border: none !important;">
+                @if(Model.IsPreSelected)
+                {
+                <span>Startdate:@Html.Telerik().DatePickerFor(m => m.StartDate).HtmlAttributes(new { title="Start date of the time period in which you search resources" })</span>
+                }
+                else
+                {
+                  <span>Startdate: @Html.Telerik().DatePicker().Name("StartDate").HtmlAttributes(new { title = "Start date of the time period in which you search resources" })</span>
+                }
+            </td>
+            <td  style="border: none !important;">
+                @if(Model.IsPreSelected)
+                {
+                    <span>Enddate: @Html.Telerik().DatePickerFor(m=>m.EndDate).HtmlAttributes(new { title = "End date of the time period in which you search resources" })</span>
+                }
+                else
+                {
+                   <span> Enddate: @Html.Telerik().DatePicker().Name("EndDate").HtmlAttributes(new { title = "End date of the time period in which you search resources" })</span>
+                }
+                
+            </td>
+        </tr>
+        <tr>
+            <td  style="border: none !important;">
+                Quantity
+                @Html.TextBox("Quantity", Model.Quantity, new { title= "Filter on quantity " })
+            </td>
+            <td  style="border: none !important;">
+                <button onclick="applyFilter()" class="bx-button small function" title="Apply filter">OK</button>
+                <button onclick="removeFilter()" class="bx-button small function" title="Clear filter">Clear</button>
+            </td>
+            </tr>
+    </table>
+    
+
+<br />
+@(Html.Telerik().TreeView()
+        .Name("TreeView")
+        .ShowCheckBox(true)
+        .ClientEvents(events => events
+                //.OnSelect("onSelect")
+                .OnChecked("onChangeFilter")
+        )
+
+         .BindTo<AttributeDomainItemsModel>(Model.TreeItems.Distinct(), (item, attribute) =>
+             {
+                 item.Text = attribute.AttrName;
+                 item.Value = attribute.AttrId.ToString();
+                 item.Checkable = false;
+                 item.Checked = false;
+                 item.Expanded = true;
+
+                 foreach(BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.DomainItemModel di in attribute.DomainItems)
+                 {
+                      TreeViewItem subitem = new TreeViewItem();
+                      item.Items.Add(subitem);
+
+                      subitem.Text = di.Key;
+                      subitem.Value = di.Key;
+                      subitem.LinkHtmlAttributes["id"] = attribute.AttrId;
+                      subitem.LinkHtmlAttributes["class"] = "domainItem";
+                      
+                      //subitem.Action("OnSelectTreeViewItem", "Schedule", new RouteValueDictionary { { "area", "RBM" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
+                 }
+             }
+        )
+        .ExpandAll(true)
+)
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    });
+
+    function treeView() {
+        return $('#TreeView').data('tTreeView');
+    }
+
+    function applyFilter() {
+
+        var startdate = $("#StartDate").val();
+        var enddate = $("#EndDate").val();
+
+        if (new Date(enddate) < new Date(startdate))
+        {
+            alert("End date is before start date. Change the date to apply the filter.");
+        }
+        else
+        {
+            var quantity = $("#Quantity").val();
+
+            $.get('@Url.Action("ApplyFilter", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', { startdate: startdate, enddate: enddate, quantity: quantity }, function (data) {
+
+                $('#Content_Resources').html(data);
+            });
+        }
+    }
+
+    function removeFilter() {
+
+        var checkedItems = [];
+
+        if ($('#TreeView>ul>li>ul>li>div :checked').length > 0) {
+
+            $('#TreeView>ul>li>ul>li>div :checked').each(function () {
+
+                var parentSelect = $(this).parent().parent();
+                var itemSelect = parentSelect.find(':input[name="itemValue"]');
+                var attrId = parentSelect.find('span[class$="domainItem"]').attr('id');
+
+                var item = attrId + "_" + itemSelect.attr('value');
+
+                checkedItems.push(item);
+            })
+
+            //convert to string to send it to sever
+            var checkedItemAsString = checkedItems.toString();
+
+            $.get('@Url.Action("RemoveFilter", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', { selectedItems: checkedItemAsString }, function (data) {
+                $("#StartDate").val("");
+                $("#EndDate").val("");
+                $("#Quantity").val(0);
+                $('#Content_Resources').html(data);
+            });
+        }
+        else {
+            $.get('@Url.Action("LoadResources", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', function (data) {
+
+                $('#Content_Resources').html(data);
+
+            });
+        }
+
+
+
+
+
+
+        @*$.get('@Url.Action("RemoveFilter", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', {}, function (data) {
+
+            $("#StartDate").val() = null;
+            $("#EndDate").val() = null;
+            $("#Quantity").val() = 0;
+            $('#Content_Resources').html(data);
+        });*@
+
+    }
+
+
+        function onChangeFilter(e) {
+
+            var checkedItems = [];
+
+            if ($('#TreeView>ul>li>ul>li>div :checked').length > 0) {
+
+                $('#TreeView>ul>li>ul>li>div :checked').each(function () {
+
+                    var parentSelect = $(this).parent().parent();
+                    var itemSelect = parentSelect.find(':input[name="itemValue"]');
+                    var attrId = parentSelect.find('span[class$="domainItem"]').attr('id');
+
+                    var item = attrId + "_" + itemSelect.attr('value');
+
+                    checkedItems.push(item);
+                })
+
+                //convert to string to send it to sever
+                var checkedItemAsString = checkedItems.toString();
+
+                $.get('@Url.Action("OnChangeFilter", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', { selectedItems: checkedItemAsString }, function (data) {
+
+                    $('#Content_Resources').html(data);
+                });
+            }
+            else {
+                $.get('@Url.Action("LoadResources", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', function (data) {
+
+                    $('#Content_Resources').html(data);
+
+                });
+            }
+        }
+    
+
+</script>
+
+
+
+
+

@@ -1,0 +1,17 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Booking;
+
+@model List<NotificationBlackboardModel>
+
+<h3>Notification Blackboard</h3>
+<hr />
+@foreach(NotificationBlackboardModel item in Model)
+{
+    <fieldset>
+        <legend>@item.Subject</legend>
+        <br />
+        <div><b> From @item.StartDate To @item.EndDate</b></div>
+        <div><p>@item.Message</p></div>
+        <div><i>Insertdate: @item.InsertDate </i></div>
+    </fieldset>
+}

@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.ResourceStructure">
+<class xmlns="urn:nhibernate-mapping-2.2" name="ResourceAttributeUsage" table="ResourceAttributeUsage" dynamic-update="true">
+
+
+    <!--<property name="DefaultValue" type="string">
+      <column name="DefaultValue" />
+    </property>-->
+  <id name="Id" type="Int64">
+    <column name="Id" />
+    <generator class="native" />
+  </id>
+
+  <property name="IsValueOptional" type="Boolean">
+      <column name="IsValueOptional" />
+    </property>
+
+  <property name="IsFileDataType" type="Boolean">
+    <column name="IsFileDataType" />
+  </property>
+
+
+
+
+
+  <!-- Mapping Entity Associations -->
+    <many-to-one name="ResourceStructureAttribute" class="BExIS.Rbm.Entities.ResourceStructure.ResourceStructureAttribute" not-null="true" column="ResourceStructureAttributeRef"/>
+    <many-to-one name="ResourceStructure" class="BExIS.Rbm.Entities.ResourceStructure.ResourceStructure" not-null="true" column="ResourceStructureRef"/>
+
+  </class>
+  
+  
+  
+</hibernate-mapping>

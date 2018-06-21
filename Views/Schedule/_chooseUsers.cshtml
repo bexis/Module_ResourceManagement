@@ -1,0 +1,112 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Booking;
+
+@model List<PersonInSchedule>
+<div >
+@(Html.Telerik().Grid(Model)
+        .Name("Grid_Users")
+        .HtmlAttributes(new { style = "width:500px" })
+        .DataKeys(keys =>
+        {
+            keys.Add(r => r.UserId);
+        })
+        .Columns(columns =>
+        {
+            columns.Bound(r => r.Index).Hidden().HtmlAttributes(new { name = "scheduleIndex" });
+            columns.Bound(r => r.UserId).Hidden();
+            columns.Bound(r => r.UserFullName).Width(50);
+            columns.Template(
+                         @<text>
+                                <div id="checkboxesUserSelect">
+                                    @Html.CheckBox("selected_userId_" + item.UserId, item.IsSelected, new { id = @item.UserId, index = @item.Index, OnChange = "changeUserSelection(this)" })
+                                </div>
+                         </text>
+                        ).Title("Select")
+                        .Width(40);
+                        //.ClientTemplate(
+                        //    @Html.CheckBox("<#= UserId #>", new { id = "UserId", OnChange = "changeUserSelection(this)" }).ToHtmlString()
+                        //).Width(30);
+            columns.Template(
+            @<text>
+                                <div id="IsContact">
+                                    @Html.CheckBox("" + item.IsContactPerson, item.IsContactPerson, new { id = @item.UserId, index = @item.Index, OnChange = "changeContactPerson(this)" })
+                                </div>
+                         </text>
+           ).Title("IsContact")
+           .Width(50);
+           //.ClientTemplate(
+           //    @Html.CheckBox("IsContact").ToHtmlString()
+           //).Width(30);
+
+
+        })
+                                                 .ClientEvents(clientEvents => clientEvents
+                                                  .OnDataBound("onDataBound")
+                                                )
+                                                                                        .Filterable()
+                                                                                        .Sortable(sortable => sortable
+                                                                                            .OrderBy(orderby => orderby
+                                                                                                .Add(r => r.UserId).Descending()))
+        //.Scrollable()
+                                                                                )
+<br />
+    <div class="bx-rpm-submit bx-rpm-buttons">
+            <button class="bx-button action" name="AddUsersToSchedule" onclick="addSelectedUsers()">Add users to schedule</button>
+    </div>
+</div>
+<script type="text/javascript">
+
+    function onDataBound() {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    }
+
+    function addSelectedUsers() {
+
+        var index = $("td[name=scheduleIndex]:first").text();
+        $.post('@Url.Action("AddUsersToSchedule", "Schedule", new RouteValueDictionary { { "area", "RBM" } })', {scheduleIndex: index }, function (data) {
+            $("#users_"+index).html(data)
+            Window_Choose_OnClose();
+        });
+    }
+
+    function changeUserSelection(e) {
+
+        var userId = e.id;
+        var selected = "";
+        var index = $(e).attr("index");
+
+        if ($(e).is(':checked')) {
+            selected = "true";
+        }
+        else {
+            selected = "false";
+        }
+
+        $.get('@Url.Action("ChangeSelectedUser", "Schedule")', { userId: userId, selected: selected, index: index }, function (data) {
+        });
+    }
+
+    function changeContactPerson(e) {
+        var userId = e.id;
+        var index = $(e).attr("index");
+        //check is user selected, onlay if selected the contact can be set
+        if ($("input[name^='selected_userId_" + userId + "']").is(':checked')) {
+            $.get('@Url.Action("ChangeContactPerson", "Schedule")', { userId: userId, index:index }, function (data) {
+            });
+        }
+        else {
+            alert("Please select the person first!");
+            $(e).attr('checked', false);
+        }
+    }
+
+
+    function Window_Choose_OnClose() {
+
+        $('#Content_ChooseUsers').empty();
+        var window = $('#Window_ChooseUsers').data('tWindow');
+        window.close();
+    }
+
+</script>

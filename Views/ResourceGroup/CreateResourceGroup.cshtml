@@ -1,0 +1,40 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Resource;
+@using BExIS.Rbm.Entities.Resource;
+
+
+@model CreateResourceGroupModel
+
+@{
+    List<string> ClassifierModeList = new List<string>();
+    foreach (Mode m in Enum.GetValues(typeof(Mode)))
+    {
+        ClassifierModeList.Add(m.ToString());
+    }
+}
+
+<div class="rbmPartialDiv" id="createResource">
+
+      @using (Html.BeginForm("Create", "ResourceGroup", new { area = "RBM" }))
+      {
+          <table class="bx-table-form" style="width: 500px;">
+              <tr>
+                  <td>@Html.LabelFor(m => m.Name)</td>
+                  <td>@Html.TextBoxFor(m => m.Name, new {@class = "bx-input", @tabindex = "2"})
+                      @Html.ValidationMessageFor(m => m.Name)</td>
+              </tr>
+              <tr>
+                  <td>@Html.LabelFor(m => m.ClassifierMode)</td>
+                  <td> @Html.DropDownListFor(m => m.ClassifierMode, new SelectList(ClassifierModeList ,Model.ClassifierMode), new { @class="bx-input"})</td>
+              </tr>
+          </table>
+
+          
+          <div class="bx-footer right">
+                <button name="create" type="submit" class="bx-button action" title="Save Resource Group">Save</button>
+                 @Html.ActionLink("Cancel", "ResourceGroup", "ResourceGroup", new { area = "RBM", @class = "t-button action", @title = "Cancel", @tabindex = "5" })
+          </div>
+
+      }
+
+</div>

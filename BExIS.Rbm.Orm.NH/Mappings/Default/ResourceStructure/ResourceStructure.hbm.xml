@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.ResourceStructure">
+
+  <class xmlns="urn:nhibernate-mapping-2.2" name="ResourceStructure" table="ResourceStructures" dynamic-update="true">
+
+    <!-- Mapping BaseEntity properties -->
+
+    <id name="Id" type="Int64">
+      <column name="Id" />
+      <generator class="native" />
+    </id>
+
+    <version name="VersionNo" type="Int32">
+      <column name="VersionNo" />
+    </version>
+
+    <property name="Extra" type="System.Xml.XmlDocument, System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+      <column name="Extra" not-null="false" sql-type="xml" />
+    </property>
+
+    <!-- Mapping BusinessEntity properties -->
+
+    <component name="CreationInfo" >
+      <property name="ActionType" type="Vaiona.Entities.Common.AuditActionType, Vaiona.Entities">
+        <column name="C_ActionType" />
+      </property>
+      <property name="Performer" type="string">
+        <column name="C_Performer" />
+      </property>
+      <property name="Comment" type="string">
+        <column name="C_Comment" />
+      </property>
+      <property name="Timestamp" type="DateTime">
+        <column name="C_Timestamp" not-null="false"/>
+      </property>
+    </component>
+
+    <component name="ModificationInfo" >
+      <property name="ActionType" type="Vaiona.Entities.Common.AuditActionType, Vaiona.Entities">
+        <column name="M_ActionType" />
+      </property>
+      <property name="Performer" type="string">
+        <column name="M_Performer" />
+      </property>
+      <property name="Comment" type="string">
+        <column name="M_Comment" />
+      </property>
+      <property name="Timestamp" type="DateTime">
+        <column name="M_Timestamp" not-null="false"/>
+      </property>
+    </component>
+
+
+    <!-- Mapping Entity properties -->
+
+    <property name="Name" type="string">
+      <column name="Name" />
+    </property>
+    <property name="Description" type="string">
+      <column name="Description" />
+    </property>
+      
+
+    <!-- Mapping Entity Associations -->
+
+
+    <set name="ResourceAttributeUsages" lazy="true">
+      <key column="ResourceStructureRef"/>
+      <one-to-many class="BExIS.Rbm.Entities.ResourceStructure.ResourceAttributeUsage, BExIS.Rbm.Entities" />
+    </set>
+
+
+    <many-to-one name="Parent" class="ResourceStructure" not-null="false" column="ParentRef"/>
+    
+    <set name="Children" cascade="all-delete-orphan" inverse="true">
+      <key column="ParentRef" not-null="false" foreign-key="fk_Classifier_ParentClassifier"/>
+      <one-to-many class="ResourceStructure"/>
+    </set>
+    
+    
+
+  </class>
+</hibernate-mapping>
+  

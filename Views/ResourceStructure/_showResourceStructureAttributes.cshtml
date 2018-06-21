@@ -1,0 +1,197 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
+
+@model ResourceStructureModel
+
+@{
+    Model.SelectedItem = (ResourceStructureAttributeModel)Session["Attribute"];
+}
+
+<div>
+    <h3>Resource Structure Attributes</h3>
+    <span class="bx-button function" onclick="Create()" title="Create a new resource structure attribute">Create New</span>
+    <span class="bx-button function" onclick="Choose()" title="Choose an existing resource structure attribute">Choose Existing</span>
+    <br /><br />
+ @(Html.Telerik().Grid(Model.ResourceStructureAttributeUsages)
+        .Name("Grid_ResourceStructureAttributes")
+
+        .Columns(columns =>
+        {
+        columns.Bound(r => r.UsageId).Width(90);
+        columns.Template(
+                         @<text>
+                                <div id="checkbox0">
+                                    @Html.CheckBox("IsValueOptional_" + item.UsageId, item.IsValueOptional, new { onClick = "isValueOptionOnChange(" + item.UsageId + ")", title= "Select here if the value should be optional in the resource where this structure is used" })
+                                </div>
+                         </text>
+                    ).Title("IsOptional")
+                    
+        .ClientTemplate(
+            "<input type='checkbox' name='IsValueOptional_<#= UsageId #>' onclick='isValueOptionOnChange(<#= UsageId #>);' <#= IsValueOptional ? checked='checked' : '' #> />");
+        columns.Template(
+                         @<text>
+                                <div id="checkbox1">
+                                    @Html.CheckBox("IsValueFile_" + item.UsageId, item.IsFileDataType, new { onClick = "isValueFileOnChange(" + item.UsageId + ")", title="Select here if value should be a file in the resource where this structure is used" })
+                                </div>
+                         </text>
+                        ).Title("IsFile")
+                        .Width(100)
+                        .ClientTemplate(
+                           "<input type='checkbox' name='IsValueFile_<#= UsageId #>' onclick='isValueFileOnChange(<#= UsageId #>);' <#= IsFileDataType ? checked='checked' : '' #> />");
+        columns.Bound(r => r.ResourceAttributeName);
+        columns.Bound(r => r.ResourceAttributeDescription);
+        columns.Bound(r => r.ParentAttributeName);
+
+        columns.Template(
+                        @<text>
+                                   @if(String.IsNullOrEmpty(item.ParentAttributeName))
+                                   {
+                                       @Html.ActionLink(" ", "RemoveUsageFromResourceStructure", "ResourceStructure", new { usageId = item.UsageId, rsId = Model.Id }, new { @class = "bx bx-grid-function bx-trash", onclick = "return confirm('Are you sure you want to remove the Resource Structure Attribute from Resource Structure" + "?')", title = "Remove attribute from the struture" })
+                                   }
+                        </text>
+                        ).Title(" ")
+                        .Width(80)
+                        .ClientTemplate(
+                            @Html.ActionLink(" ", "RemoveUsageFromResourceStructure", "ResourceStructure", new { AttributeId = "<#= UsageId #>" }, new { @class = "bx bx-grid-function bx-trash", onclick = "return confirm('Are you sure you want to remove the Resource Structure Attribute from Resource Structure" + "?')", title="Remove attribute from the struture" }).ToHtmlString()
+                        ).Width(70);
+
+        })
+
+                                                            .ClientEvents(clientEvents => clientEvents
+                                                            //.OnCommand("OnCommand")
+                                                            .OnDataBound("onDataBound")
+                                               )
+                                                            .DataBinding(dataBinding => dataBinding
+                                                             .Ajax()
+                                                            .Select("ResourceStructureUsages_Select", "ResourceStructure", new { id = Model.Id })
+                                               )
+                                                                         //.Filterable()
+                                                                         //.Sortable(sortable => sortable
+                                                                         //.OrderBy(orderby => orderby
+                                                                         //.Add(r => r.UsageId).Descending()))
+                                                                         
+                                                                         .Sortable()
+
+
+                                        )
+
+
+   @(Html.Telerik().Window()
+    .Name("Window_Creation")
+    .Title("Create Resource Structure Attribute")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_Creation"></div>
+    </text>)
+    .ClientEvents(clientEvents => clientEvents
+        .OnClose("Window_Creation_OnClose")
+    )
+)
+
+     @(Html.Telerik().Window()
+    .Name("Window_Choose")
+    .Title("Choose Resource Structure Attribute")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .Width(1300)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_Choose"></div>
+    </text>)
+    .ClientEvents(clientEvents => clientEvents
+        .OnClose("Window_Choose_OnClose")
+    )
+)
+             </div>
+
+
+<script type="text/javascript">
+
+    function onDataBound() {
+        resetAllTelerikIconTitles();
+        addTooltips();
+
+        @*var m = '@(Model.Message)';
+        alert(m);*@
+    }
+
+    function Create() {
+        var id = '@Model.Id';
+
+        $.get('@Url.Action("CreateResourceStructureAttributeWithUsage", "ResourceStructure", new RouteValueDictionary { { "area", "RBM" } })', { id: id }, function (data) {
+
+            $('#Content_Creation').html(data);
+            var window = $('#Window_Creation').data('tWindow');
+            window.center().open();
+        });
+    }
+
+    function Choose() {
+
+        var id = '@Model.Id';
+
+        $.get('@Url.Action("ChooseResourceStructureAttributes", "ResourceStructure", new RouteValueDictionary { { "area", "RBM" } })', { id: id }, function (data) {
+
+            $('#Content_Choose').html(data);
+            var window1 = $('#Window_Choose').data('tWindow');
+            window1.center().open();
+        });
+    }
+
+    function Window_Creation_OnClose() {
+        $('#Content_Creation').empty();
+        refreshGrid();
+    }
+
+    function Window_Choose_OnClose() {
+        @*var m = '@(Model.Message)';
+        alert(m);*@
+    }
+
+    function isValueOptionOnChange(id) {
+
+        var selected = false;
+        if ($("input[name=IsValueOptional_" + id + "]").is(":checked")) {
+            selected = true;
+        }
+
+        $.get('@Url.Action("EditIsOptionalUsage", "ResourceStructure", new RouteValueDictionary { { "area", "RBM" } })', { usageId: id, isOptional: selected }, function (data) {
+            //refreshGrid();
+        });
+    }
+
+
+    function isValueFileOnChange(id) {
+        var selected = false;
+        if ($("input[name=IsValueFile_" + id + "]").is(":checked")) {
+            selected = true;
+        }
+
+
+
+        $.get('@Url.Action("EditIsFileUsage", "ResourceStructure", new RouteValueDictionary { { "area", "RBM"} })', { usageId: id, isFile: selected }, function (data) {
+            //refreshGrid();
+        });
+    }
+
+
+    function refreshGrid() {
+        $(".t-grid .t-refresh").trigger('click');
+        alert(test);
+    }
+
+    function attributeCreate_onSuccess(data) {
+        if (data.success) {
+            $('#Window_Creation').data('tWindow').close();
+            $('#Window_Edit').data('tWindow').close();
+        }
+    }
+
+
+</script> 

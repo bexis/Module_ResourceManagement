@@ -1,0 +1,22 @@
+﻿<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.ResourceConstraint">
+  <subclass name="DependencyConstraint" extends="ResourceConstraint" discriminator-value="DEP" dynamic-update="true">
+
+
+    <!-- Mapping Entity properties -->
+
+    <property name="Implicit" type="Boolean">
+      <column name="Implicit" />
+    </property>
+
+    <property name="Quantity" type="Int32">
+      <column name="Quantity" />
+    </property>
+
+    <property name="QuantityComparisonOperator" type="BExIS.Dlm.Entities.DataStructure.ComparisonOperator, BExIS.Dlm.Entities">
+      <column name="QuantityComparisonOperator" />
+    </property>
+
+
+  </subclass>
+
+</hibernate-mapping>

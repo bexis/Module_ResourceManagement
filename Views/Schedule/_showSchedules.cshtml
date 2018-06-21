@@ -1,0 +1,29 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Booking;
+
+@model ShowEventModel
+
+
+<table>
+    <tr>
+     <th class="t-header">Resource</th>
+     <th class="t-header">Start</th>
+     <th class="t-header">End</th>
+     <th class="t-header">For Persons</th>
+    </tr>
+   
+    @foreach (ScheduleEventModel schedule in Model.Schedules)
+    {
+         <tr>
+             <td>@schedule.ResourceName</td>
+             <td>@schedule.StartDate</td>
+             <td>@schedule.EndDate</td>
+             <td>@foreach (PersonUser user in schedule.ForPersons)
+                 {
+                     @user.UserFullName <br />
+                 }
+             </td>
+         </tr>
+    }
+    
+</table>

@@ -1,0 +1,115 @@
+﻿@using Telerik.Web.Mvc.UI;
+@using BExIS.Web.Shell.Areas.RBM.Models.Booking;
+
+@model AvailabilityScheduleModel
+
+@using (Ajax.BeginForm("UseAlternateTimePeriod", "Schedule", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "contentCreate", OnSuccess = "alternate_onSuccess" }))
+{
+    <h3>Change the time period for @Model.CurrentResourceName</h3>
+    <hr />
+      @Html.HiddenFor(m=>m.Index)
+ <table class="bx-table-form" style="width: 900px;">
+    <tr>
+        <th>Schedule</th>
+        <th>Alternate Startdate</th>
+        <th>Alternate Enddate</th>
+        <th></th>
+    </tr>
+    <tr>
+        <td>
+           <div id='miniCalendar' class="additonalCalendar"></div> 
+        </td>
+        <td>
+          @Html.Telerik().DateTimePickerFor(m=>m.AlternateStartDate).Value(DateTime.Now)
+        </td>
+        <td>
+             @Html.Telerik().DateTimePickerFor(m=>m.AlternateEndDate).Value(DateTime.Now)
+        </td>
+        <td>
+            <button type="submit" class="bx-button action" name="changeTimePeriod" id="">OK</button>
+        </td>
+    </tr>
+
+</table>
+      
+  }
+
+@using (Ajax.BeginForm("UseAlternateResource", "Schedule", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "contentCreateA", OnSuccess = "alternateResource_onSuccess" }))
+{
+    <h3>Choose one alternate resources</h3>
+    <hr />
+     <table class="bx-table-form" style="width: 900px;">
+        <tr>
+        <th>Schedule</th>
+        <th>Alternate Startdate</th>
+        <th>Alternate Enddate</th>
+        <th></th>
+    </tr>
+    @for (int i = 0; i<Model.AlternateResources.Count(); i++)
+    {
+         <tr>
+             <td>
+                 <b>@Html.DisplayFor(m=>m.AlternateResources[i].ResourceName)</b><br />
+                 @Html.HiddenFor(m=>m.AlternateResources[i].ResourceId)
+                 @Html.HiddenFor(m=>m.Index)
+                 @{
+                    string calendarId = "miniCalendar_" + @Model.AlternateResources[i].ResourceId;
+                 }
+                 <div id="@calendarId" class="additonalCalendar"></div> 
+             </td>
+             <td>
+                 @Html.Telerik().DateTimePickerFor(m=>m.AlternateResources[i].StartDate).Value(DateTime.Now)
+             </td>
+             <td>
+                 @Html.Telerik().DateTimePickerFor(m=>m.AlternateResources[i].EndDate).Value(DateTime.Now)
+             </td>
+             <td>
+                <button type="submit" name="chooseAlternateResource" class="bx-button action" value="@Model.AlternateResources[i].ResourceId" id="">OK</button>
+            </td>
+         </tr>
+    }
+    </table>
+    
+}
+
+
+
+
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        resetAllTelerikIconTitles();
+        addTooltips();
+
+        loadCalendar('@Model.CurrentResourceId', '#miniCalendar');
+
+        var array = $(".additonalCalendar");
+        for (var i = 0; i < array.length ; i++) {
+            var id = array[i].id.split("_")[1];
+            loadCalendar(id, "#miniCalendar_" + id);
+        }
+
+    })
+
+   
+    @*function alternateResource_onSuccess(data) {
+        if (data.success) {
+            $('#Window_Availability').data('tWindow').close();
+            $.get('@Url.Action("LoadSchedules", "Schedule")', function (data) {
+                $('#Content_Event').html(data);
+                });
+
+            }
+        }*@
+
+</script>
+
+<style type="text/css">
+
+
+
+</style>

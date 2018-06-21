@@ -1,0 +1,13 @@
+﻿<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.Users">
+  <subclass name="IndividualPerson" extends="Person" discriminator-value="IPP" dynamic-update="true">
+
+    <!-- Mapping Entity properties -->
+
+    <many-to-one name="Person" class="BExIS.Security.Entities.Subjects.User" column="Person"  cascade="none" />
+    
+
+   
+  </subclass>
+
+</hibernate-mapping>
+

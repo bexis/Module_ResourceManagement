@@ -1,0 +1,117 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Resource;
+@using BExIS.Web.Shell.Areas.RBM.Helpers;
+@using BExIS.Rbm.Services.ResourceConstraints;
+@using BExIS.Rbm.Entities.ResourceConstraint;
+
+
+@model ResourceConstraintModel
+
+<tr class="constraintRow.@Model.Index">
+@using (Html.BeginCollectionItem("ResourceConstraints"))
+{
+    @Html.HiddenFor(m=>m.Id);
+    @Html.HiddenFor(m => m.Index);
+    <td class="bx-rpm-constrainlabel">
+        <b>@Html.DisplayFor(m=>m.SelectedType)</b>
+    </td>
+     <td class="bx-rpm-negated">
+          <div class="bx-rpm-container">
+            <div class="bx-rpm-text">@Html.Label("Invert")</div>
+            @Html.CheckBoxFor(m => m.Negated, new { @constraint = "constraint", @class = "checkBox", @Name = "negated_" + @Model.Index, OnChange = "control_OnChange(this)", title= "Inverted the constraint" })
+        </div>
+    </td>
+    <td>
+        <div class="bx-rpm-text">@Html.Label("mode")</div>
+        @Html.DropDownListFor(m=>m.SelectedMode, new SelectList(Model.Mode), new { @constraint = "constraint", @class =" t-dropdown t-header t-dropdown-wrap", @Name = "mode_" + @Model.Index, OnChange = "control_OnChange(this)", title= " If the constraint applies on a resource group, you can define  this application to each/any one of the group  or the group altogether." })
+    </td>
+   
+    <td>
+        <div id="ResourceConstraints">
+      
+        @if (Model.SelectedType == "Dependency")
+        {
+        <div id="DependencyConstraints">
+            @{
+              if(Model.Id == 0)
+              {
+                DependencyConstraintModel dcm = (DependencyConstraintModel)Model;
+                dcm.Index = Model.Index;
+                @Html.Partial("_dependencyConstraint", dcm);
+              }
+              else
+              {
+                  ResourceConstraintManager rcManager = new ResourceConstraintManager();
+                  DependencyConstraint dc = rcManager.GetDependencyConstraintById(Model.Id);
+                  DependencyConstraintModel dcM = new DependencyConstraintModel(dc);
+                  dcM.Index = Model.Index;
+                  @Html.Partial("_dependencyConstraint",dcM);
+              }
+            }
+        </div>
+        }
+        else if (Model.SelectedType == "Blocking")
+        {
+            <div id="BlockingConstraints">
+            @{
+              if(Model.Id == 0)
+              {
+                 BlockingConstraintModel bcm = (BlockingConstraintModel)Model;
+                 bcm.Index = Model.Index;   
+                 @Html.Partial("_blockingConstraint", bcm); 
+              }
+              else
+              {
+                  ResourceConstraintManager rcManager = new ResourceConstraintManager();
+                  BlockingConstraint bc = rcManager.GetBlockingConstraintById(Model.Id);
+                  BlockingConstraintModel bcM = new BlockingConstraintModel(bc);
+                  bcM.Index = Model.Index;
+                  @Html.Partial("_blockingConstraint", bcM);
+              }
+            }
+        </div>
+        }
+        else if (Model.SelectedType == "Quantity")
+        {
+            <div id="QuantityConstraints">
+            @{
+               if(Model.Id == 0)
+               {
+                QuantityConstraintModel qcm = (QuantityConstraintModel)Model;
+                qcm.Index = Model.Index;
+                @Html.Partial("_quantityConstraint", qcm);
+               }
+               else
+               {
+                  ResourceConstraintManager rcManager = new ResourceConstraintManager();
+                  QuantityConstraint qc = rcManager.GetQuantityConstraintById(Model.Id);
+                  QuantityConstraintModel qcM = new QuantityConstraintModel(qc);
+                  qcM.Index = Model.Index;
+                  @Html.Partial("_quantityConstraint", qcM);
+              }
+               }
+            
+
+        </div>
+        }
+     </div>
+    </td>
+    <td class="bx-rpm-constrainDesc">
+        <div class="bx-rpm-container">
+            <div class="bx-rpm-text">@Html.Label("Description")</div>
+            @Html.TextAreaFor(m=>m.Description, new { @constraint = "constraint", @class = "bx-input", @tabindex = "2", @Name = "description_" + @Model.Index, OnChange = "control_OnChange(this)" })
+        </div>
+    </td>
+    <td>
+        <div id="removeConstraintItem" class="t-icon t-delete" onclick="onConfirmDeleteConstraint(@Model.Index)" title="Delete constraint from the resource"></div>
+    </td>
+ 
+}
+</tr>
+
+
+
+
+
+
+

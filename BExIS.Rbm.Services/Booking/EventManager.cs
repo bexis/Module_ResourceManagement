@@ -1,0 +1,109 @@
+﻿using BExIS.Rbm.Entities.Booking;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Text;
+using Vaiona.Persistence.Api;
+using E = BExIS.Rbm.Entities.Booking;
+using R = BExIS.Rbm.Entities.Resource;
+
+namespace BExIS.Rbm.Services.Booking
+{
+    public class EventManager
+    {
+        public EventManager()
+        {
+            IUnitOfWork uow = this.GetUnitOfWork();
+            this.EventRepo = uow.GetReadOnlyRepository<E.BookingEvent>();
+            this.BookingTemplateRepo = uow.GetReadOnlyRepository<E.BookingTemplate>();
+        }
+
+        #region Data Readers
+
+        public IReadOnlyRepository<E.BookingEvent> EventRepo { get; private set; }
+        public IReadOnlyRepository<E.BookingTemplate> BookingTemplateRepo { get; private set; }
+
+        #endregion
+
+        #region Methods
+
+        public E.BookingEvent CreateEvent(string name, string description, List<Activity> activities, DateTime minDate, DateTime maxDate)
+        {
+            BookingEvent newEvent = new BookingEvent()
+            {
+                Name = name,
+                Description = description,
+                Activities = activities,
+                MinDate = minDate,
+                MaxDate = maxDate
+            };
+
+            using (IUnitOfWork uow = this.GetUnitOfWork())
+            {
+                IRepository<E.BookingEvent> repo = uow.GetRepository<E.BookingEvent>();
+                repo.Put(newEvent);
+                uow.Commit();
+            }
+
+            return newEvent;
+        }
+
+        public bool DeleteEvent(E.BookingEvent deleteEvent)
+        {
+            Contract.Requires(deleteEvent != null);
+            Contract.Requires(deleteEvent.Id >= 0);
+
+            ScheduleManager sManager = new ScheduleManager();
+            bool deleteSchedules = sManager.RemoveAllSchedulesByEvent(deleteEvent.Id);
+
+            if (deleteSchedules)
+            {
+                using (IUnitOfWork uow = this.GetUnitOfWork())
+                {
+                    IRepository<E.BookingEvent> repo = uow.GetRepository<E.BookingEvent>();
+                    deleteEvent = repo.Reload(deleteEvent);
+                    repo.Delete(deleteEvent);
+                    uow.Commit();
+                }
+            }
+
+            return true;
+        }
+
+        public E.BookingEvent UpdateEvent(E.BookingEvent eEvent)
+        {
+            Contract.Requires(eEvent != null);
+            using (IUnitOfWork uow = this.GetUnitOfWork())
+            {
+                IRepository<E.BookingEvent> repo = uow.GetRepository<E.BookingEvent>();
+                repo.Put(eEvent);
+                uow.Commit();
+            }
+
+            return eEvent;
+        }
+
+        public IQueryable<E.BookingEvent> GetAllEvents()
+        {
+            return EventRepo.Query();
+        }
+
+        public List<E.BookingEvent> GetAllEventByTimePeriod(DateTime startDate, DateTime endDate)
+        {
+            return EventRepo.Query(a => ((DateTime)a.MinDate >= startDate && (DateTime)a.MinDate <= endDate) || ((DateTime)a.MaxDate >= startDate && (DateTime)a.MaxDate <= endDate)).ToList(); 
+        }
+
+        public BookingEvent GetEventById(long id)
+        {
+            return EventRepo.Query(a => a.Id == id).FirstOrDefault();
+        }
+
+        public IQueryable<BookingEvent> GetEventsWhereActivity(long activityId)
+        {
+            return EventRepo.Query(a => a.Activities.Any(u=>u.Id == activityId));
+        }
+
+        #endregion
+    }
+}

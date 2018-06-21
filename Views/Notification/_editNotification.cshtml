@@ -1,0 +1,123 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Booking;
+
+@model EditNotificationModel
+
+@Html.ValidationSummary(true)
+@using (Ajax.BeginForm("Save", "Notification", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "notificationEdit", OnSuccess = "notificationEdit_onSuccess" }))
+{
+    @Html.HiddenFor(m=>m.Id)
+    <div id="notificationEdit">
+        <table class="bx-table-form" style="width: 500px;">
+            <tr>
+                <td>@Html.LabelFor(m => m.Subject)</td>
+                <td>
+                    @Html.TextBoxFor(m => m.Subject, new { @class = "bx-input", @tabindex = "2", title= "Select a meaningful subject" })<br />
+                     @Html.ValidationMessageFor(m => m.Subject)
+                </td>
+            </tr>
+            <tr>
+                <td>@Html.LabelFor(m => m.StartDate)</td>
+                <td>@(Html.Telerik().DatePickerFor(m => m.StartDate).Value(DateTime.Now).HtmlAttributes( new {title="Start date from the time period in which the notification affected the resources" }))</td>
+            </tr>
+            <tr>
+                <td>@Html.LabelFor(m => m.EndDate)</td>
+                <td> @(Html.Telerik().DatePickerFor(m => m.EndDate).Value(DateTime.Now).HtmlAttributes(new {title = "End date from the time period in which the notification affected the resources" }))</td>
+            </tr>
+            <tr>
+                <td><b>For Resources</b></td>
+
+                <td>
+                    @(Html.Telerik().TreeView()
+                        .Name("TreeView")
+                        .ShowCheckBox(true)
+            .ClientEvents(events => events
+            .OnChecked("changeResourceFilter")
+            )
+
+            .BindTo<AttributeDomainItemsModel>(Model.AttributeDomainItems.Distinct(), (item, attribute) =>
+            {
+                item.Text = attribute.AttrName;
+                item.Value = attribute.AttrId.ToString();
+                item.Checkable = false;
+                item.Checked = false;
+                item.Expanded = true;
+
+                foreach (BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.DomainItemModel di in attribute.DomainItems)
+                {
+                    TreeViewItem subitem = new TreeViewItem();
+                    item.Items.Add(subitem);
+                    if(Model.NotificationDependencies.Select(a => a.DomainItem).ToList().Contains(di.Key))
+                    {
+                        subitem.Checked = true;
+                    }
+                    subitem.Text = di.Key;
+                    subitem.Value = di.Key;
+                    subitem.LinkHtmlAttributes["id"] = attribute.AttrId;
+                    subitem.LinkHtmlAttributes["class"] = "domainItem";
+
+                    //subitem.Action("OnSelectTreeViewItem", "Schedule", new RouteValueDictionary { { "area", "RBM" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
+                }
+            }
+        )
+        .ExpandAll(false)
+                    )
+                </td>
+            </tr>
+            <tr>
+                <td>@Html.LabelFor(m => m.Message)</td>
+                <td>@Html.TextAreaFor(m => m.Message, new { @class = "bx-input", @tabindex = "2", title= "Message that is to mediate" })<br />
+                    @Html.ValidationMessageFor(m => m.Message)</td>
+            </tr>
+        </table>
+
+        <div class="bx-footer right">
+            <br />
+            <button name="save" type="submit" class="t-button action" title="Save Notification">Save</button>
+            <button style="margin-left: 1px" type="button" onclick="OnCancel_Notification()" class="bx-button action">Cancel</button>
+        </div><br />
+    </div>
+
+}
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    });
+
+    $(".domainItems").click(function (e) {
+        //if ($(this).is(':checked')) {
+            var value = $(this).attr('name');
+            var key = $(this).attr('attr');
+            var checked = $(this).is(':checked');
+
+            $.get('@Url.Action("ChangeResourceFilter", "Notification")', { stringKey: key, value: value, isChecked: checked }, function (data) {
+
+            });
+        //}
+    });
+
+    function treeView() {
+        return $('#TreeView').data('tTreeView');
+    }
+
+    function changeResourceFilter(e) {
+    
+        var value = treeView().getItemText(e.item);
+        var key = $(e.item.parentNode).closest('.t-item').find(':input[name*="Value"]').val();
+        var checked = $(e.item).find("input:checkbox").is(":checked");
+
+        $.get('@Url.Action("ChangeResourceFilter", "Notification")', { stringKey: key, value: value, isChecked: checked }, function (data) {
+
+        });
+    }
+
+    function OnCancel_Notification() {
+        $('#Window_Notification').data('tWindow').close();
+    }
+
+</script>

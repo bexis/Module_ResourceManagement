@@ -1,0 +1,105 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
+
+@model List<ResourceStructureParentChoosingModel>
+
+
+@{
+    ViewBag.Title = "ResourceStructureManager";
+}
+
+
+@(Html.Telerik().Grid(Model)
+        .Name("Grid_ResourceStructure")
+        .HtmlAttributes(new { style = "width:500px" })
+        .DataKeys(keys =>
+        {
+            keys.Add(r => r.ParentId);
+        })
+       
+        .Columns(columns =>
+        {
+           
+            columns.Bound(r => r.ParentId).Width(50);
+            columns.Bound(r => r.Name).Width(100);
+            columns.Bound(r => r.Description).Width(100);   
+            columns.Template(
+                        @<text>
+                                @if (!item.Locked)
+                                {
+                                <div class="t-button t-button-icontext t-button-bare">
+                                    @Html.ActionLink(" ", "AddParent", "ResourceStructure", new { id = item.RsId, parentId = item.ParentId }, new { @class = "bx bx-grid-function bx-add" })
+                                </div>
+                                }
+                                else
+                                {
+                                <div class="locked">locked</div>
+                                }
+                            
+                        </text>
+                        ).Title("Add")
+                        .Width(50)
+                        .ClientTemplate(
+                          "<div style=\"<#= Locked ? 'display:none;' : 'display:inline;' #>\">" +
+                           "<a id=\"<#= Id #>\" onclick=\"OnClickAdd('<#= RsId #>', '<#= ParentId #>')\" class=\"bx bx-grid-function bx-add\" ></a>" +
+                           "</div>" +
+                           "<div class=\"locked\" style=\"<#= Locked ? 'display:inline;' : 'display:none;' #>\">" +
+                           "locked" +
+                           "</div>"
+                 //@Html.ActionLink("Add", "AddParent", "ResourceStructure", new { id = "<#= Id #>" }, new { @class = "t-icon t-edit" }).ToHtmlString()
+                        );
+
+        })
+                                                        .ClientEvents(clientEvents => clientEvents
+                                                        .OnDataBound("onDataBound")
+                                                        )
+                                                        .DataBinding(dataBinding => dataBinding
+                                                            .Ajax()
+                                                            .Select("ResourceStructureParent_Select", "ResourceStructure", new { rsId = (long)ViewData["RSID"] })
+                                                        )
+                                                        .Filterable()
+                                                        .Sortable(sortable => sortable
+                                                            .OrderBy(orderby => orderby
+                                                                .Add(r => r.ParentId).Descending()))
+        //.Scrollable()
+
+                                                                      )
+
+<script type="text/javascript">
+
+    function onDataBound() {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    }
+
+function loadClientTemplate(data)
+{
+    if (data != null) {
+        var template = ""
+
+        for (var i = 0; i < data.length ; i++) {
+            template += "<span>" + data[i].NameAttribute + "<br/></data>";
+        }
+
+        return template;
+    }
+
+    return "";
+}
+
+function OnClickAdd(id, parentId) {
+
+    $.get('@Url.Action("AddParent", "ResourceStructure", new RouteValueDictionary { { "area", "RBM"} })', { id: id, parentId: parentId }, function (data) {
+        if (window.location.href.search("Create") != -1)
+        {
+            window.location.href = 'Edit/' + id;
+        }
+        else
+        {
+           window.location.href = id;
+        }
+        
+        });
+}
+
+ </script>

@@ -1,0 +1,29 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Resource;
+@using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
+
+@model  List<ResourceStructureAttributeValueModel>
+
+<table class="bx-table-form" border="1" style="width: 500px;">
+
+   @foreach (ResourceStructureAttributeValueModel value in Model)
+     {
+         if (value is TextValueModel)
+         {
+             TextValueModel tv = (TextValueModel)value;
+             if (tv.DomainConstraint != null)
+             {
+                 Html.RenderPartial("_valueDomainConstraint", tv);
+             }
+             else
+             {
+                 Html.RenderPartial("_value", tv);
+             }
+         }
+         else if (value is FileValueModel)
+         {
+             FileValueModel fv = (FileValueModel)value;
+             Html.RenderPartial("_valueFileType", fv);
+         }
+     }
+    </table>

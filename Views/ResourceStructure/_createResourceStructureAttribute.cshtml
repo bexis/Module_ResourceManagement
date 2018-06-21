@@ -1,0 +1,113 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
+
+@model EditResourceStructureAttributeModel
+
+@Html.ValidationSummary(true)
+@using (Ajax.BeginForm("SaveResourceStructureAttribute", "ResourceStructure", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "attributeEdit", OnSuccess = "attributeCreate_onSuccess" }))
+{
+     @Html.HiddenFor(m => m.rsID)
+    if(Model.Id !=0)
+    { 
+        @Html.HiddenFor(m => m.Id)
+    }
+    <div id="attributeEdit" class="bx-window">
+        <table class="bx-table-form" style="width: 500px;">
+            <tr>
+                <td> @Html.LabelFor(m => m.AttributeName) <span class="bx bx-required" title="Required"></span></td>
+                <td>
+                    @Html.TextBoxFor(m => m.AttributeName, new { @class = "bx-input", @tabindex = "2" })
+                    @Html.ValidationMessageFor(m => m.AttributeName)<br />
+                    <small>@Html.ValidationMessage("NameExist")</small>
+                </td>
+            </tr>
+            <tr>
+                <td>@Html.LabelFor(m => m.AttributeDescription)</td>
+                <td>
+                    @Html.TextAreaFor(m => m.AttributeDescription, new { @class = "bx-input", @tabindex = "2" })
+                @Html.ValidationMessageFor(m => m.AttributeDescription)
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" class="bx-rpm-container">
+                <h4><a class="bx-link" href="javascript:clickConstraints()">Domain Constraint <span class="bx bx-angle-double-down"></span></a></h4>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" class="bx-rpm-container">
+                <div id="showdomainConstraint" style="display: none">
+                    <div id="domainConstraints">
+                        @if (Model.DomainItems.Count() > 0)
+                        {
+
+                            for (int i = 0; i < Model.DomainItems.Count(); i++)
+                            {
+                                <div class="domainConstraint" index="@i">
+                                    @Html.Label("Item")
+                                    @Html.TextBoxFor(m => m.DomainItems[i].Key, new { Name = "keys", title="Enter one domain item here" })
+                                    <div class="removeDomainItem t-icon t-delete" onclick="RemoveItem(this)" index="@i" titel="Remove item from attribute"></div>
+                                </div>
+
+                            }
+                        }
+                    </div><br />
+                    <button class="bx-button function" onclick="AddItem()" type="button" title="Add a new domain item">Add Item</button>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+
+    <div class="bx-footer right">
+        <button name="createR" type="submit" class="t-button action" title="Save Resource Structure">Save</button>
+        <button style="margin-left: 1px" type="button" onclick="OnCancel_WindowCreate()" class="bx-button action">Cancel</button>
+    </div>
+</div>
+
+}
+
+<div id="hiddenConstraint" hidden="hidden">
+    @Html.Label("Item")
+    @Html.TextBox("keys")
+    <div class="removeDomainItem t-icon t-delete" onclick="RemoveItem(this)"></div>
+</div>
+
+<script type="text/javascript">
+
+
+
+    function AddItem() {
+        var item = $("#hiddenConstraint").clone();
+        item.attr("id", "domainConstraint");
+        item.attr("class", "domainConstraint");
+        item.attr("title", "Enter one domain item here");
+        item.removeAttr("hidden");
+        var count = $(".domainConstraint").length;
+        item.attr("index", count + 1);
+
+        item.find(".removeDomainItem").attr("index", count + 1);
+
+        $("#domainConstraints").append(item);
+
+    }
+
+    function RemoveItem(e) {
+        
+        var index = $(e).attr('index');
+        $("div[index=" + index + "]").remove();
+    }
+
+    function clickConstraints()
+    {
+        $("#showdomainConstraint").toggle();
+    }
+
+
+    function OnCancel_WindowCreate() {
+        $('#Window_Creation').data('tWindow').close();
+        $('#Window_Edit').data('tWindow').close();
+    }
+    
+</script>
+
+

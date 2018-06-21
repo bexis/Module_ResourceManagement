@@ -1,0 +1,387 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Booking;
+
+@section Information
+{
+    With this interface you are able to define are details to your event.
+    <p>
+        <a href="/RBM/Help/Index/#_Toc434570750" class="bx-informationLink" title="go to help" target="_blank">More</a>
+    </p>
+}
+
+@model EventModel
+
+<script language="javascript" type="text/javascript" src="~/Areas/RBM/Scripts/RBM/rbm.js"></script>
+<div id="Content_Event">
+
+          <table class="bx-table-form" style="width: 500px;">
+              <tr>
+                 <td>@Html.LabelFor(m => m.Name)</td>
+                 <td>
+                     @if(Model.EditMode || Model.Id == 0)
+                     {
+                        @Html.TextBoxFor(m => m.Name,  new { OnChange="onChangeControl(this)", @class = "bx-input", @tabindex = "2", @Name="Name_"})
+                        <small>@Html.ValidationMessage("Name")</small><br />
+                     }
+                     else
+                     {
+                          @Html.TextBoxFor(m => m.Name,  new { OnChange="onChangeControl(this)", @class = "bx-input", disabled="disabled", @tabindex = "2", @Name="Name_"})
+                     }
+                 </td>
+              </tr>
+               <tr>
+                 <td>@Html.LabelFor(m => m.Description)</td>
+                 <td>
+                     @if (Model.EditMode || Model.Id == 0)
+                     {
+                        @Html.TextAreaFor(m => m.Description,  new { OnChange="onChangeControl(this)", @class = "bx-input", @tabindex = "2", @Name="Description_"})
+                     }
+                     else
+                     {
+                       @Html.TextAreaFor(m => m.Description,  new { OnChange="onChangeControl(this)", @class = "bx-input", disabled="disabled", @tabindex = "2", @Name="Description_"})
+                     }
+                 </td>
+              </tr>
+          </table>
+    <hr />
+    
+        @*<table style="background-color:#EFF7F6; border: 2px solid black; padding:5px;">
+            <tr>
+                <td>
+                    <b>Resource Name</b>
+                </td>
+                <td style="text-align:right">
+                    Infos
+                </td>
+            </tr>
+        </table>*@
+
+        @Html.Partial("_schedules", Model.Schedules)
+    
+     <div class="bx-footer right">
+        @if (!Model.EditMode && Model.EditAccess)
+        {
+            <button id="edit" class="t-button action" title="" onclick="openEditMode(@Model.Id)">Edit</button>
+        }
+        else if(Model.EditMode)
+        {
+           @Html.ActionLink("Save", "SaveEvent", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Save event", @tabindex = "5" })
+           @Html.ActionLink("Add Resource", "AddResource", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Add more resources to the event", @tabindex = "5" })
+        }
+        @if (Model.DeleteAccess)
+        {
+            @Html.ActionLink("Delete", "Delete", "Schedule",  new { area = "RBM", id = Model.Id}, new{ @class = "t-button action", @title = "Delete", @tabindex = "5" })
+        }
+
+        @Html.ActionLink("Cancel", "Schedule", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Cancel", @tabindex = "5" })
+    </div>
+
+</div>
+
+@*Windows*@
+
+ @(Html.Telerik().Window()
+    .Name("Window_ChooseUsers")
+    .Title("Select user(s)")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_ChooseUsers"></div>
+    </text>)
+)
+
+@(Html.Telerik().Window()
+    .Name("Window_ShowUsers")
+    .Title("Selected users")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_ShowUsers"></div>
+    </text>)
+)
+
+@(Html.Telerik().Window()
+    .Name("Window_ShowActivities")
+    .Title("Selected activities")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_ShowActivities"></div>
+    </text>)
+)
+
+ @(Html.Telerik().Window()
+    .Name("Window_ChooseActivities")
+    .Title("Select Activities")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_ChooseActivities"></div>
+    </text>)
+)
+
+@(Html.Telerik().Window()
+    .Name("Window_Availability")
+    .Title("Availability")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_Availability"></div>
+    </text>)
+)
+
+@(Html.Telerik().Window()
+    .Name("Window_Similar")
+    .Title("Similar")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_Similar"></div>
+    </text>)
+)
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        resetAllTelerikIconTitles();
+        addTooltips();
+
+        var myArray = [];
+
+        @foreach (var d in Model.Schedules)
+        {
+            @:myArray.push("@d.Index");
+        }
+
+
+        for (var i = 0; i < myArray.length; i++) {
+
+            var index = myArray[i];
+            FillLists(index);
+        }
+
+    });
+
+    function FillLists(i) {
+        //Show reserved for user in schedules
+        $.post('@Url.Action("ShowUsersInSchedule", "Schedule", new RouteValueDictionary { { "area", "RBM" } })', { index: i }, function (data) {
+            $('#users_' + i).html(data);
+        });
+
+        //Show activities in schedules
+        $.post('@Url.Action("ShowActivityInSchedule", "Schedule", new RouteValueDictionary { { "area", "RBM" } })', { index: i }, function (data) {
+            $('#activities_' + i).html(data);
+        });
+
+        //Add Timeperiod
+        $.post('@Url.Action("ShowTimePeriodInSchedule", "Schedule", new RouteValueDictionary { { "area", "RBM" } })', { index: i }, function (data) {
+            $('#timePeriod_' + i).html(data);
+        });
+
+    }
+
+    function Toogle(index) {
+        $("#scheduleDetails_" + index).toggle();
+    }
+
+@*    function saveEvent() {
+        $.get('@Url.Action("OpenEdit", "Schedule")', { id: id }, function (data) {
+
+        });
+    }*@
+
+    function openEditMode(id) {
+
+        $.get('@Url.Action("OpenEdit", "Schedule")', { id: id }, function (data) {
+            window.location.href = '../OpenEdit/'+id;
+        });
+    }
+
+    function onChangeControl(e)
+    {
+        if (e.name !== undefined || this.name !== "") {
+            var substr = "";
+            var value = "";
+
+            if (this.name !== "") {
+                substr = this.name.split('_');
+                value = $(this).attr('value');
+            }
+            else {
+                substr = e.name.split('_');
+                value = e.value;
+            }
+
+            var element = substr[0];
+            var index = substr[1];
+
+            $.get('@Url.Action("OnChangeEventItem", "Schedule", new RouteValueDictionary { { "area", "RBM" } })', { value: value, index: index, element: element }, function (response) {
+
+                if (element == "Start")
+                {
+                    $('#timePeriod_' + index).html(response);
+                }
+            });
+        }
+    }
+
+
+    function RemoveScheduleFromEvent(index) {
+
+        $.get('@Url.Action("RemoveScheduleFromEvent", "Schedule")', { index: index }, function (data) {
+            $('#Content_Event').html(data)
+        });
+    }
+
+    function OnClickChooseForPerson(index) {
+
+        $.get('@Url.Action("LoadUsers", "Schedule")', { index: index}, function (data) {
+            $('#Content_ChooseUsers').html(data);
+            var window = $('#Window_ChooseUsers').data('tWindow');
+            window.center().open();
+        });
+    }
+
+    function OnClickChooseActivity(index) {
+        $.get('@Url.Action("LoadActivities", "Schedule")', { index: index }, function (data) {
+            $('#Content_ChooseActivities').html(data);
+            var window = $('#Window_ChooseActivities').data('tWindow');
+            window.center().open();
+        });
+    }
+
+    function RemoveUserFromSchedule(u, i) {
+
+        $.get('@Url.Action("RemoveUserFromSchedule", "Schedule")', { userId: u, scheduleIndex: i }, function (data) {
+            $("#users_"+i).html(data)
+        });
+    }
+
+    function ShowAllUsers(index) {
+        $.get('@Url.Action("ShowAllUsers", "Schedule")', { scheduleIndex: index }, function (data) {
+            $('#Content_ShowUsers').html(data);
+            var window = $('#Window_ShowUsers').data('tWindow');
+            window.center().open();
+        });
+    }
+
+    function RemoveActivityFromSchedule(a, index) {
+
+        $.get('@Url.Action("RemoveActivityFromSchedule", "Schedule")', { activityId: a, scheduleIndex: index }, function (data) {
+            $("#activities_" +index).html(data)
+        });
+    }
+
+    function ShowAllActivities(index) {
+        $.get('@Url.Action("ShowAllActivities", "Schedule")', { scheduleIndex: index }, function (data) {
+             $('#Content_ShowActivities').html(data);
+             var window = $('#Window_ShowActivities').data('tWindow');
+             window.center().open();
+         });
+    }
+
+    function OnChangeFileConfirmation(e) {
+
+        var substr = "";
+
+        if (this.name !== "") {
+            substr = this.name.split('_');
+        }
+        else {
+            substr = e.name.split('_');
+        }
+
+        var resource = substr[1];
+
+        $.get('@Url.Action("OnChangeFileConfirmation", "Schedule")', { resourceId: resource}, function (data) {
+
+        });
+
+    }
+
+    function OnClickCopy(index, id) {
+
+        $.get('@Url.Action("CopySchedule", "Schedule")', { index: index }, function (data) {
+            $('#Content_Event').html(data);
+        });
+    }
+
+    function OnClickCheckAvailability(index, id) {
+
+        var startDate = $("#Start_" + index).attr('value');
+        var endDate = $("#End_" + index).attr('value');
+
+        $.get('@Url.Action("CheckResourceAvailability", "Schedule", new RouteValueDictionary { { "area", "RBM" } })', { id: id, startDate: startDate, endDate: endDate }, function (data) {
+            if (data == "False") {
+                $('#availability_' + id).css('color', 'red');
+                //$("span[id$=" + id + "]").css('color', 'red');
+                window.setTimeout(clickToday, 200);
+                $.get('@Url.Action("LoadResourceAlternatives", "Schedule")', { scheduleIndex: index }, function (data) {
+                    $('#Content_Availability').html(data);
+                    var window = $('#Window_Availability').data('tWindow');
+                    window.center().open();
+                });
+            }
+            else {
+                $('#availability_' + id).css('color', 'green');
+            }
+        });
+    }
+
+    function OnClickShowSimilar(index, id) {
+
+        window.setTimeout(clickToday, 200);
+
+        $.get('@Url.Action("LoadSimilarResources", "Schedule", new RouteValueDictionary { { "area", "RBM" } })', { index: index, id: id }, function (data) {
+            $('#Content_Similar').html(data);
+            var window = $('#Window_Similar').data('tWindow');
+            window.center().open();
+        });
+    }
+
+    function useValuesForAll(index)
+    {
+        $.get('@Url.Action("UseValuesForAllSchedules", "Schedule", new RouteValueDictionary { { "area", "RBM" } })', { index: index }, function (data) {
+            $('#Content_Event').html(data);
+        });
+    }
+
+     function alternateResource_onSuccess(data) {
+        if (data.success) {
+            $('#Window_Availability').data('tWindow').close();
+            $.get('@Url.Action("LoadSchedules", "Schedule")', function (data) {
+                $('#Content_Event').html(data);
+                });
+            }
+        }
+
+    function similareResources_onSuccess(data) {
+        if (data.success) {
+            $('#Window_Similar').data('tWindow').close();
+
+            $.get('@Url.Action("LoadSchedules", "Schedule")', { }, function (data) {
+                $('#Content_Event').html(data);
+            });
+        }
+    }
+
+</script>

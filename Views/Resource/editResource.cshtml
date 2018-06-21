@@ -1,0 +1,301 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Resource;
+@using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
+@using BExIS.Rbm.Entities.BookingManagementTime;
+
+@model EditResourceModel
+
+@section Information
+{
+    With this interface you are create or edit a resource. 
+    <p>
+        <a href="/RBM/Help/Index/#_Toc434570750" class="bx-informationLink" title="go to help" target="_blank">More</a>
+    </p>
+}
+
+<link rel='stylesheet' href="@Url.Content("~/Areas/RBM/Scripts/colorpicker/jquery.minicolors.css")" />
+<script src="@Url.Content("~/Areas/RBM/Scripts/colorpicker/jquery.minicolors.js")"></script>
+<link href="@Url.Content("~/Areas/RBM/Stylesheets/RBM.css")" rel="stylesheet" type="text/css" />
+
+<table class="bx-table-form" style="width: 500px;">
+    <tr>
+        <td>@Html.LabelFor(m => m.Name)</td>
+        <td>
+            @Html.TextBoxFor(m => m.Name, new { OnChange = "control_OnChange(this)", @class = "bx-input", @tabindex = "2" })
+        <br />
+        <small>@Html.ValidationMessage("Name")</small>
+    </td>
+    <td rowspan="7" style="vertical-align:top;width:90px"><b>Resource Structure</b></td>
+    <td rowspan="7" style="vertical-align:top;">
+        @Html.DropDownListFor(m => m.ResourceStructure.Id, new SelectList(Model.ResourceStructures, "Id", "Name"), "-- SELECT --", new { id = "ResourceStructure", @class = "t-dropdown long t-header t-dropdown-wrap", @tabindex = "5", title="Select a resource structure" })
+        <br /><br />
+        <div id="rs"></div>
+    </td>
+</tr>
+<tr>
+    <td> @Html.LabelFor(m => m.Description)</td>
+    <td>
+        @Html.TextAreaFor(m => m.Description, new { OnChange = "control_OnChange(this)", @class = "bx-input", @tabindex = "2" })
+</td>
+</tr>
+<tr>
+    <td>@Html.LabelFor(m => m.Quantity)</td>
+    <td>
+        @(Html.Telerik().IntegerTextBox().Name("Quantity")
+                                                    .MinValue(0)
+                                                    .MaxValue(Int32.MaxValue)
+                                                    .Value(Model.Quantity)
+                                                    .ClientEvents(events => events
+                                                    .OnChange("control_OnChange"))
+                                                    .InputHtmlAttributes(new {@class = "bx-input" })
+                                                    .HtmlAttributes(new { title= "Quantity which is available from the resource" })
+        )
+</td>
+</tr>
+
+<tr>
+    <td>@Html.LabelFor(m => m.Color)
+        <br />
+        <small>@Html.ValidationMessage("Color")</small>
+    </td>
+    <td>
+       
+    @Html.HiddenFor(m => m.Color, new { OnChange = "control_OnChange(this)", id = "colorpicker", @class = "bx-input", @tabindex = "2" })
+</td>
+</tr>
+<tr>
+    <td>@Html.LabelFor(m => m.Duration)</td>
+    <td>
+        @(Html.Telerik().IntegerTextBox().Name("Duration")
+                                                    .MinValue(0)
+                                                    .MaxValue(Int32.MaxValue)
+                                                    .Value(Model.Duration.Value)
+                                                    .ClientEvents(events => events
+                                                    .OnChange("control_OnChange"))
+                                                    .InputHtmlAttributes(new { @class = "bx-input" })
+                                                    .HtmlAttributes(new { title = "The resource booking time interval" })
+        )
+    <small>@Html.ValidationMessage("Duration")</small><br />
+</td>
+</tr>
+<tr>
+    <td>@Html.LabelFor(m => m.TimeUnits)</td>
+    <td>@Html.DropDownListFor(m => m.Duration.TimeUnit, new SelectList(Model.TimeUnits, "", "", SystemDefinedUnit.day), new { OnChange = "control_OnChange(this)", @class = " long t-dropdown t-header t-dropdown-wrap", @tabindex = "2", title= "The resource booking time interval unit" })</td>
+</tr>
+    <tr>
+        <td>@Html.LabelFor(m => m.WithActivity)</td>
+        <td>@Html.CheckBoxFor(m => m.WithActivity, new { @class = "js-switch", OnChange = "control_OnChange(this)", title= "Resource need a activity for the booking" })</td>
+    </tr>
+<tr>
+    <td colspan="3">
+        <small>@Html.ValidationSummary("Errors")</small><br />
+    </td>
+</tr>
+</table>
+
+<hr />
+
+<div id="resourceConstrains" class="bx-link"><b>Resource Constrains</b><span class="bx bx-angle-double-down"></div><br />
+<div id="showResourceConstrains" style="display: none">
+    @Html.Partial("_resourceConstraints", Model.ResourceConstraintModel)
+</div>
+
+<div class="bx-footer right">
+    @Html.ActionLink("Save", "Save", "Resource", new { area = "RBM", @class = "t-button action", @title = "Create", @tabindex = "5" })
+    @*<button id="saveResource" name="create" type="submit" class="bx-button action" title="SaveResource">Save</button>*@
+    @Html.ActionLink("Cancel", "Resource", "Resource", new { area = "RBM", @class = "t-button action", @title = "Cancel", @tabindex = "5" })
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        resetAllTelerikIconTitles();
+        addTooltips();
+
+        $('#colorpicker').prop('title', 'Display color in the booking calendar');
+
+        //render constraints
+        var myArray = [];
+        @if (Model.ResourceConstraints.Count() > 0)
+        {
+            foreach (var i in Model.ResourceConstraints)
+            {
+                @:myArray.push("@i.Index");
+            }
+        }
+
+        if (myArray.length > 0) {
+            for (var i = 0; i < myArray.length; i++) {
+                $.get('@Url.Action("EditResourceConstraint", "Resource")', { index: myArray[i] }, function (data) {
+                    $('#resourceConstraints').append(data);
+                });
+            }
+        }
+
+        //render resource struture
+        var rsId = 1;
+        @if(Model.ResourceStructure == null)
+        {
+            @:rsId = 0;
+        }
+
+
+        if (rsId == 1) {
+            renderResourceStructure();
+        }
+
+
+    });
+
+
+    function renderResourceStructure()
+    {
+        $.get('@Url.Action("LoadResourceStructure", "Resource")', { selectedResourceStructureId: 0 }, function (data) {
+            $('#rs').html(data);
+        });
+    }
+
+    //Save item change to Session
+    function control_OnChange(e) {
+        var substr = "";
+        var value = "";
+        var valuetype = "";
+        var element = "";
+        var constraintelement = "";
+        var constraintindex = "";
+        var periodicTimeIntervalElement = "";
+        var dayId = "";
+
+        if (typeof $(e).attr('key') != "undefined") {
+            valuetype = $(e).attr('key');
+            element = "resourcestructurevalue";
+            value = $(e).attr('value');
+        }
+        else if (typeof $(e).attr('constraint') != "undefined" || typeof $(this).attr('constraint') != "undefined")
+        {
+            if (this.name !== "") {
+                substr = this.name.split('_');
+                element = $(this).attr('constraint');
+
+                if ($(this).is(':checkbox')) {
+                    if($(this).is(':checked'))
+                    {
+                        value = true;
+                    }
+                    else
+                    {
+                        value = false;
+                    }
+
+                }
+                else {
+                    value = $(this).attr('value');
+                }
+            }
+            else if (typeof e.name === "undefined")
+            {
+                substr = e.attr("name").split('_');
+                element = $(e).attr('constraint');
+                value = $(e).attr('value');
+            }
+            else
+            {
+                substr = e.name.split('_');
+                element = $(e).attr('constraint');
+                if ($(e).is(':checkbox')) {
+                    if ($(e).is(':checked')) {
+                        value = true;
+                    }
+                    else {
+                        value = false;
+                    }
+
+                }
+                else {
+                    value = $(e).attr('value');
+                    element = $(e).attr('constraint');
+                }
+            }
+
+            if (typeof $(e).attr('repetition') != "undefined" || typeof $(this).attr('repetition') != "undefined") {
+                constraintelement = "periodictimeinterval";
+                periodicTimeIntervalElement = substr[0].toLowerCase();
+                if(periodicTimeIntervalElement === "repeaton")
+                {
+                    dayId = substr[2];
+                }
+            }
+            else
+            {
+                constraintelement = substr[0].toLowerCase();
+
+            }
+            constraintindex = substr[1];  
+        }
+        else {
+
+            if (this.name !== "") {
+                substr = this.name.split('_');
+
+                if ($(this).is(':checkbox')) {
+                    if ($(this).is(':checked')) {
+                        value = true;
+                    }
+                    else {
+                        value = false;
+                    }
+
+                }
+                else {
+                    value = $(this).attr('value');
+                }
+            }
+            else {
+                substr = e.name.split('_');
+                if ($(e).is(':checkbox')) {
+                    if ($(e).is(':checked')) {
+                        value = true;
+                    }
+                    else {
+                        value = false;
+                    }
+
+                }
+                else {
+                    value = $(e).attr('value');
+                }
+            }
+
+            element = substr[0].toLowerCase();
+        }
+
+        $.get('@Url.Action("OnChangeResourceItem", "Resource")', { element: element, value: value, valuetype: valuetype, constraintelement: constraintelement, constraintindex: constraintindex, periodicTimeIntervalElement: periodicTimeIntervalElement, dayId:dayId }, function (data) {
+        });
+    }
+
+    //Load selected resource struture
+    $("#ResourceStructure").change(function () {
+
+        var entityId = $(this).val();
+        $.get('@Url.Action("LoadResourceStructure", "Resource")', { selectedResourceStructureId: entityId }, function (data) {
+            if ($('#rs').find('table').length) {
+                $('#rs').empty();
+                $('#rs').html(data);
+            }
+            else {
+                $('#rs').html(data);
+            }
+        });
+    });
+
+    //Show constraints part
+    $("#resourceConstrains").click(function () {
+        $("#showResourceConstrains").toggle();
+    });
+
+    //Load  colorpicker
+    $('#colorpicker').minicolors();
+    
+
+</script>

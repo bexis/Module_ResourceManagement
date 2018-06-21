@@ -1,0 +1,212 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Booking;
+
+@model List<ActivityModel>
+
+@section Information
+{
+    With this interface you are able to manage (e.g. create, edit, delete) activities.
+    <p>
+        <a href="/RBM/Help/Index/#_Toc434570750" class="bx-informationLink" title="go to help" target="_blank">More</a>
+    </p>
+}
+
+<span class="bx-button function" onclick="Create()">Create New</span><br /><br />
+
+@(Html.Telerik().Grid(Model)
+        .Name("Grid_Activities")
+        .DataKeys(keys =>
+        {
+            keys.Add(r => r.Id);
+        })
+        //.ToolBar(command =>
+        //          {
+        //              command.Custom().Name("Create")
+        //                  .Text("Create New")
+        //                  .Action("CreateA", "Activity", new { })
+
+       //                  .Ajax(true).ButtonType(GridButtonType.ImageAndText)
+        //                  .ImageHtmlAttributes(new { @class = "t-icon t-add" });
+        //          })
+        .Columns(columns =>
+        {
+            columns.Bound(r => r.Id).Width(90);
+            columns.Bound(r => r.Name);
+            columns.Bound(r => r.Description);
+            columns.Bound(r => r.Disable);
+            columns.Template(
+                @<text>
+                             @if (!item.InUse)
+                             {
+                                <div class="t-button t-button-icontext t-button-bare">
+                                   @Html.ActionLink("Edit", "#", "", null, new { @class = "t-icon t-edit", onclick = "OnClickEdit('" + item.Id + "')" });
+                                   @Html.ActionLink("Delete", "Delete", "Resource", new { id = item.Id }, new { @class = "t-icon t-delete", onclick = "return confirm('Are you sure you want to delete the Activity" + "?')" })
+                                </div>
+                             }
+                             else
+                             {
+                               <div>
+                                    <div class = "bx bx-grid-function bx-edit bx-disabled" disabled = "disabled" title = 'Edit Unit "@item.Name"'></div>
+                                    <div class = "bx bx-grid-function bx-trash bx-disabled" disabled = "disabled" title = 'Delete Unit "@item.Name"'></div>
+                                </div>
+                             }
+                        </text>
+            )
+            .Title(" ")
+                    .ClientTemplate(
+                  "<div style=\"<#= InUse ? 'display:none;' : 'display:inline;' #>\">" +
+                  "<div style=\"<#= EditAccess ? 'display:inline;' : 'display:none;' #>\">" +
+                  "<a id=\"<#= Id #>\" onclick=\"OnClickEdit('<#= Id #>')\" class=\"t-icon t-edit\" title = \'Edit Activity \" <#= Name #>\"\' ></a>" +
+                  "</div>" +
+                  "<div style=\"<#= EditAccess ? 'display:none;' : 'display:inline;' #>\">" +
+                  "<div class = \"bx bx-grid-function bx-edit bx-disabled\" disabled = \"disabled\" title = \'Edit Activity \" <#= Name #>\"\'></div>" +
+                  "</div>" +
+                  "<div style=\"<#= DeleteAccess ? 'display:inline;' : 'display:none;' #>\">" +
+                  "<a id=\"<#= Id #>\" onclick=\"onConfirm('<#= Id #>')\" class=\"bx bx-grid-function bx-trash\" title = \'Delete Activity \" <#= Name #>\"\' ></a>" +
+                  "</div>" +
+                  "<div style=\"<#= DeleteAccess ? 'display:none;' : 'display:inline;' #>\">" +
+                  "<div class = \"bx bx-grid-function bx-trash bx-disabled\" disabled = \"disabled\" title = \'Delete Activity \" <#= Name #>\"\'></div>" +
+                  "</div>" +
+                  "</div>" +
+                  "<div class=\"locked\" style=\"<#= InUse ? 'display:inline;' : 'display:none;' #>\">" +
+                  "<div class = \"bx bx-grid-function bx-edit bx-disabled\" disabled = \"disabled\" title = \'Edit Activity \" <#= Name #>\"\'></div>" +
+                  "<div class = \"bx bx-grid-function bx-trash bx-disabled\" disabled = \"disabled\" title = \'Delete Activity \" <#= Name #>\"\'></div>" +
+                  "</div>"
+                    ).Width(70);
+
+        })
+         .ClientEvents(clientEvents => clientEvents
+         .OnDataBound("onDataBound")
+         )
+
+         .DataBinding(dataBinding => dataBinding
+            .Ajax()
+            .Select("Activity_Select", "Activity")
+         )
+         .Filterable()
+         .Sortable(sortable => sortable
+         .OrderBy(orderby => orderby
+         .Add(r => r.Id).Descending()))
+         //.Scrollable()
+         .Pageable()
+)
+
+ @(Html.Telerik().Window()
+    .Name("Window_Creation")
+    .Title("Create Activity")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_Creation"></div>
+    </text>)
+    .ClientEvents(clientEvents => clientEvents
+        .OnClose("Window_Creation_OnClose")
+    )
+)
+
+ @(Html.Telerik().Window()
+    .Name("Window_Edit")
+    .Title("Edit Activity")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_Edit"></div>
+    </text>)
+    .ClientEvents(clientEvents => clientEvents
+        .OnClose("Window_Details_OnClose")
+    )
+)
+
+
+
+
+<script type="text/javascript">
+    
+        function onDataBound() {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    }
+
+    function Create() {
+
+        $.get('@Url.Action("CreateA", "Activity", new RouteValueDictionary { { "area", "RBM" } })', function (data) {
+
+            $('#Content_Creation').html(data);
+
+            var window = $('#Window_Creation').data('tWindow');
+            window.center().open();
+        });
+
+    }
+   @* function OnCommand(e) {
+        if (e.name == "Create") {
+            $.get('@Url.Action("CreateA", "Activity", new RouteValueDictionary { { "area", "RBM" } })', function (data) {
+
+                $('#Content_Creation').html(data);
+
+                var window = $('#Window_Creation').data('tWindow');
+                window.center().open();
+            });
+        }
+    }*@
+
+    function Window_Creation_OnClose() {
+
+        $('#Content_Creation').empty();
+        refreshGrid();
+    }
+
+    function Window_Details_OnClose() {
+        $('#Content_Creation').empty();
+        refreshGrid();
+    }
+
+
+    function OnClickEdit(id) {
+
+        $.get('@Url.Action("Edit", "Activity", new RouteValueDictionary { { "area", "RBM" } })', { id: id }, function (data) {
+            $('#Content_Edit').html(data);
+
+            var window1 = $('#Window_Edit').data('tWindow');
+            window1.center().open();
+        });
+    }
+
+    function onConfirm(id) {
+        if (confirm("Are you sure you want to delete the Resource?")) {
+            OnClickDelete(id);
+        }
+        else {
+            return false;
+        }
+    }
+
+    function OnClickDelete(id) {
+        $.get('@Url.Action("Delete", "Activity", new RouteValueDictionary { { "area", "RBM" } })', { id: id }, function (data) {
+            refreshGrid();
+        });
+    }
+
+    function refreshGrid() {
+        $(".t-grid .t-refresh").trigger('click');
+    }
+
+    function activityCreate_onSuccess(data) {
+        if (data.success) {
+            $('#Window_Creation').data('tWindow').close();
+        }
+    }
+
+    function activityEdit_onSuccess(data) {
+        if (data.success) {
+            $('#Window_Edit').data('tWindow').close();
+        }
+    }
+
+   </script>

@@ -1,0 +1,81 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Resource;
+@model List<ResourceGroupManagerModel>
+
+@Html.ActionLink("Create", "Create", "ResourceGroup", new { @class = "bx-button function" })
+<br />
+<br />
+@(Html.Telerik().Grid(Model)
+        .Name("Grid_Resource")
+        .DataKeys(keys =>
+        {
+            keys.Add(r => r.Id);
+        })
+        //.ToolBar(command =>
+        //    {
+        //        command.Custom().Name("Create").Text("New Resource Group").
+        //                         Action("Create", "ResourceGroup").Ajax(false).ImageHtmlAttributes(new { @class = "t-icon t-add" });
+        //    })
+        .Columns(columns =>
+        {
+           
+            columns.Bound(r => r.Id).Width(100);
+            columns.Bound(r => r.Name).Width(200);
+            columns.Bound(r => r.ClassifierMode).Width(100); 
+            columns.Template(
+                        @<text>
+                            @{string temp = String.Join(",", item.ResoureNames);
+                              }
+                              @temp
+                        </text>
+                    ).Title("Resources in Group").Width(160)
+                    .ClientTemplate("<#= loadClientTemplate(ResoureNames) #>");
+            columns.Template(
+                        @<text>
+                                <div class="t-button t-button-icontext t-button-bare">
+                                    @Html.ActionLink(" ", "Edit", "ResourceGroup", new { id = item.Id }, new { @class = "bx bx-grid-function bx-edit" })
+                                     @Html.ActionLink(" ", "Delete", "ResourceGroup", new { id = item.Id }, new { @class = "bx bx-grid-function bx-trash", onclick = "return confirm('Are you sure you want to delete the Resource Group" + "?')" })
+                                </div>
+                        </text>
+                        ).Title(" ")
+                        .Width(40)
+                        .ClientTemplate(
+                            @Html.ActionLink(" ", "Edit", "ResourceGroup", new { id = "<#= Id #>" }, new { @class = "bx bx-grid-function bx-edit" }).ToHtmlString() +
+                            @Html.ActionLink(" ", "Delete", "ResourceGroup", new { id = "<#= Id #>" }, new { @class = "bx bx-grid-function bx-trash", onclick = "return confirm('Are you sure you want to delete the Resource Group" + "?')" }).ToHtmlString()
+                        );
+        })
+                                            .ClientEvents(clientEvents => clientEvents
+                                            //.OnCommand("OnCommand")
+                                            .OnDataBound("onDataBound")
+                                         )
+                                                         .DataBinding(dataBinding => dataBinding
+                                                             .Ajax()
+                                                             .Select("ResourceGroup_Select", "ResourceGroup")
+                                                         )
+        .Filterable()
+        .Sortable(sortable => sortable
+            .OrderBy(orderby => orderby
+                .Add(r => r.Id).Descending()))
+        .Scrollable()
+)
+
+<script type="text/javascript">
+
+    function onDataBound() {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    }
+
+function loadClientTemplate(data)
+{
+    if (data != null) {
+        var template = ""
+
+        for (var i = 0; i < data.length ; i++) {
+            template += "<span>" + data[i] + "<br/></data>";
+        }
+
+        return template;
+    }
+}
+</script>

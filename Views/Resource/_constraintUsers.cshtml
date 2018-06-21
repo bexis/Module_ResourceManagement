@@ -1,0 +1,19 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Booking;
+
+@model List<PersonInConstraint>
+
+ <ul id="userList">
+      @for (int i = 0; i < Model.Count(); i++)
+      {
+        if (i <= 1)
+        {
+           <li class="fullName" style="font-size:10px;">@Model[i].UserFullName <input type="hidden" name="user" value="@Model[i].UserId"  /><span id="removeUser" class="bx bx-trash" onclick="onConfirmDeleteUser(@Model[i].Index, @Model[i].UserId, 'page')"></span></li>
+        }
+        else
+        {
+           <li><a href="#" class="bx bx-link" onclick="ShowAllUsers(@Model[i].Index)" >show all</a></li>
+        }
+      }
+</ul>
+

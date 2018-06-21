@@ -1,0 +1,145 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Booking;
+@model List<NotificationModel>
+
+@section Information
+{
+    With this interface you are able to manage (e.g. create, edit, delete) notifications. Notifications deliver necessary information to people who have booked or will book a resources.
+    If you create a notification all people who have booked an affected resource will get a Email.
+    <p>
+        <a href="/RBM/Help/Index/#_Toc434570750" class="bx-informationLink" title="go to help" target="_blank">More</a>
+    </p>
+}
+
+<span class="bx-button function" onclick="Create()" title="Create a new Notification">Create Notification</span><br /><br />
+
+@(Html.Telerik().Grid(Model)
+        .Name("Grid_Activities")
+        .DataKeys(keys =>
+        {
+            keys.Add(r => r.Id);
+        })
+      
+        .Columns(columns =>
+            {
+        columns.Bound(r => r.Id).Width(90);
+        columns.Bound(r => r.Subject);
+        columns.Bound(r => r.StartDate);
+        columns.Bound(r => r.EndDate);
+        columns.Bound(r => r.Message);
+        columns.Template(
+                    @<text>
+                            
+                                <div class="">
+                                   @Html.ActionLink("Edit", "#", "", null, new { @class = "t-icon t-edit", onclick = "OnClickEdit('" + item.Id + "')" });
+                                   @Html.ActionLink("Delete", "Delete", "Notification", new { id = item.Id }, new { @class = "t-icon t-delete", onclick = "return confirm('Are you sure you want to delete the Notification" + "?')" })
+                                </div>
+                        </text>
+                )
+                .Title(" ")
+                        .ClientTemplate(
+                  
+                  "<div style=\"<#= EditAccess ? 'display:inline;' : 'display:none;' #>\">" +
+                  "<a id=\"<#= Id #>\" onclick=\"OnClickEdit('<#= Id #>')\" class=\"t-icon t-edit\" title = \'Edit Notification \" <#= Subject #>\"\' ></a>" +
+                  "</div>" +
+                  "<div style=\"<#= EditAccess ? 'display:none;' : 'display:inline;' #>\">" +
+                  "<div class = \"bx bx-grid-function bx-edit bx-disabled\" disabled = \"disabled\" title = \'Edit Notification \" <#= Subject #>\"\'></div>" +
+                  "</div>" +
+                  "<div style=\"<#= DeleteAccess ? 'display:inline;' : 'display:none;' #>\">" +
+                  "<a id=\"<#= Id #>\" onclick=\"OnClickDelete('<#= Id #>')\" class=\"bx bx-grid-function bx-trash\" title = \'Delete Notification \" <#= Subject #>\"\' ></a>" +
+                  "</div>" +
+                  "<div style=\"<#= DeleteAccess ? 'display:none;' : 'display:inline;' #>\">" +
+                  "<div class = \"bx bx-grid-function bx-trash bx-disabled\" disabled = \"disabled\" title = \'Delete Notification \" <#= Subject #>\"\'></div>" +
+                  "</div>"
+                        ).Width(70);
+            })
+                                                .ClientEvents(clientEvents => clientEvents
+                                                    //.OnCommand("OnCommand"))
+                                                .OnDataBound("onDataBound"))
+                                                .DataBinding(dataBinding => dataBinding
+                                                .Ajax()
+                                                .Select("Notification_Select", "Notification")
+                                                )
+                                                .Filterable()
+                                                .Sortable(sortable => sortable
+                                                .OrderBy(orderby => orderby
+                                                .Add(r => r.Id).Descending()))
+                                                .Scrollable()
+                                       )
+
+
+ @(Html.Telerik().Window()
+    .Name("Window_Notification")
+    .Title("Notification")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content"></div>
+    </text>)
+    .ClientEvents(clientEvents => clientEvents
+        .OnClose("Window_Notification_OnClose")
+    )
+)
+
+
+<script type="text/javascript">
+
+    function onDataBound() {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    }
+
+    function Create() {
+        $.get('@Url.Action("CreateN", "Notification", new RouteValueDictionary { { "area", "RBM" } })', function (data) {
+
+            $('#Content').html(data);
+
+            var window = $('#Window_Notification').data('tWindow');
+            window.center().open();
+        });
+    }
+
+    function OnClickEdit(id) {
+
+        $.get('@Url.Action("Edit", "Notification", new RouteValueDictionary { { "area", "RBM" } })', { id: id }, function (data) {
+            $('#Content').html(data);
+            var window23 = $('#Window_Notification').data('tWindow');
+            window23.center().open();
+        });
+    }
+
+    function OnClickDelete(id) {
+        confirm("Are you sure you want to delete the Resource Structure Attribute");
+        $.get('@Url.Action("Delete", "Notification", new RouteValueDictionary { { "area", "RBM"} })', { id: id }, function (data) {
+
+            refreshGrid();
+        });
+    }
+
+    function Window_Notification_OnClose() {
+
+        $('#Content').empty();
+        refreshGrid();
+    }
+
+    function refreshGrid() {
+        $(".t-grid .t-refresh").trigger('click');
+    }
+
+    function notificationEdit_onSuccess(data) {
+        if (data.success) {
+            $('#Window_Notification').data('tWindow').close();
+        }
+        else
+        {
+            $('#Content').html(data);
+            var window23 = $('#Window_Notification').data('tWindow');
+            window23.center().open();
+        }
+    }
+
+</script>
+

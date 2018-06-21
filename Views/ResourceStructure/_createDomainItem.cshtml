@@ -1,0 +1,17 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
+@using BExIS.Web.Shell.Areas.RBM.Helpers;
+
+@model DomainItemModel
+
+@using (Html.BeginCollectionItem("Items"))
+{ 
+<div class="domainItem">
+@Html.LabelFor(m => m.Key)
+@Html.TextBoxFor(m => m.Key,  new { Name = "key" })
+@Html.LabelFor(m => m.Value)
+@Html.TextBoxFor(m => m.Value,  new { Name = "value" })
+
+</div>
+    
+}

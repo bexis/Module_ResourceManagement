@@ -1,0 +1,177 @@
+﻿@using Telerik.Web.Mvc.UI
+
+@using BExIS.Web.Shell.Areas.RBM.Models.Booking;
+@using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
+@using System.Text;
+
+@model List<ScheduleEventModel>
+
+@Html.ValidationSummary(true)
+
+@for(int i = 0; i < Model.Count(); i++)
+    {
+        <div class="item">
+            @{string color = "";
+              if (Model[i].ScheduleError)
+              {
+                  color = "background-color: #F24C24;";
+              }
+              else
+              {
+                  color = "background-color: #EFF7F6;";
+              }
+            }
+            <div class="itemHeader" style="border: 2px solid black; padding:5px; @color " onclick="Toogle(@Model[i].Index)" title="Click here to open the schedule">
+                @Html.HiddenFor(m=>m[i].Index)
+                @Html.HiddenFor(m=>m[i].ResourceId)
+                <table style="background-color:#EFF7F6;">
+                    <tr>
+                        <td><b>@Html.DisplayFor(m=>m[i].ResourceName)</b></td>
+                        <td style="text-align:right">
+                            <small><b>Id:</b> @Html.DisplayFor(m=>m[i].ResourceId)
+                                   <b>Status:</b> @Html.DisplayFor(m=>m[i].Status)
+                                   <b>Quantity:</b> @Html.DisplayFor(m=>m[i].ResourceQuantity)
+                            </small>
+                        </td>
+                    </tr>
+                </table>
+               </div>
+            <div class="itemContent" id="scheduleDetails_@Model[i].Index" style="display: none; border-left:2px solid black; border-right:2px solid black; border-bottom:2px solid black;">
+                <table style="width:100%;">
+                    <tr>
+                        <td colspan="4" style="width:200px" ><div id="timePeriod_@Model[i].Index"></div></td>
+                        <td>
+                            <small>@Html.ValidationMessage("DateMismatch_" + Model[i].Index.ToString())</small><br />
+                            <small>@Html.ValidationMessage("DurationError_" + Model[i].Index.ToString())</small><br />
+                        </td>
+                        <td rowspan="6" style="text-align: right">
+                            @if ((Model[i].EditMode && Model[i].EditAccess) || Model[i].EventId == 0)
+                            {
+                                    <div class="controlPanel">
+                                        @if (Model[i].DeleteAccess || Model[i].EventId == 0)
+                                        {
+                                            <span class="bx bx-grid-function bx-trash" id="" onclick = "RemoveScheduleFromEvent(@Model[i].Index)" title="Remove schedule from event"></span><br />
+                                        }
+                                        <span  id="availability_@Model[i].ResourceId" class="bx bx-grid-function bx-calendar-o" onclick = "OnClickCheckAvailability(@Model[i].Index,@Model[i].ResourceId)" title="Check availability for the defined time period and quantity"></span><br />
+                                        <span  id="@Model[i].ResourceId" class="bx bx-grid-function bx-clone" onclick = "OnClickCopy(@Model[i].Index, @Model[i].EventId)" title="Copy the whole resource schedule"></span><br />
+                                        <span  id="TT_@Model[i].ResourceId" class="bx bx-grid-function bx-filter" onclick = "OnClickShowSimilar(@Model[i].Index,@Model[i].ResourceId)" title="Show similar resources"></span><br />
+                                        <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function bx-reply-all" onclick="useValuesForAll(@Model[i].Index)" title="Use filled values for all other schedules"></span>
+                                    </div>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width:200px"><b>Reserved For</b></td>
+                        <td>
+                            @if ((Model[i].EditMode && Model[i].EditAccess) || Model[i].EventId == 0)
+                            {
+                               <span class="bx-grid-function bx-user-plus" onclick = "OnClickChooseForPerson(@Model[i].Index)" title="Select one or more person(s) for whom you want to reserve"></span>
+                            }
+
+                        </td>
+                        <td  style="width:200px" colspan="2">
+                          <div id="users_@Model[i].Index"></div>
+                        </td>
+                         <td>
+                             <small>@Html.ValidationMessage("UserMissing_" + Model[i].Index.ToString())</small>
+                        </td>
+                    </tr>
+               @*     <tr>
+                        <td><b>Contact Person</b></td>
+                        <td>@Html.DisplayFor(m=>m[i].ContactName)</td>
+                    </tr>*@
+                    <tr>
+                        <td>
+                            <b>Reserved By</b>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(m=>m[i].ByPerson)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>@Html.LabelFor(m=>m[i].ScheduleQuantity)</td>
+                        <td>
+                            @if(Model[i].ResourceQuantity != 0)
+                            {
+                                if ((Model[i].EditMode && Model[i].EditAccess) || Model[i].EventId == 0)
+                                {
+                                    @Html.TextBoxFor(m => m[i].ScheduleQuantity, new { OnChange="onChangeControl(this)", @Name="Quantity_"+ @Model[i].Index.ToString()})
+                                }
+                                else
+                                {
+                                    @Html.TextBoxFor(m => m[i].ScheduleQuantity, new { OnChange="onChangeControl(this)", disabled="disabled", @Name="Quantity_"+ @Model[i].Index.ToString()})
+                                }
+                            }
+                            else
+                            {
+                                <p>no limitation</p>
+                            }
+                        </td>
+                        <td></td>
+                        <td></td>
+                         <td>
+                             <small>@Html.ValidationMessage("Quantity_" + Model[i].Index.ToString())</small>
+                        </td>
+                    </tr>
+                    @if (Model[i].WithActivity)
+                    {
+                    <tr>
+                        <td>
+                            <b>Reason</b>
+                        </td>
+                        <td>
+                            @if ((Model[i].EditMode && Model[i].EditAccess) || Model[i].EventId == 0)
+                            {
+                                <span class="bx-grid-function bx-arrows" onclick = "OnClickChooseActivity(@Model[i].Index)" title="Give a predefined reason why you are booking this resource."></span>
+                            }
+                        </td>
+                      
+                        <td colspan="2">
+                           <div id="activities_@Model[i].Index"></div>
+                        </td>
+                          <td>
+                             <small>@Html.ValidationMessage("ActivityMissing_" + Model[i].Index.ToString())</small>
+                        </td>
+                    </tr>
+                    }
+                    @if (Model[i].ResourceHasFiles)
+                    {
+                        for(int j = 0; j< Model[i].Files.Count(); j++)
+                        {
+                            <tr colspan="2">
+                                <td><b>@Model[i].Files[j].AttributeName</b></td>
+                                <td>@Html.ActionLink(@Model[i].Files[j].Name, "DownloadFile", "Schedule", new { id = @Model[i].Files[j].Id }, null )
+                                @if ((@Model[i].Files[j].NeedConfirmation && Model[i].EditMode) || (@Model[i].Files[j].NeedConfirmation  && Model[i].EventId == 0))
+                                {
+                                    <br /><br />@Html.CheckBoxFor(m=>m[i].FileConfirmation, new{ @Name = "FileConfirmation_"+ @Model[i].ResourceId, @OnChange = "OnChangeFileConfirmation(this)" }) <span>I read the file(s)</span>
+                                           }
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <small>@Html.ValidationMessage("FileConfirmation_" + Model[i].Index.ToString())</small>
+                                </td>
+                            </tr>
+                          
+                        }
+                    }
+                    <tr>
+                        <td colspan="5">
+                            <small>@Html.ValidationMessage("DependencyConstraint_" + Model[i].Index.ToString())</small><br />
+                            <small>@Html.ValidationMessage("QuantityConstraint_" + Model[i].Index.ToString())</small><br />
+                            <small>@Html.ValidationMessage("BlockingConstraint_" + Model[i].Index.ToString())</small>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            @*<div>
+                <br />
+            </div>*@
+        </div>
+
+    }
+    
+<script type="text/javascript">
+   
+</script>
+

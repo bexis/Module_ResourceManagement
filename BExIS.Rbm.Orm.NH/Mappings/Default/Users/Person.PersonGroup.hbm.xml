@@ -1,0 +1,18 @@
+﻿<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.Users">
+  <subclass name="PersonGroup" extends="Person" discriminator-value="PGP" dynamic-update="true">
+
+    <!-- Mapping Entity properties -->
+
+    <set name="Users" table="PersonGroup_User" cascade="none"  lazy="true">
+      <key column="PersonGroupRef"/>
+      <many-to-many column="UserRef" class="BExIS.Security.Entities.Subjects.User, BExIS.Security.Entities"/>
+    </set>
+
+
+
+
+  </subclass>
+
+</hibernate-mapping>
+
+

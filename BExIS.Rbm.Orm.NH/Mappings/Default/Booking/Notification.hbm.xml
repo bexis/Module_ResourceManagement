@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.Booking">
+  <class xmlns="urn:nhibernate-mapping-2.2" name="Notification" table="Notifications">
+
+    <!-- Mapping BaseEntity properties -->
+    <id name="Id" type="Int64">
+      <column name="Id" />
+      <generator class="native" />
+    </id>
+
+    <version name="VersionNo" type="Int32">
+      <column name="VersionNo" />
+    </version>
+
+    <property name="Extra" type="System.Xml.XmlDocument, System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+      <column name="Extra" not-null="false" sql-type="xml" />
+    </property>
+
+    <!-- Mapping Event Properties -->
+
+    <property name="Subject" type="String" />
+
+    <property name="StartDate" type="DateTime" />
+    
+    <property name="EndDate" type="DateTime" />
+
+    <property name="InsertDate" type="DateTime" />
+    
+    <property name="Message" type="String" length="2056" />
+
+    <!-- Mapping Entity Associations -->
+
+    <!--<set name="Schedules" table="Schedule_Notification" cascade="save-update" lazy="true">
+      <key column="NotificationRef"/>
+      <many-to-many column="ScheduleRef" class="Schedule"/>
+    </set>-->
+
+    <set name="NotificationDependency" inverse="true" cascade="all-delete-orphan" lazy="true">
+      <key column="NotificationRef"/>
+      <one-to-many class="BExIS.Rbm.Entities.Booking.NotificationDependency, BExIS.Rbm.Entities.Booking" />
+    </set>
+
+
+  </class>
+</hibernate-mapping>

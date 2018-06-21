@@ -1,0 +1,225 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
+
+@model List<ResourceStructureAttributeModel>
+
+@{
+    GridPagerStyles pagerStyles = GridPagerStyles.PageSizeDropDown;
+    pagerStyles |= GridPagerStyles.NextPreviousAndNumeric;
+    pagerStyles |= GridPagerStyles.Numeric;
+}
+
+@section Information
+{
+    With this interface you are able to manage (e.g. create, edit, delete) resource structure attributes. Resource structures attributes cannot be edited or deleted once they are associated with a resource structure (they become locked).
+    <p>
+        <a href="/RBM/Help/Index/#_Toc434570750" class="bx-informationLink" title="go to help" target="_blank">More</a>
+    </p>
+}
+
+<link href="@Url.Content("~/Areas/RBM/Stylesheets/RBM.css")" rel="stylesheet" type="text/css" />
+<span class="bx-button function" onclick="Create()" title="Create a new Resource Structures Attribute">Create Resource Structures Attribute</span><br /><br />
+
+@(Html.Telerik().Grid(Model)
+        .Name("Grid_ResourceStructureAttribute")
+        //.ToolBar(command =>
+        //        {
+        //            command.Custom().Name("Create")
+        //                .Text("Create New")
+        //                .Action("CreateResourceStructureAttributeWithoutUsage", "ResourceStructure", new { })
+
+         //                .Ajax(true).ButtonType(GridButtonType.ImageAndText)
+        //                .ImageHtmlAttributes(new { @class = "t-icon t-add" });
+        //        })
+        .DataKeys(keys =>
+        {
+            keys.Add(r => r.AttributeId);
+        })
+        .Columns(columns =>
+        {
+            columns.Bound(r => r.AttributeId).Width(90);
+            columns.Bound(r => r.AttributeName);
+            columns.Bound(r => r.AttributeDescription);
+            columns.Template(
+                       @<text>
+                            @if (!item.InUse)
+                            {
+                                <div class="t-button t-button-icontext t-button-bare">
+                                   @if(item.EditAccess)
+                                   {
+                                        @Html.ActionLink("Edit", "#", "", null, new { @class = "t-icon t-edit", onclick = "OnClickEdit('" + item.AttributeId + "')", title= "Edit Attribute @item.AttributeName" });
+                                   }
+                                   else
+                                   {
+                                         <div class = "bx bx-grid-function bx-edit bx-disabled" disabled = "disabled" title = 'Edit Attribute "@item.AttributeName"'></div>
+                                   }
+                                   @if(item.DeleteAccess)
+                                   {
+                                        @Html.ActionLink("Delete", "DeleteResourceStructureAttribute", "ResourceStructure", new { id = item.AttributeId }, new { @class = "t-icon t-delete", onclick = "return confirm('Are you sure you want to delete the Resource Structure Attribute" + "?')", title= "Delete Attribute @item.AttributeName" })
+                                   }
+                                   else
+                                   {
+                                       <div class = "bx bx-grid-function bx-trash bx-disabled" disabled = "disabled" title = 'Delete Attribute "@item.AttributeName"'></div>
+                                   }
+                                </div>
+                            }
+                            else
+                            {
+                                <div>
+                                    <div class = "bx bx-grid-function bx-edit bx-disabled" disabled = "disabled" title = 'Edit Unit "@item.AttributeName"'></div>
+                                    <div class = "bx bx-grid-function bx-trash bx-disabled" disabled = "disabled" title = 'Delete Unit "@item.AttributeName"'></div>
+                                </div>
+                            }
+                        </text>
+                        ).Title(" ")
+                        .ClientTemplate(
+                           "<div style=\"<#= InUse ? 'display:none;' : 'display:inline;' #>\">" +
+                           "<div style=\"<#= EditAccess ? 'display:inline;' : 'display:none;' #>\">" +
+                           "<a id=\"<#= AttributeId #>\" onclick=\"OnClickEdit('<#= AttributeId #>')\" class=\"t-icon t-edit\"  title = \'Edit resource structure attribute \"<#= AttributeName #>\"\' ></a>" +
+                           "</div>" +
+                           "<div style=\"<#= EditAccess ? 'display:none;' : 'display:inline;' #>\">" +
+                           "<div class = \"bx bx-grid-function bx-edit bx-disabled\" disabled = \"disabled\" title = \'Edit resource structure attribute \"<#= AttributeName #>\"\'></div>" +
+                           "</div>" +
+                           "<div style=\"<#= DeleteAccess ? 'display:inline;' : 'display:none;' #>\">" +
+                           "<a id=\"<#= AttributeId #>\" onclick=\"OnClickDelete('<#= AttributeId #>')\" class=\"bx bx-grid-function bx-trash\" title=\' Delete resource structure attribute \"<#= AttributeName #>\"\' ></a>" +
+                           "</div>" +
+                           "<div style=\"<#= DeleteAccess ? 'display:none;' : 'display:inline;' #>\">" +
+                           "<div class = \"bx bx-grid-function bx-trash bx-disabled\" disabled = \"disabled\" title = \'Delete resource structure attribute \"<#= AttributeName #>\"\'></div>" +
+                           "</div>" +
+                           "</div>" +
+                          "<div class=\"locked\" style=\"<#= InUse ? 'display:inline;' : 'display:none;' #>\">" +
+                          "<div class = \"bx bx-grid-function bx-edit bx-disabled\" disabled = \"disabled\" title = \' Edit resource structure attribute \"<#= AttributeName #>\"\'></div>" +
+                          "<div class = \"bx bx-grid-function bx-trash bx-disabled\" disabled = \"disabled\" title = \'Delete resource structure attribute \"<#= AttributeName #>\"\'></div>" +
+                           "</div>"
+                        ).Width(70);
+        })
+                                               .ClientEvents(clientEvents => clientEvents
+                                                   //.OnCommand("OnCommand")
+                                               .OnDataBound("onDataBound")
+                                            )
+                                                                                         .DataBinding(dataBinding => dataBinding
+                                                                                             .Ajax()
+                                                                                             .Select("ResourceStructureAttributesAllManager_Select", "ResourceStructure")
+                                                                                         )
+                                                                                 .Filterable()
+                                                                                 .Pageable()
+                                                                                 .Sortable(sortable => sortable
+                                                                                     .OrderBy(orderby => orderby
+                                                                                         .Add(r => r.AttributeId).Descending()))
+                                                                                 //.Scrollable()
+                                                                                 
+                                                                         )
+
+
+   @(Html.Telerik().Window()
+    .Name("Window_Creation")
+    .Title("Create Resource Structure Attribute")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_Creation"></div>
+    </text>)
+    .ClientEvents(clientEvents => clientEvents
+        .OnClose("Window_Creation_OnClose")
+    )
+)
+
+ @(Html.Telerik().Window()
+    .Name("Window_Edit")
+    .Title("Edit")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_Edit"></div>
+    </text>)
+    .ClientEvents(clientEvents => clientEvents
+        .OnClose("Window_Details_OnClose")
+    )
+)
+
+
+<script type="text/javascript">
+
+    function onDataBound() {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    }
+
+
+    function Create() {
+        $.get('@Url.Action("CreateResourceStructureAttributeWithoutUsage", "ResourceStructure", new RouteValueDictionary { { "area", "RBM" } })', function (data) {
+
+            $('#Content_Creation').html(data);
+
+            var window = $('#Window_Creation').data('tWindow');
+            window.center().open();
+        });
+    }
+
+  @*  function OnCommand(e) {
+
+        if (e.name == "Create") {
+            $.get('@Url.Action("CreateResourceStructureAttributeWithoutUsage", "ResourceStructure", new RouteValueDictionary { { "area", "RBM" } })', function (data) {
+
+                $('#Content_Creation').html(data);
+
+                var window = $('#Window_Creation').data('tWindow');
+                window.center().open();
+            });
+        }
+    }*@
+
+    function OnClickEdit(id) {
+
+        $.get('@Url.Action("OpenEditResourceStructureAttribute", "ResourceStructure", new RouteValueDictionary { { "area", "RBM" } })', { id: id }, function (data) {
+            $('#Content_Edit').html(data);
+
+            var window1 = $('#Window_Edit').data('tWindow');
+            window1.center().open();
+        });
+    }
+
+    function OnClickDelete(id) {
+        confirm("Are you sure you want to delete the Resource Structure Attribute");
+        $.get('@Url.Action("DeleteResourceStructureAttribute", "ResourceStructure", new RouteValueDictionary { { "area", "RBM" } })', { id: id }, function (data) {
+
+        refreshGrid();
+        });
+    }
+
+
+    function Window_Creation_OnClose() {
+
+        $('#Content_Creation').empty();
+        refreshGrid();
+    }
+
+    function Window_Details_OnClose() {
+        $('#Content_Creation').empty();
+        refreshGrid();
+    }
+
+    function refreshGrid() {
+        $(".t-grid .t-refresh").trigger('click');
+    }
+
+    function attributeCreate_onSuccess(data) {
+        if (data.success) {
+            $('#Window_Creation').data('tWindow').close();
+            $('#Window_Edit').data('tWindow').close();
+        }
+        else
+        {
+            $('#Content_Creation').html(data);
+            var window = $('#Window_Creation').data('tWindow');
+            window.center().open();
+        }
+    }
+
+</script>

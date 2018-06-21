@@ -1,0 +1,20 @@
+﻿<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.ResourceStructure">
+  <subclass name="ResourceStructureAttribute" extends="BExIS.Dlm.Entities.DataStructure.DataContainer" discriminator-value="RSA" dynamic-update="true">
+
+    
+    <!-- Mapping BaseEntity properties -->
+
+
+    <!-- Mapping Entity Associations -->
+
+
+    <!--<set name="ResourceAttributeUsage" cascade="all-delete-orphan" lazy="true">
+      <key column="ResourceStructureAttributeRef"/>
+      <one-to-many class="BExIS.Rbm.Entities.ResourceStructure.ResourceAttributeUsage, BExIS.Rbm.Entities" />
+    </set>-->
+
+
+
+  </subclass>
+
+</hibernate-mapping>

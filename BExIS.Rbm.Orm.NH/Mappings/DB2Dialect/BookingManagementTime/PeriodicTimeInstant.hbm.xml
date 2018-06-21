@@ -1,0 +1,39 @@
+﻿<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.BookingManagementTime">
+  <class xmlns="urn:nhibernate-mapping-2.2" name="PeriodicTimeInstant" table="PeriodicTimeInstant" dynamic-update="true">
+
+    <!-- Mapping BaseEntity properties -->
+
+    <id name="Id" type="Int64">
+      <column name="Id" />
+      <generator class="native" />
+    </id>
+
+    <version name="VersionNo" type="Int32">
+      <column name="VersionNo" />
+    </version>
+
+    <property name="Extra" type="System.Xml.XmlDocument, System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+      <column name="Extra" not-null="false" sql-type="xml" />
+    </property>
+
+    <!-- Mapping Entity properties -->
+    
+    <property name="ResetFrequency" type="BExIS.Rbm.Entities.BookingManagementTime.ResetFrequency, BExIS.RBM.Entities">
+    </property>
+
+    <property name="ResetInterval" type="Int32">
+      <column name="ResetInterval" />
+    </property>
+    
+    <property name="Off_Set" type="Int32">
+      <column name="Off_Set" />
+    </property>
+
+    <property name="Off_Set_Unit" type="BExIS.Rbm.Entities.BookingManagementTime.SystemDefinedUnit, BExIS.RBM.Entities">
+    </property>
+
+    <!--<one-to-one name="PeriodicTimeInterval" class="BExIS.Rbm.Entities.BookingManagementTime.PeriodicTimeInterval, BExIS.RBM.Entities" />-->
+
+
+  </class>
+</hibernate-mapping>

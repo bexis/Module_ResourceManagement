@@ -1,0 +1,13 @@
+﻿<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.Booking">
+  <joined-subclass xmlns="urn:nhibernate-mapping-2.2" name="BookingTemplate" table="BookingTemplates" extends="RealEvent" dynamic-update="true">
+
+    <!-- Mapping Subject Properties -->
+    <key column="Id" />
+
+    <!-- Mapping BookingTemplate Properties -->
+    <property name="Description" type="String" />
+
+
+  </joined-subclass>
+
+</hibernate-mapping>

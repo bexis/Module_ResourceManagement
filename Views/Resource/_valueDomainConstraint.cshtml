@@ -1,0 +1,30 @@
+﻿@model BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.TextValueModel
+@using BExIS.Web.Shell.Areas.RBM.Helpers;
+
+@using (Html.BeginCollectionItem("TextValueModel"))
+{
+  <tr>
+    <td>@Html.DisplayFor(m =>m.AttributeName) 
+        @Html.HiddenFor(m=>m.ResourceAttributeUsageId)
+        @Html.HiddenFor(m=>m.Id)
+    </td>
+      @if(@Model.EditMode == true)
+      {
+    <td>
+         @if (Model.Value != "")
+         {
+             @Html.DropDownListFor(m => m.Value, new SelectList(Model.DomainConstraint.Items, "Key", "Key", Model.Value), "-- SELECT --", new { @Key = Model.AttributeName, OnChange = "control_OnChange(this)", @class = " long t-dropdown t-header t-dropdown-wrap" });
+         }
+        else
+         {
+             @Html.DropDownListFor(m => m.Value, new SelectList(Model.DomainConstraint.Items, "key", "key"), "-- SELECT--- ", new { @Key = Model.AttributeName, OnChange = "control_OnChange(this)", @class = "long t-dropdown t-header t-dropdown-wrap" });
+         }
+    </td>
+      }
+      else
+      {
+          @Html.DisplayFor(m=>m.Value);
+      }
+ </tr>
+
+}

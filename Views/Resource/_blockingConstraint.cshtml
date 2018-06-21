@@ -1,0 +1,157 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Resource;
+@using BExIS.Web.Shell.Areas.RBM.Helpers;
+
+@model BlockingConstraintModel
+
+@using (Html.BeginCollectionItem("BlockingConstraints"))
+{
+
+    @Html.HiddenFor(m => m.Index);
+    @Html.HiddenFor(m=>m.Id);
+
+    <table class="bx-table-form" style="width: 500px;">
+        <tr>
+           
+            <td>
+               <div class="bx-rpm-text">@Html.LabelFor(m => m.AllUsers)</div>
+                @Html.CheckBoxFor(m => m.AllUsers, new { @constraint = "blockingconstraint", @Name = "allUsers_"+@Model.Index, OnChange= "control_OnChange(this)", title= "Should the resource be blocked for all user" })
+            </td>
+            <td>
+              <div class="bx-rpm-text">@Html.Label("For people:")</div>
+              <span name="chooseForPerson" class="bx-grid-function bx-user-plus" onclick = "ChooseForPerson_OnClick(@Model.Index)" title="Choose persons for whom the resource should be blocked"></span>
+            </td>
+            <td>
+                <div id="users_@Model.Index"></div>
+                          
+            </td>
+        </tr>
+          <tr>
+              <td>
+                  <div class="bx-rpm-text">@Html.LabelFor(m => m.ForEver)</div>
+                   @Html.CheckBoxFor(m => m.ForEver, new { @constraint = "blockingconstraint", @Name = "forEver_"+@Model.Index, OnChange= "control_OnChange(this)", title= "Should the resource be blocked for ever" })
+              </td>
+              <td colspan="3">
+                   <div class="bx-rpm-text">@Html.LabelFor(m => m.ForTimeInterval.StartTime)</div>
+                  @if(Model.Id == 0 && Model.ForTimeInterval.StartTime.Instant == null)
+                  {
+                    @Html.Telerik().DateTimePicker().Name("startDate_" + Model.Index).ClientEvents(events => events.OnChange("control_OnChange")).HtmlAttributes(new { title = "Start date of the time period when the resource should be blocked" })
+
+                  }
+                  else
+                  {
+                    @Html.Telerik().DateTimePickerFor(m=>m.ForTimeInterval.StartTime.Instant).Name("startDate_" + Model.Index).ClientEvents(events => events.OnChange("control_OnChange")).HtmlAttributes(new { title = "Start date of the time period when the resource should be blocked" })
+                  }
+              </td>
+
+          </tr>
+        <tr>
+            <td></td>
+              <td colspan="3">
+                   <div class="bx-rpm-text">@Html.LabelFor(m => m.ForTimeInterval.EndTime)</div>
+                  @if (Model.Id == 0 && Model.ForTimeInterval.EndTime.Instant == null)
+                  {
+                     @Html.Telerik().DateTimePicker().Name("endDate_" + Model.Index).ClientEvents(events => events.OnChange("control_OnChange")).HtmlAttributes(new { title = "End date of the time period when the resource should be blocked" })
+                  }
+                  else
+                  {
+                    @Html.Telerik().DateTimePickerFor(m=>m.ForTimeInterval.EndTime.Instant).Name("endDate_" + Model.Index).ClientEvents(events => events.OnChange("control_OnChange")).HtmlAttributes(new { title = "End date of the time period when the resource should be blocked" })
+                  }
+              </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="bx-rpm-text">Repetition</div>
+                @Html.CheckBoxFor(m => m.ForPeriodicTimeInterval.IsSet, new { @constraint = "constraint", @Name = "periodictimeintervalisset_" + @Model.Index, OnChange = "Repetition_OnClick("+@Model.Index +")", title= "Add a time repetition for the blocking constraint" })
+            </td>
+            <td><small><span id="repetitionSummary_@Model.Index"></span></small></td>
+            <td><small><span id="editRepetition_@Model.Index" style="display: none" onclick="editRepetition(@Model.Index)"><a>Edit</a></span></small></td>
+        </tr>
+
+    </table>
+
+}
+
+@(Html.Telerik().Window()
+    .Name("Window_Add")
+    .Title("Choose Object")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .Width(900)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+                <div id="Content_Creation"></div>
+            </text>)
+    .ClientEvents(clientEvents => clientEvents
+        .OnClose("Window_Creation_OnClose")
+    ))
+
+@(Html.Telerik().Window()
+    .Name("Window_ChooseUsers")
+    .Title("Select user(s)")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_ChooseUsers"></div>
+    </text>)
+)
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        resetAllTelerikIconTitles();
+        addTooltips();
+
+        var index = '@Model.Index';
+
+        $.post('@Url.Action("ShowUsersInConstraint", "Resource", new RouteValueDictionary { { "area", "RBM" } })', { index: index }, function (data) {
+            $('#users_' + index).html(data);
+        });
+
+        $('#repetitionSummary_' +index).text("@Model.ForPeriodicTimeInterval.Summary");
+
+        var isSet = '@Model.ForPeriodicTimeInterval.IsSet';
+
+        if(isSet == "True")
+        {
+            $("#editRepetition_" +index).toggle();
+        }
+
+        //add consstraint attr
+        $("input[name^='startDate']").attr("constraint", "constraint");
+        $("input[name^='endDate']").attr("constraint", "constraint");
+
+    });
+
+  @*  $("input[name$='ResourceObjectName']").click(function () {
+        var selectItem = $("select[name$='resourceObjects']").val();
+        $("input[name$='SelectedType']").val(selectItem);
+        $.get('@Url.Action("ChooseDependencyObject", "Resource", new RouteValueDictionary { { "area", "RBM" } })', { selectedObject: selectItem }, function (data) {
+
+            $('#Window_Add #Content_Creation').html(data);
+            var window = $('#Window_Add').data('tWindow');
+            window.center().open();
+        });
+    });*@
+
+
+    function ChooseResource(id, name) {
+
+        $("input[name$='ResourceObjectName']").val(name);
+        $("input[name$='ResourceObjectId']").val(id);
+
+        var window = $('#Window_Add').data('tWindow');
+        window.close();
+    }
+
+
+
+
+
+</script>

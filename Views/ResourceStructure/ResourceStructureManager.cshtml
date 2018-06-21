@@ -1,0 +1,183 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
+
+@model List<ResourceStructureManagerModel>
+
+@{
+    GridPagerStyles pagerStyles = GridPagerStyles.PageSizeDropDown;
+    pagerStyles |= GridPagerStyles.NextPreviousAndNumeric;
+    pagerStyles |= GridPagerStyles.Numeric;
+}
+
+@section Information
+{
+    With this interface you are able to manage (e.g. create, edit, delete) resource structures. Resource structures cannot be edited or deleted once they are associated with a resource (they become locked).
+    <p>
+        <a href="/RBM/Help/Index/#_Toc434570750" class="bx-informationLink" title="go to help" target="_blank">More</a>
+    </p>
+}
+
+<link href="@Url.Content("~/Areas/RBM/Stylesheets/RBM.css")" rel="stylesheet" type="text/css" />
+@Html.ActionLink("Create Resource Structure", "Create", "ResourceStructure", new { @class = "bx-button function", title= "Create a new Resource Structure" })
+
+
+@(Html.Telerik().Grid(Model)
+        .Name("Grid_ResourceStructure")
+        .DataKeys(keys =>
+        {
+            keys.Add(r => r.Id);
+        })
+        //.ToolBar(command =>
+        //{
+        //    command.Custom().Name("Create").Text("New Resource Structure")
+        //        .Action("Create", "ResourceStructure").Ajax(false)
+        //        .ImageHtmlAttributes(new { @class = "t-icon t-add" });
+        //})
+        .Columns(columns =>
+        {
+            columns.Bound(r => r.Id).Width(90);
+            columns.Bound(r => r.Name);
+            columns.Bound(r => r.Parent);
+            columns.Bound(r => r.Description);
+            columns.Template(
+                        @<text>
+                            @{string temp = String.Join(",", item.ResourceStructureAttributesNames);
+                              }
+                              @temp
+                        </text>
+                    ).Title("Associated Resource Structure Attributes ").Width(160)
+                    .ClientTemplate("<#= loadClientTemplate(ResourceStructureAttributesNames) #>");
+
+            columns.Template(
+              @<text>
+                            @if (!item.InUse)
+                            {
+                                <div class="t-button t-button-icontext t-button-bare">
+                                   @Html.ActionLink("Edit", "#", "", null, new { @class = "t-icon t-edit", onclick = "OnClickEdit('" + item.Id + "')" });
+                                   @Html.ActionLink("Delete", "Delete", "ResourceStructure", new { id = item.Id }, new { @class = "t-icon t-delete"})
+                                </div>
+                            }
+                            else
+                            {
+                                 <div>
+                                    <div class = "bx bx-grid-function bx-edit bx-disabled" disabled = "disabled" title = 'Edit Unit "@item..Name"'></div>
+                                    <div class = "bx bx-grid-function bx-trash bx-disabled" disabled = "disabled" title = 'Delete Unit "@item.Name"'></div>
+                                </div>
+                            }
+                        </text>
+               ).Title(" ")
+               .ClientTemplate(
+                  "<div style=\"<#= InUse ? 'display:none;' : 'display:inline;' #>\">" +
+                  "<div style=\"<#= EditAccess ? 'display:inline;' : 'display:none;' #>\">" +
+                  "<a id=\"<#= Id #>\" onclick=\"OnClickEdit('<#= Id #>')\" class=\"t-icon t-edit\" title = \'Edit Resource Structure \" <#= Name #>\"\' ></a>" +
+                  "</div>" +
+                  "<div style=\"<#= EditAccess ? 'display:none;' : 'display:inline;' #>\">" +
+                  "<div class = \"bx bx-grid-function bx-edit bx-disabled\" disabled = \"disabled\" title = \'Edit Resource Structure \" <#= Name #>\"\'></div>" +
+                  "</div>" +
+                  "<div style=\"<#= DeleteAccess ? 'display:inline;' : 'display:none;' #>\">" +
+                  "<a id=\"<#= Id #>\" onclick=\"return onConfirm('<#= Id #>')\" class=\"bx bx-grid-function bx-trash\" title = \'Delete Resource Structure \" <#= Name #>\"\'  ></a>" +
+                  "</div>" +
+                  "<div style=\"<#= DeleteAccess ? 'display:none;' : 'display:inline;' #>\">" +
+                  "<div class = \"bx bx-grid-function bx-trash bx-disabled\" disabled = \"disabled\" title = \'Delete Resource Structure \" <#= Name #>\"\'></div>" +
+                  "</div>" +
+                  "</div>" +
+                  "<div class=\"locked\" style=\"<#= InUse ? 'display:inline;' : 'display:none;' #>\">" +
+                  "<div class = \"bx bx-grid-function bx-edit bx-disabled\" disabled = \"disabled\" title = \'Edit Resource Structure \" <#= Name #>\"\'></div>" +
+                  "<div class = \"bx bx-grid-function bx-trash bx-disabled\" disabled = \"disabled\" title = \'Delete Resource Structure \" <#= Name #>\"\'></div>" +
+                  "</div>"
+               ).Width(70);
+        })
+        .ClientEvents(clientEvents => clientEvents
+            .OnDataBound("onDataBound")
+        )
+        .DataBinding(dataBinding => dataBinding
+            .Ajax()
+            .Select("ResourceStructure_Select", "ResourceStructure")
+        )
+        .Filterable()
+        .Pageable(paging =>
+                paging
+                    .Style(pagerStyles)
+                    .PageSize(50)
+                    .Position(GridPagerPosition.Both)
+                    )
+         .Sortable(sortable => sortable
+            .OrderBy(orderby => orderby
+            .Add(r => r.Id).Descending()))
+
+//.Scrollable()
+
+)
+
+
+<script type="text/javascript">
+
+function onDataBound() {
+        resetAllTelerikIconTitles();
+        addTooltips();
+}
+
+function onConfirm(id)
+{
+    if (confirm("Are you sure you want to delete the Resource Structure?")) {
+        OnClickDelete(id);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+function loadClientTemplate(data)
+    {
+        var template = ""
+
+        for (var i = 0; i < data.length ; i++)
+        {
+            template += "<span>" + data[i] + "<br/></data>";
+        }
+        
+        return template;
+    }
+
+function OnClickEdit(id) {
+
+    $.get('@Url.Action("Edit", "ResourceStructure", new RouteValueDictionary { { "area", "RBM" } })', { id: id }, function (data) {
+
+        window.location.href = 'Edit/' + id;
+        });
+    }
+
+    function OnClickDelete(id) {
+        $.get('@Url.Action("Delete", "ResourceStructure", new RouteValueDictionary { { "area", "RBM" } })', { id: id }, function (data) {
+
+            refreshGrid();
+        });
+    }
+
+    function refreshGrid() {
+        $(".t-grid .t-refresh").trigger('click');
+    }
+
+  
+
+@*function OnCommand(e) {
+
+    if (e.name == "Edit") {
+        var rsId = e.dataItem.Id;
+
+        $.get('@Url.Action("Edit", "ResourceStructure")',  { Id: rsId }, function (data) {
+            $('body').html(data);
+        });
+    }
+
+    if (e.name == "Delete") {
+        var rsId = e.dataItem.Id;
+
+        $.get('@Url.Action("Delete", "ResourceStructure")', { Id: rsId }, function (data) {
+            $('body').html(data);
+        });
+    }
+}*@
+
+ </script>

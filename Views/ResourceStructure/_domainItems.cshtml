@@ -1,0 +1,33 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
+
+@model CreateResourceStructureAttributeModel
+
+<h3>Constrains</h3>
+            <div id="addItems">
+                @{ foreach (DomainItemModel item in Model.DomainItems)
+                   {
+                       Html.RenderPartial("_createDomainItem", item);
+                   }
+                }
+            </div>
+@Html.ActionLink("Add item", "Add", null, new { id = "addItem" })
+
+
+<script type="text/javascript">
+
+    $("#addItem").click(function () {
+        $.ajax({
+            url: this.href,
+            cache: false,
+            success: function (html) { $("#addItems").append(html); }
+        });
+        return false;
+    });
+
+    $("a.deleteRow").live("click", function () {
+        $(this).parents("div.editorRow:first").remove();
+        return false;
+    });
+
+</script>

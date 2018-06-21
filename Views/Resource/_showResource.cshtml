@@ -1,0 +1,76 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Resource;
+@using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
+@using BExIS.Rbm.Services.ResourceStructure; 
+@using BExIS.Rbm.Entities.ResourceStructure;
+
+
+@model ShowResourceModel
+
+<hr />
+<h3>@Model.Name</h3>
+
+<table>
+     <tr>
+        <td>Id:</td>
+        <td>@Model.Id</td>
+    </tr>
+     <tr>
+        <td>Description:</td>
+        <td>@Model.Description</td>
+    </tr>
+    <tr>
+        <td>Quantity:</td>
+        <td>
+        @if (Model.Quantity == 0)
+        {
+            <span>no limitation</span>
+        }
+        else
+        {
+        @Model.Quantity
+        }
+        </td>
+    </tr>
+    <tr>
+        <td>Duration:</td>
+        <td>@Model.Duration</td>
+    </tr>
+    <tr>
+        <td>Time Unit</td>
+        <td>@Model.TimeUnit</td>
+    </tr>
+    @{
+        ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
+
+    }
+    
+    @foreach(ResourceStructureAttributeValueModel v in Model.ResourceStructureAttributeValues)
+    {
+        <tr>
+            <td>
+                @v.AttributeName
+            </td>
+            <td>
+                @if (v.ResourceAttributeUsage.IsFileDataType)
+                {
+                    FileValue fileValue = (FileValue)rsaManager.GetValueByUsageAndResource(v.ResourceAttributeUsage.Id, Model.Id);
+                    if (fileValue.Name != null)
+                    {
+                        @Html.ActionLink(fileValue.Name, "DownloadFile", "Schedule", new { id = fileValue.Id }, null)
+                    }
+                }
+                else
+                {
+                    TextValue textValue = (TextValue)rsaManager.GetValueByUsageAndResource(v.ResourceAttributeUsage.Id, Model.Id);
+                   <span>@textValue.Value</span>
+                } 
+            </td>
+        </tr>
+    }
+
+</table>
+
+
+<hr />
+

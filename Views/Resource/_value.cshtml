@@ -1,0 +1,23 @@
+﻿@model BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.TextValueModel
+@using BExIS.Web.Shell.Areas.RBM.Helpers;
+
+
+@using (Html.BeginCollectionItem("TextValueModel"))
+{ 
+     @Html.HiddenFor(m=>m.Id)
+    <tr>
+    <td>@Html.DisplayFor(m =>m.AttributeName) 
+        @Html.HiddenFor(m=>m.ResourceAttributeUsageId)
+    </td>
+        @if(@Model.EditMode == true)
+        {
+            <td>@Html.TextBoxFor(m =>m.Value, new { @Key = Model.AttributeName, OnChange = "control_OnChange(this)" })</td>
+        }
+        else
+        {
+            <td>@Html.DisplayFor(m =>m.Value)</td>
+        }
+    </tr>
+      
+}
+

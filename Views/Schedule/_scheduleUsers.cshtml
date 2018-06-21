@@ -1,0 +1,30 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Booking;
+
+@model List<PersonInSchedule>
+
+@if (Model.Count()> 0)
+{
+  <ul id="userList">
+    @for (int j = 0; j < Model.Count(); j++)
+    {
+      if(j<=1)
+      {
+         <li class="fullName" style="font-size:12px;">@Html.DisplayFor(m=>m[j].UserFullName)
+             @if(Model[j].IsContactPerson)
+             {
+                 <b> (Is Contact)</b>
+             }
+             @if(Model[j].EditMode && Model[j].EditAccess)
+             { 
+                <span id="removeUser" class="bx bx-trash" onclick="RemoveUserFromSchedule(@Model[j].UserId, @Model[j].Index)"></span>
+             }
+         </li>
+      }
+      else
+      {
+         <li><a href="#" class="bx bx-link" onclick="ShowAllUsers(@Html.DisplayFor(m=>m[j].Index, @Model[j].Index))" >show all</a></li>
+      }
+                                        }
+  </ul>
+}

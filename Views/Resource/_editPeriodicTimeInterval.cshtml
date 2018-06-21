@@ -1,0 +1,198 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.BookingManagementTime;
+
+@model PeriodicTimeIntervalModel
+
+<table>
+    <tr>
+        <td><b>Repeats:</b></td>
+        <td>
+            @Html.DropDownListFor(m => m.PeriodicTimeInstant.ResetFrequency, new SelectList(Model.ResetFrequencies, "", ""), "-- SELECT --", new { id = "bx-input", @Name = "ResetFrequency_" + @Model.Index, @class = "", @constraint = "constraint", repetition = "repetition", @tabindex = "5", OnChange = "selectRepeats(this)", title= "Choose the repeat frequency unit" })
+        </td>
+    </tr>
+    <tr>
+        <td><b>Repeat every:</b></td>
+        <td>
+            @(Html.Telerik().IntegerTextBox().Name("ResetInterval_" + @Model.Index)
+                                                    .MinValue(1)
+                                                    .MaxValue(Int32.MaxValue)
+                                                    .Value(Model.PeriodicTimeInstant.ResetInterval)
+                                                    .ClientEvents(events => events
+                                                    .OnChange("control_OnChange"))
+                                                    .InputHtmlAttributes(new { @class = "bx-input", @tabindex = "2", @constraint = "constraint", repetition = "repetition" })
+                                                    .HtmlAttributes(new { title = "Choose the repeat reset interval" })
+            )
+        </td>
+    </tr>
+    <tr id="dailySelectionStart" style="display: none">
+        <td><b>Start Time:</b></td>
+        <td>
+            @Html.Telerik().TimePickerFor(m => m.StartTime).Name("StartTime_" + Model.Index).ClientEvents(events => events.OnChange("control_OnChange")).HtmlAttributes(new { title = "Start time of the time period at the day" })
+        </td>
+    </tr>
+    <tr id="dailySelectionEnd" style="display: none">
+        <td><b>End Time:</b></td>
+        <td>
+            @Html.Telerik().TimePickerFor(m => m.EndTime).Name("EndTime_" + Model.Index).ClientEvents(events => events.OnChange("control_OnChange")).HtmlAttributes(new { title = "End time of the time period at the day" })
+        </td>
+    </tr>
+    <tr id="weeklySelection" style="display: none">
+        <td><b>Repeat on:</b></td>
+        <td>
+            @for (var i = 0; i < Model.Days.Count(); i++)
+            {
+                <span>
+                    @Html.CheckBoxFor(m => m.Days[i].Checked, new { OnChange = "control_OnChange(this)", @constraint = "constraint", @repetition = "repetition", @Name = "repeaton_" + @Model.Index + "_" + @Model.Days[i].Id })
+                    <lable>@Model.Days[i].DisplayName</lable>
+                </span>
+            }
+        </td>
+    </tr>
+    <tr>
+        <td><b>Starts on:</b></td>
+        <td>
+                @Html.Telerik().DatePickerFor(m => m.StartDate).Name("StartDate_" + Model.Index).Enable(false).ClientEvents(events => events.OnChange("control_OnChange")).HtmlAttributes(new { title = "Start date of the time period at the month" })
+        </td>
+    </tr>
+    <tr>
+        <td><b>Ends on:</b></td>
+        <td>
+            @Html.Telerik().DatePickerFor(m => m.EndDate).Name("EndDate_" +Model.Index).Enable(false).ClientEvents(events => events.OnChange("control_OnChange")).HtmlAttributes(new { title = "End date of the time period at the month" })
+        </td>
+    </tr>
+</table>
+
+<div class="bx-footer right">
+    <button class="bx-button action" name="AddRepetitionToConstraint" onclick="AddRepetitionToConstraint(@Model.Index)">Save</button>
+    @Html.ActionLink("Cancel", "Create", "Resource", new { area = "RBM", @class = "t-button action", @title = "Cancel", @tabindex = "5" })
+</div>
+
+<script type="text/javascript">
+
+    $("#enable").click(function () {
+        var datePicker = $("#StartDate_0").data("tDatePicker");
+        datePicker.enable();
+    })
+
+    $("#disable").click(function () {
+        var datePicker = $("#StartDate_").data("tDatePicker");
+        datePicker.disable();
+    })
+
+    $(document).ready(function () {
+
+        resetAllTelerikIconTitles();
+        addTooltips();
+        var value = "";
+        value = "@Model.PeriodicTimeInstant.ResetFrequency";
+        var index = "";
+        index = '@Model.Index';
+
+        displayRepeats(value, index);
+
+        $("#PeriodicTimeInstant_ResetInterval").spinner({
+            min: 1,
+            change: function(event,ui){
+                $(this).attr("value",$(this).val());
+            }
+        });
+
+        $("#PeriodicTimeInstant_ResetInterval").bind("keydown", function (event) {
+            event.preventDefault();
+        });
+
+        //check for ever is checked
+       var forEver = '@Model.ForEverIsSet';
+        if (forEver == "True")
+        {
+            var datePicker1 = $("#StartDate_" + index).data("tDatePicker");
+            datePicker1.enable();
+        }
+
+        //add consstraint attr
+        $("input[name^='StartDate']").attr("constraint", "constraint");
+        $("input[name^='EndDate']").attr("constraint", "constraint");
+
+        $("input[name^='StartTime']").attr("constraint", "constraint");
+        $("input[name^='EndTime']").attr("constraint", "constraint");
+
+        $("input[name^='StartTime']").attr("repetition", "repetition");
+        $("input[name^='EndTime']").attr("repetition", "repetition");
+    });
+
+    function selectRepeats(e) {
+        var selectedValue = $(e).val();
+        var name = $(e).attr("name");
+        var index = name.split("_")[1];
+
+        displayRepeats(selectedValue, index);
+        control_OnChange(e);
+    }
+
+    function displayRepeats(selectedValue, index) {
+
+        var datePicker1 = $("#StartDate_" + index).data("tDatePicker");
+        var datePicker2 = $("#EndDate_" + index).data("tDatePicker");
+
+        if (selectedValue === "Weekly") {
+            if ($("#dailySelectionStart").is(":visible") && $("#dailySelectionEnd").is(":visible")) {
+                $("#dailySelectionStart").toggle();
+                $("#dailySelectionEnd").toggle();
+            }
+
+            $("#weeklySelection").toggle();
+            $("#resetIntervalUnit").text('weeks');
+
+            datePicker1.disable();
+            datePicker2.disable();
+        }
+
+        if (selectedValue === "Daily") {
+            if ($("#weeklySelection").is(":visible")) {
+                $("#weeklySelection").toggle();
+            }
+
+            $("#dailySelectionStart").toggle();
+            $("#dailySelectionEnd").toggle();
+
+            $("#resetIntervalUnit").text('days');
+
+            datePicker1.disable();
+            datePicker2.disable();
+        }
+
+        if (selectedValue === "Monthly") {
+
+            if ($("#dailySelectionStart").is(":visible") && $("#dailySelectionEnd").is(":visible")) {
+                $("#dailySelectionStart").toggle();
+                $("#dailySelectionEnd").toggle();
+            }
+
+            if ($("#weeklySelection").is(":visible")) {
+                $("#weeklySelection").toggle();
+            }
+
+            datePicker1.enable();
+            datePicker2.enable();
+
+            $("#resetIntervalUnit").text('months');
+        }
+    }
+
+    function AddRepetitionToConstraint(index) {
+        $.get('@Url.Action("AddRepetition", "Resource")', { index: index }, function (data) {
+            $('#repetitionSummary_' + index).html(data);
+            var window = $('#Window_Repetition').data('tWindow');
+            window.close();
+            if (data != null) {
+                if($("#editRepetition_" + index).is(":hidden"))
+                {
+                    $("#editRepetition_" + index).toggle();
+                }
+            }
+        });
+    }
+
+
+
+</script>

@@ -1,0 +1,173 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Resource;
+
+@model List<ResourceManagerModel>
+
+@{
+    GridPagerStyles pagerStyles = GridPagerStyles.PageSizeDropDown;
+    pagerStyles |= GridPagerStyles.NextPreviousAndNumeric;
+    pagerStyles |= GridPagerStyles.Numeric;
+}
+
+@section Information
+{
+    With this interface you are able to manage (e.g. create, edit, delete) resources which can be booked.
+    <p>
+        <a href="/RBM/Help/Index/#_Toc434570750" class="bx-informationLink" title="go to help" target="_blank">More</a>
+    </p>
+}
+
+<link href="@Url.Content("~/Areas/RBM/Stylesheets/RBM.css")" rel="stylesheet" type="text/css" />
+
+@Html.ActionLink("Create Resource", "Create", "Resource", new { @class = "bx-button function", title="Create a new Resource" })
+<br /><br />
+
+@(Html.Telerik().Grid(Model)
+        .Name("Grid_Resource")
+        .DataKeys(keys =>
+        {
+            keys.Add(r => r.Id);
+        })
+        .Columns(columns =>
+        {
+
+            columns.Bound(r => r.Id).Width(90);
+            columns.Bound(r => r.Name);
+            columns.Bound(r => r.ResourceStructureName);
+            columns.Bound(r => r.Quantity);
+            columns.Bound(r => r.Description);
+            columns.Template(
+                         @<text>
+                            <span class="bx bx-grid-function bx-show" onclick="OnClickShowDetails('' + @item.Id + '')"></span>
+                            @if (!item.InUse)
+                            {
+                                <div class="t-button t-button-icontext t-button-bare">
+                                   @Html.ActionLink("Edit", "#", "", null, new { @class = "bx bx-grid-function bx-edit", onclick = "OnClickEdit('" + item.Id + "')", title= "Edit Resource" });
+                                   @Html.ActionLink("Delete", "Delete", "Resource", new { id = item.Id }, new { @class = "bx bx-grid-function bx-trash", title = "Delete Resource", onclick = "return confirm('Are you sure you want to delete the Resource" + "?')" })
+                                </div>
+                            }
+                            else
+                            {
+                               <div>
+                                    <div class = "bx bx-grid-function bx-edit bx-disabled" disabled = "disabled" title = 'Edit Resource "@item.Name"'></div>
+                                    <div class = "bx bx-grid-function bx-trash bx-disabled" disabled = "disabled" title = 'Delete Resource "@item.Name"'></div>
+                                </div>
+                            }
+                            
+                        </text>
+                        ).Title(" ")
+                        .ClientTemplate(
+                        "<div style='display:inline;'>" +
+                        "<div style='display:inline;'>" +
+                        "<a id=\"<#= Id #>\" onclick=\"OnClickShowDetails('<#= Id #>')\" class=\"bx bx-grid-function bx-show\" title = \'Show Resource \" <#= Name #>\"\'></a>" +
+                        "</div>" +
+                        "<div style=\"<#= InUse ? 'display:none;' : 'display:inline;' #>\">" +
+                        "<div style=\"<#= EditAccess ? 'display:inline;' : 'display:none;' #>\">" +
+                        "<a id=\"<#= Id #>\" onclick=\"OnClickEdit('<#= Id #>')\" class=\"t-icon t-edit\" title = \'Edit Resource \" <#= Name #>\"\' ></a>" +
+                        "</div>" +
+                        "<div style=\"<#= EditAccess ? 'display:none;' : 'display:inline;' #>\">" +
+                        "<div class = \"bx bx-grid-function bx-edit bx-disabled\" disabled = \"disabled\" title = \'Edit Resource \" <#= Name #>\"\'></div>" +
+                        "</div>" +
+                        "<div style=\"<#= DeleteAccess ? 'display:inline;' : 'display:none;' #>\">" +
+                        "<a id=\"<#= Id #>\" onclick=\"onConfirm('<#= Id #>')\" class=\"bx bx-grid-function bx-trash\" title = \'Delete Resource \" <#= Name #>\"\' ></a>" +
+                        "</div>" +
+                        "<div style=\"<#= DeleteAccess ? 'display:none;' : 'display:inline;' #>\">" +
+                        "<div class = \"bx bx-grid-function bx-trash bx-disabled\" disabled = \"disabled\" title = \'Delete Resource \" <#= Name #>\"\'></div>" +
+                        "</div>" +
+                        "</div>" +
+                        "<div class=\"locked\" style=\"<#= InUse ? 'display:inline;' : 'display:none;' #>\">" +
+                        "<div class = \"bx bx-grid-function bx-edit bx-disabled\" disabled = \"disabled\" title = \'Edit Resource \" <#= Name #>\"\'></div>" +
+                        "<div class = \"bx bx-grid-function bx-trash bx-disabled\" disabled = \"disabled\" title = \'Delete Resource \" <#= Name #>\"\'></div>" +
+                        "</div>"
+
+                        ).Width(90);
+        })
+        .ClientEvents(clientEvents => clientEvents
+          .OnDataBound("onDataBound")
+        )
+                .DataBinding(dataBinding => dataBinding
+                    .Ajax()
+                    .Select("Resource_Select", "Resource")
+                )
+                  .Pageable(paging =>
+                paging
+                    .Style(pagerStyles)
+                    .PageSize(10)
+                    .Position(GridPagerPosition.Both)
+                    )
+        .Filterable()
+        .Sortable(sortable => sortable
+            .OrderBy(orderby => orderby
+                .Add(r => r.Id).Descending()))
+)
+
+@(Html.Telerik().Window()
+    .Name("Window_Details")
+    .Title("Resource Details")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_Show"></div>
+    </text>)
+    .ClientEvents(clientEvents => clientEvents
+        .OnClose("Window_Details_OnClose")
+    )
+)
+
+
+
+
+<script type="text/javascript">
+
+    function onDataBound() {
+    resetAllTelerikIconTitles();
+    addTooltips();
+}
+
+    function onConfirm(id) {
+        if (confirm("Are you sure you want to delete the Resource?")) {
+            OnClickDelete(id);
+        }
+        else {
+            return false;
+        }
+    }
+
+function OnClickEdit(id) {
+
+    $.get('@Url.Action("Edit", "Resource", new RouteValueDictionary { { "area", "RBM" } })', { id: id }, function (data) {
+
+        window.location.href = 'Edit/' + id;
+        });
+    }
+
+    function OnClickDelete(id) {
+        $.get('@Url.Action("Delete", "Resource", new RouteValueDictionary { { "area", "RBM" } })', { id: id }, function (data) {
+
+            refreshGrid();
+        });
+    }
+
+    function OnClickShowDetails(id) {
+        $.get('@Url.Action("ShowDetails", "Resource", new RouteValueDictionary { { "area", "RBM" } })', { id: id }, function (data) {
+
+            $('#Content_Show').html(data);
+            var window = $('#Window_Details').data('tWindow');
+            window.center().open();
+
+        });
+    }
+
+    function Window_Details_OnClose() {
+        $('#Content_Show').empty();
+    }
+
+
+    function refreshGrid() {
+        $(".t-grid .t-refresh").trigger('click');
+    }
+
+   </script>

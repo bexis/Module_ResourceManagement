@@ -1,0 +1,170 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Resource;
+
+@model ResourceConstraintModel
+
+
+ <p style="display:inline">
+@Html.DropDownList("constrainType", new SelectList(Model.ConstraintType), new { @class = "t-dropdown t-header t-dropdown-wrap" }) 
+     <button id="addConstraint" name="addConstraint" type="button" class="bx-button function">Add</button></p>
+<br />
+<div>
+<table id="resourceConstraints" class="bx-rpm-container bx-rpm-constrainTable">
+</table>
+    </div>
+
+@(Html.Telerik().Window()
+    .Name("Window_ShowUsers")
+    .Title("Selected users")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_ShowUsers"></div>
+    </text>)
+)
+
+
+@(Html.Telerik().Window()
+    .Name("Window_Repetition")
+    .Title("Repetition")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+        <div id="Content_Repetition"></div>
+    </text>)
+)
+
+<script type="text/javascript">
+
+    $('#addConstraint').click(function () {
+
+        var selectItem = $('select#constrainType').val();
+        $.get('@Url.Action("AddResourceConstraint", "Resource")', { Type: selectItem}, function (data) {
+
+            $('#resourceConstraints').append(data);
+
+        });
+    })
+
+    function onConfirmDeleteConstraint(index) {
+        if (confirm("Are you sure you want to delete the constraint?")) {
+            RemoveConstraint(index);
+        }
+        else {
+            return false;
+        }
+    }
+
+    function RemoveConstraint(index) {
+        $("tr[class$='" + index + "']").remove();
+        $.get('@Url.Action("RemoveResourceConstraint", "Resource")', { index: index}, function (data) {
+        });
+    }
+
+    function Window_Creation_OnClose() {
+        $('#Content_Creation').empty();
+    }
+
+    //function for the specific constrains----------------------
+    //make a function that change all items in constraint!!!!!
+    @*function ConstraintControl_OnChange(e) {
+
+        var substr = "";
+        var value = "";
+
+        if (this.name !== "") {
+            substr = this.name.split('_');
+            value = $(this).attr('value');
+        }
+        else {
+            substr = e.name.split('_');
+            value = $(e).attr('value');
+        }
+
+        var type = substr[0];
+        var index = substr[1];
+
+        $.get('@Url.Action("OnChangeConstraintItem", "Resource")', { type: type, index: index, value: value }, function (data) {
+        });
+    }*@
+
+    function ChooseForPerson_OnClick(index) {
+
+        //var index = "@Model.Index";
+
+        $.get('@Url.Action("LoadUsers", "Resource")', { index: index}, function (data) {
+             $('#Content_ChooseUsers').html(data);
+             var window = $('#Window_ChooseUsers').data('tWindow');
+             window.center().open();
+         });
+    }
+
+    function onConfirmDeleteUser(index, user, source) {
+        if (confirm("Are you sure you want to delete that user?")) {
+            RemoveUserFromConstraint(index, user, source);
+        }
+        else {
+            return false;
+        }
+    }
+
+    function RemoveUserFromConstraint(index, user, source) {
+        $.get('@Url.Action("RemoveUserFromConstraint", "Resource")', { userId: user, index: index, source:source }, function (data) {
+
+            if (source === "page") {
+                $('#users_' + index).html(data);
+            }
+            else if (source === "window") {
+                $('#Content_ShowUsers').html(data);
+            }
+          });
+    }
+
+    function ShowAllUsers(index) {
+        $.get('@Url.Action("ShowAllUsers", "Resource")', { index: index }, function (data) {
+            $('#Content_ShowUsers').html(data);
+            var window = $('#Window_ShowUsers').data('tWindow');
+            window.center().open();
+        });
+    }
+
+    function ChangeAllUsers_OnClick(index) {
+        $.get('@Url.Action("ChangeDateInConstraint", "Resource")', { dateType: dateType, index: index, value: value }, function (data) {
+        });
+    }
+
+
+    function Repetition_OnClick(index)
+    {
+        if ($("input[name^='periodictimeintervalisset']").is(':checked')) {
+            $.get('@Url.Action("OpenRepetition", "Resource")', { index: index }, function (data) {
+                $('#Content_Repetition').html(data);
+                var window = $('#Window_Repetition').data('tWindow');
+                window.center().open();
+            });
+        }
+        else
+        {
+            $.get('@Url.Action("RemoveRepetition", "Resource")', { index: index }, function (data) {
+                $("#editRepetition").toggle();
+                $('#repetitionSummary').text("");
+            });
+        }
+    }
+
+    function editRepetition(index)
+    {
+         $.get('@Url.Action("OpenRepetition", "Resource")', { index: index }, function (data) {
+                $('#Content_Repetition').html(data);
+                var window = $('#Window_Repetition').data('tWindow');
+                window.center().open();
+            });
+    }
+
+</script>

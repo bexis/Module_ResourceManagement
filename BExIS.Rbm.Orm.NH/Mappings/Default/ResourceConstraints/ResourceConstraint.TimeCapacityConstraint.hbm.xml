@@ -1,0 +1,11 @@
+﻿<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.ResourceConstraint">
+  <subclass name="TimeCapacityConstraint" extends="ResourceConstraint" discriminator-value="TIC" dynamic-update="true">
+
+
+    <!-- Mapping Entity properties -->
+    <many-to-one name="Duration" class="BExIS.Rbm.Entities.BookingManagementTime.TimeDuration" column="Duration"/>
+    <many-to-one name="MaxTimeInterval" class="BExIS.Rbm.Entities.BookingManagementTime.TimeInterval" column="MaxTimeInterval"/>
+
+  </subclass>
+
+</hibernate-mapping>

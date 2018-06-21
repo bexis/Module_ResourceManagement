@@ -1,0 +1,59 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Booking;
+
+@model List<ResourceCart>
+
+@Html.ValidationSummary(true)
+<div id="ResourceCart" style="overflow:scroll; height:600px;">
+<table>
+    @foreach(ResourceCart rc in Model)
+    {
+        <tr>
+            <td colspan="3" style="background-color:#EFF7F6;">
+                 <b>@rc.Name</b><br />
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align:middle;">
+                <div>
+                    <small>Startdate: @rc.PreselectedStartDate</small><br />
+                    <small>Enddate: @rc.PreselectedEndDate</small><br />
+                    <small>Quantity: @rc.PreselectdQuantity</small><br />
+                </div>
+            </td>
+            <td style="vertical-align:middle;">
+                <div id="remove" class="bx bx-grid-function bx-trash" onclick="removeRourceFromCart(@rc.Index)" title="Remove resource from cart"></div>
+
+            </td>
+        </tr>
+    }
+</table>
+</div>
+
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    });
+
+    function removeRourceFromCart(index) {
+        $.get('@Url.Action("RemoveResourceFromCart", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', { index: index }, function (data) {
+            $('#ResourceCart').html(data);
+        });
+    }
+
+    @*function changeQuantityInCart(e) {
+        var index = e.target.id;
+        var quantity = e.target.value;
+        $.get('@Url.Action("OnChangeQuantityInCart", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', { quantity: quantity, index: index }, function (data) {
+            $('#ResourceCart').html(data);
+        });
+    }*@
+
+</script>
+
+

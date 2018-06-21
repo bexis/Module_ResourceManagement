@@ -1,0 +1,60 @@
+﻿@using Telerik.Web.Mvc.UI
+@model BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.FileValueModel
+@using BExIS.Web.Shell.Areas.RBM.Helpers;
+
+@using (Html.BeginCollectionItem("FileValueModel"))
+{
+    <tr>
+    <td>@Html.DisplayFor(m =>m.AttributeName) 
+        @Html.HiddenFor(m=>m.ResourceAttributeUsageId)
+        @Html.HiddenFor(m=>m.Id)
+    </td>
+   
+        @*@if (Model.Name != null)
+        {
+            <td>
+           @Model.Name
+            </td>
+        }
+
+    @if(@Model.EditMode == true)
+    {*@
+    <td>
+    @(Html.Telerik().Upload()
+      .Name("file")
+      .Multiple(false)
+      .ShowFileList(false)
+      .HtmlAttributes(new {title="Browse"})
+      .ClientEvents(events =>
+          events
+          .OnSuccess("SelectFile_OnSuccess")
+       )
+       .Async(async => async
+          .Save("SaveFileTemp", "Resource", new { area = "RBM", id = Model.ResourceAttributeUsageId })
+          .AutoUpload(true))
+
+     )
+        <div id="fileNameDiv">@if (Model.Name != ""){@Model.Name}</div>
+        </td>
+    @*}
+    else
+    {
+        @Html.DisplayFor(m=>m.Name)
+    }*@
+        
+        </tr>
+        <tr>
+            <td>
+                Confirmation File:
+            </td>
+            <td>@Html.CheckBoxFor(m => m.NeedConfirmation, new { @Key = Model.AttributeName, OnChange = "control_OnChange(this)" })</td>
+        </tr>
+}
+
+<script type="text/javascript">
+
+    function SelectFile_OnSuccess(e) {
+        $('#fileNameDiv').text(e.files[0].name);
+    }
+
+</script>

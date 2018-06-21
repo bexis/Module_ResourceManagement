@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9C1990BA-2E9C-49CC-B4A1-7E40056BB661}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BExIS.Rbm.Orm.NH</RootNamespace>
+    <AssemblyName>BExIS.Rbm.Orm.NH</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Class1.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Mappings\DB2Dialect\BookingManagementTime\PeriodicTimeInstant.hbm.xml" />
+    <Content Include="Mappings\DB2Dialect\BookingManagementTime\PeriodicTimeInterval.hbm.xml" />
+    <Content Include="Mappings\DB2Dialect\BookingManagementTime\TimeDuration.hbm.xml" />
+    <Content Include="Mappings\DB2Dialect\BookingManagementTime\TimeInstant.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\DB2Dialect\BookingManagementTime\TimeInterval.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\BookingManagementTime\PeriodicTimeInstant.hbm.xml" />
+    <Content Include="Mappings\Default\BookingManagementTime\PeriodicTimeInterval.hbm.xml" />
+    <Content Include="Mappings\Default\BookingManagementTime\TimeDuration.hbm.xml" />
+    <Content Include="Mappings\Default\BookingManagementTime\TimeInstant.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\BookingManagementTime\TimeInterval.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\Booking\Activity.hbm.xml" />
+    <Content Include="Mappings\Default\Booking\BookingTemplate.hbm.xml" />
+    <Content Include="Mappings\Default\Booking\Notification.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\Booking\NotificationDependencies.hbm.xml" />
+    <Content Include="Mappings\Default\Booking\RealEvent.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\Booking\Event.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\Booking\Schedule.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\ResourceConstraints\ResourceConstraint.BlockingConstraint.hbm.xml" />
+    <Content Include="Mappings\Default\ResourceConstraints\ResourceConstraint.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\ResourceConstraints\ResourceConstraint.QuantityConstraint.hbm.xml" />
+    <Content Include="Mappings\Default\ResourceConstraints\ResourceConstraint.TimeCapacityConstraint.hbm.xml" />
+    <Content Include="Mappings\Default\ResourceStructure\ResourceAttributeUsage.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\ResourceStructure\ResourceAttributeValue.FileValue.hbm.xml" />
+    <Content Include="Mappings\Default\ResourceStructure\ResourceAttributeValue.hbm.xml" />
+    <Content Include="Mappings\Default\ResourceStructure\ResourceAttributeValue.TextValue.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\ResourceStructure\ResourceStructure.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\ResourceStructure\ResourceStructureAttribute.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\Resource\Resource.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\Resource\Resource.ResourceGroup.hbm.xml" />
+    <Content Include="Mappings\Default\Resource\Resource.SingleResource.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\Resource\ResourceFilter.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\Resource\ResourceFilterExpression.hbm.xml" />
+    <Content Include="Mappings\Default\Resource\ResourceFilterOperator.hbm.xml" />
+    <Content Include="Mappings\Default\Users\Person.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\Users\Person.IndividualPerson.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Mappings\Default\Users\Person.PersonGroup.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Mappings\Default\ResourceConstraints\ResourceConstraint.DependencyConstraint.hbm.xml">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>rmdir /S /Q  "$(SolutionDir)Console\Workspace\Modules\Rbm\Db\Mappings"
+C:\Windows\System32\xcopy "$(ProjectDir)Mappings" "$(SolutionDir)Workspace\Modules\Rbm\Db\Mappings" /E /C /Y /I</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

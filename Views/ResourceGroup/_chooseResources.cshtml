@@ -1,0 +1,91 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Resource;
+@using BExIS.Rbm.Entities.Resource;
+
+@model ResourceGroupModel
+
+@(Html.Telerik().Grid(Model.AllResources)
+        .Name("Grid_Resources")
+        .HtmlAttributes(new { style = "width:800px" })
+        .DataKeys(keys =>
+        {
+            keys.Add(r => r.Id);
+        })
+        .Columns(columns =>
+        {
+           
+            columns.Bound(r => r.Id).Width(40);
+            columns.Bound(r => r.Name).Width(100);
+            columns.Bound(r => r.ResourceStructureName).Width(100);
+            columns.Bound(r => r.Description).Width(200);
+             columns.Template(
+                         @<text>
+                                <div id="checkboxes">
+                                    @Html.CheckBox("" + item.Id)
+                                </div>
+                         </text>
+                        ).Title(" ")
+                        .Width(20)
+                        .ClientTemplate(
+                            @Html.CheckBox("selectedResource").ToHtmlString()
+                        ).Width(20);
+             columns.Template(
+              @<text>
+                      @Html.ActionLink(" ", "AddResourceToGroup", "ResourceGroup", new { setId = Model.Id, resourceId = item.Id }, new { @class = "bx bx-grid-function bx-add" })
+              </text>
+             ).Title(" ")
+             .Width(80)
+             .ClientTemplate(
+                 @Html.ActionLink(" ", "AddResourceToGroup", "ResourceGroup", new { Id = "<#= Id #>" }, new { @class = "bx bx-grid-function bx-add" }).ToHtmlString()
+             ).Width(50);
+        })
+                                                                                           .ClientEvents(clientEvents => clientEvents
+                                                                                           .OnDataBound("onDataBound")
+                                                                                        )
+                                                        .DataBinding(dataBinding => dataBinding
+                                                            .Ajax()
+                                                            .Select("Resource_Select", "ResourceGroup")
+                                                        )
+                                                .Filterable()
+                                                .Sortable(sortable => sortable
+                                                    .OrderBy(orderby => orderby
+                                                        .Add(r => r.Id).Descending()))
+        //.Scrollable()
+                                        )
+
+<br />
+<button name="AddResourcesToSet" onclick="addSelectedResources()">Add Resources to Set</button>
+
+<script type="text/javascript">
+
+    function onDataBound() {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    }
+
+    function addSelectedResources() {
+        var selected = [];
+        $('#checkboxes input:checked').each(function () {
+            selected.push($(this).attr('name'));
+        });
+        var selectedAsString = selected.toString();
+        var setId = '@Model.Id';
+        $.post('@Url.Action("AddResourcesToGroup", "ResourceGroup", new RouteValueDictionary { { "area", "RBM" } })', { setId: setId, resourceIds: selectedAsString }, function (data) {
+
+            refreshGrid();
+            var window = $('#Window_Creation').data('tWindow');
+            window.close();
+        });
+    }
+
+    function Window_Creation_OnClose() {
+
+        $('#Content_Creation').empty();
+        refreshGrid();
+    }
+
+    function refreshGrid() {
+        $(".t-grid .t-refresh").trigger('click');
+    }
+
+</script>

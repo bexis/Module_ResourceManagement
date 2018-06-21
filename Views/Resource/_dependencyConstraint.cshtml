@@ -1,0 +1,91 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Resource;
+@using BExIS.Web.Shell.Areas.RBM.Helpers;
+
+@model DependencyConstraintModel
+
+@using (Html.BeginCollectionItem("DependencyConstraints"))
+{ 
+    @Html.HiddenFor(m => m.Index);
+    @Html.HiddenFor(m=>m.Id);
+<table class="bx-table-form" style="width: 500px;">
+<tr>
+    <td><div class="bx-rpm-text">@Html.Label("Dependency on:")</div>
+        @Html.DropDownList("resourceObjects", new SelectList(Model.ResourceObjects), new { @constraint = "dependencyconstraint", id = "resourceObjectsDDL_" + @Model.Index, @class = " t-dropdown t-header t-dropdown-wrap", title="" })
+        <div id="@Model.Index">
+            @Html.HiddenFor(m => m.SelectedType)
+            @Html.HiddenFor(m=>m.Id)
+        </div>
+    </td>
+    <td colspan="1">
+        <div class="bx-rpm-text">@Html.LabelFor(m => m.Quantity)</div>
+         @Html.TextBoxFor(m=>m.Quantity, new { @constraint = "dependencyconstraint", @Name = "quantity_" + @Model.Index, @class = "bx-rpm-midinput bx-input", OnChange = "control_OnChange(this)", title= "Quantity of the resource which is dependent" })
+    </td>
+    <td colspan="1">
+        <div class="bx-rpm-text">@Html.LabelFor(m => m.Implicit)</div>
+        @Html.CheckBoxFor(m => m.Implicit, new { @constraint = "dependencyconstraint", @Name = "implicit_" + @Model.Index, OnChange = "control_OnChange(this)", title = " Implicit dependency" })
+    </td>
+</tr>
+<tr>
+    <td>
+        <div class="bx-rpm-text">@Html.LabelFor(m => m.ObjectName)</div>
+         @Html.TextBoxFor(m => m.ObjectName, new { @constraint = "dependencyconstraint", id = "ResourceObjectName_" + @Model.Index, @Name = "ObjectName_" + @Model.Index, @class = "bx-rpm-midinput bx-input", @tabindex = "2", OnChange = "control_OnChange(this)" , title= "Choose the dependent resource" })
+         @Html.HiddenFor(m => m.ObjectId, new { @constraint = "dependencyconstraint", id = "ResourceObjectId_" + @Model.Index, @Name = "objectId_" + @Model.Index, OnChange = "control_OnChange(this)" })
+    </td>
+</tr>
+</table>
+    
+}
+
+@(Html.Telerik().Window()
+    .Name("Window_Add")
+    .Title("Choose Object")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(true)
+    .Width(900)
+    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+    .Content(@<text>
+                <div id="Content_Creation"></div>
+            </text>)
+    .ClientEvents(clientEvents => clientEvents
+        .OnClose("Window_Creation_OnClose")
+    ))
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        resetAllTelerikIconTitles();
+        addTooltips();
+    });
+
+    $("input[name^='ObjectName']").click(function () {
+        var i = "@Model.Index";
+        var selectItem = $("#resourceObjectsDDL_" + i).val();
+        $("input[name$='SelectedType']").val(selectItem);
+
+        $.get('@Url.Action("ChooseDependencyObject", "Resource", new RouteValueDictionary { { "area", "RBM" } })', { selectedObject: selectItem, index: i}, function (data) {
+
+            $('#Window_Add #Content_Creation').html(data);
+            var window = $('#Window_Add').data('tWindow');
+            window.center().open();
+        });
+    });
+
+
+    function ChooseResource(id, name, index) {
+
+        $("#ResourceObjectName_" +index).val(name);
+        $("#ResourceObjectId_" + index).val(id);
+
+        $("#ResourceObjectName_" + index).change();
+        $("#ResourceObjectId_" + index).change();
+
+        var window = $('#Window_Add').data('tWindow');
+        window.close();
+    }
+
+
+</script>

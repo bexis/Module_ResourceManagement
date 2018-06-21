@@ -1,0 +1,30 @@
+﻿<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.BookingManagementTime">
+  <class xmlns="urn:nhibernate-mapping-2.2" name="PeriodicTimeInterval" table="PeriodicTimeInterval" dynamic-update="true">
+
+    <!-- Mapping BaseEntity properties -->
+
+    <id name="Id" type="Int64">
+      <column name="Id" />
+      <generator class="native" />
+    </id>
+
+    <version name="VersionNo" type="Int32">
+      <column name="VersionNo" />
+    </version>
+
+    <property name="Extra" type="System.Xml.XmlDocument, System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+      <column name="Extra" not-null="false" sql-type="xml" />
+    </property>
+
+    <!-- Mapping Entity properties -->
+
+    <many-to-one name="PeriodicTimeInstant" class="BExIS.Rbm.Entities.BookingManagementTime.PeriodicTimeInstant, BExIS.Rbm.Entities" column="PeriodicTimeInstant" unique="true" cascade="all-delete-orphan"/>
+
+    <many-to-one name="Duration" class="BExIS.Rbm.Entities.BookingManagementTime.TimeDuration, BExIS.Rbm.Entities" column="Duration" unique="true" cascade="all-delete-orphan"/>
+
+    <one-to-one name="ResourceConstraint" class="BExIS.Rbm.Entities.ResourceConstraint.ResourceConstraint, BExIS.RBM.Entities" />
+
+
+
+  </class>
+</hibernate-mapping>

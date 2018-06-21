@@ -1,0 +1,50 @@
+﻿@using Telerik.Web.Mvc.UI
+@using BExIS.Web.Shell.Areas.RBM.Models.Booking;
+
+@model ShowEventModel
+
+<div class="rbmPartialDiv" id="showEvent">
+
+   <div id="tabs">
+        
+    <ul>
+        <li><a href="#tabs-1">Schedules</a></li>
+        <li><a href="#tabs-2">Activities</a></li>
+    </ul>
+
+    <div id="tabs-1">
+        @Html.Action("ShowSchedules", "Schedule", new { Id = Model.Id })
+    </div>
+    <div id="tabs-2">
+        @Html.Action("ShowActivities", "Schedule", new { Id = Model.Id })
+    </div>
+
+         
+</div>
+    <div class="bx-rpm-submit bx-rpm-buttons">
+    <br />
+        @if(Model.EditAccess)
+        {  
+            @Html.ActionLink("Edit Event", "Edit", "Schedule", new { area = "RBM", id = Model.Id }, new { @class = "bx-button action" })
+        }
+        else
+        {
+            <button class ="bx-button bx-disabled" disabled ="disabled">Edit Event</button>
+        }
+
+        @if(Model.DeleteAccess)
+        {
+            @Html.ActionLink("Delete Event", "Delete", "Schedule", new { area = "RBM", id = Model.Id }, new { @class = "bx-button action" })
+        }
+        else
+        {
+            <button class ="bx-button bx-disabled" disabled ="disabled">Edit Event</button>
+        }
+        </div>
+    </div>
+
+<script type="text/javascript">
+
+    $("#tabs").tabs();
+    
+</script>
