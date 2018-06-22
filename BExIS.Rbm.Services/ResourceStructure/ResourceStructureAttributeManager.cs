@@ -14,17 +14,43 @@ using BExIS.Rbm.Entities.Resource;
 
 namespace BExIS.Rbm.Services.ResourceStructure
 {
-    public class ResourceStructureAttributeManager
+    public class ResourceStructureAttributeManager :IDisposable
     {
+        private readonly IUnitOfWork _guow;
+        private bool _isDisposed;
+
         public ResourceStructureAttributeManager()
         {
-            IUnitOfWork uow = this.GetUnitOfWork();
-            this.ResourceStructureAttrRepo = uow.GetReadOnlyRepository<RS.ResourceStructureAttribute>();
-            this.ResourceAttributeValueRepro = uow.GetReadOnlyRepository<RS.ResourceAttributeValue>();
-            this.ResourceStructureRepro = uow.GetReadOnlyRepository<RS.ResourceStructure>();
-            this.ResourceAttributeUsageRepro = uow.GetReadOnlyRepository<RS.ResourceAttributeUsage>();
-            this.TextValueRepro = uow.GetReadOnlyRepository<RS.TextValue>();
+            _guow = this.GetIsolatedUnitOfWork();
+            this.ResourceStructureAttrRepo = _guow.GetReadOnlyRepository<RS.ResourceStructureAttribute>();
+            this.ResourceAttributeValueRepro = _guow.GetReadOnlyRepository<RS.ResourceAttributeValue>();
+            this.ResourceStructureRepro = _guow.GetReadOnlyRepository<RS.ResourceStructure>();
+            this.ResourceAttributeUsageRepro = _guow.GetReadOnlyRepository<RS.ResourceAttributeUsage>();
+            this.TextValueRepro = _guow.GetReadOnlyRepository<RS.TextValue>();
 
+        }
+
+        ~ResourceStructureAttributeManager()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                if (disposing)
+                {
+                    if (_guow != null)
+                        _guow.Dispose();
+                    _isDisposed = true;
+                }
+            }
         }
 
         #region ResourceStructureAttribute

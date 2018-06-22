@@ -9,15 +9,41 @@ using Vaiona.Persistence.Api;
 
 namespace BExIS.Rbm.Services.Users
 {
-    public class PersonManager
+    public class PersonManager :IDisposable
     {
+        private readonly IUnitOfWork _guow;
+        private bool _isDisposed;
+
         public PersonManager()
         {
-            IUnitOfWork uow = this.GetUnitOfWork();
-            this.IndividualPersonRepo = uow.GetReadOnlyRepository<IndividualPerson>();
-            this.PersonGroupRepo = uow.GetReadOnlyRepository<PersonGroup>();
-            this.PersonRepo = uow.GetReadOnlyRepository<Person>();
+            _guow = this.GetIsolatedUnitOfWork();
+            this.IndividualPersonRepo = _guow.GetReadOnlyRepository<IndividualPerson>();
+            this.PersonGroupRepo = _guow.GetReadOnlyRepository<PersonGroup>();
+            this.PersonRepo = _guow.GetReadOnlyRepository<Person>();
 
+        }
+
+        ~PersonManager()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                if (disposing)
+                {
+                    if (_guow != null)
+                        _guow.Dispose();
+                    _isDisposed = true;
+                }
+            }
         }
 
         #region Data Readers

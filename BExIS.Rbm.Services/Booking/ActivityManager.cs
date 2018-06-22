@@ -11,12 +11,38 @@ namespace BExIS.Rbm.Services.Booking
     /// <summary>
     /// ActivityManager class is responsible for CRUD (Create, Read, Update, Delete) operations on the aggregate area of the activity.
     /// </summary>
-    public class ActivityManager
+    public class ActivityManager :IDisposable
     {
+        private readonly IUnitOfWork _guow;
+        private bool _isDisposed;
+
         public ActivityManager()
         {
-            IUnitOfWork uow = this.GetUnitOfWork();
-            this.ActivityRepo = uow.GetReadOnlyRepository<Activity>();
+            _guow = this.GetIsolatedUnitOfWork();
+            this.ActivityRepo = _guow.GetReadOnlyRepository<Activity>();
+        }
+
+        ~ActivityManager()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                if (disposing)
+                {
+                    if (_guow != null)
+                        _guow.Dispose();
+                    _isDisposed = true;
+                }
+            }
         }
 
         #region Data Readers
@@ -112,7 +138,6 @@ namespace BExIS.Rbm.Services.Booking
             else
                 return false;
         }
-
 
         #endregion
 

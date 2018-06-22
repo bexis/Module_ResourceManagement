@@ -11,17 +11,44 @@ using R = BExIS.Rbm.Entities.Resource;
 
 namespace BExIS.Rbm.Services.ResourceConstraints
 {
-    public class ResourceConstraintManager
+    public class ResourceConstraintManager :IDisposable
     {
+        private readonly IUnitOfWork _guow;
+        private bool _isDisposed;
+
         public ResourceConstraintManager()
         {
-            IUnitOfWork uow = this.GetUnitOfWork();
-            this.ResourceConstraintRepo = uow.GetReadOnlyRepository<ResourceConstraint>();
-            this.DependencyConstraintRepo = uow.GetReadOnlyRepository<DependencyConstraint>();
-            this.BlockingConstraintRepo = uow.GetReadOnlyRepository<BlockingConstraint>();
-            this.QuantityConstraintRepo = uow.GetReadOnlyRepository<QuantityConstraint>();
-            this.TimeCapacityConstraintRepo = uow.GetReadOnlyRepository<TimeCapacityConstraint>();
+            _guow = this.GetIsolatedUnitOfWork();
+            this.ResourceConstraintRepo = _guow.GetReadOnlyRepository<ResourceConstraint>();
+            this.DependencyConstraintRepo = _guow.GetReadOnlyRepository<DependencyConstraint>();
+            this.BlockingConstraintRepo = _guow.GetReadOnlyRepository<BlockingConstraint>();
+            this.QuantityConstraintRepo = _guow.GetReadOnlyRepository<QuantityConstraint>();
+            this.TimeCapacityConstraintRepo = _guow.GetReadOnlyRepository<TimeCapacityConstraint>();
         }
+
+        ~ResourceConstraintManager()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                if (disposing)
+                {
+                    if (_guow != null)
+                        _guow.Dispose();
+                    _isDisposed = true;
+                }
+            }
+        }
+
 
         #region Data Readers
 

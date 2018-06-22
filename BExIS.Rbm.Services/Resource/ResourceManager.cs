@@ -13,13 +13,40 @@ namespace BExIS.Rbm.Services.Resource
 {
     public class SingleResourceManager : IDisposable
     {
+        private readonly IUnitOfWork _guow;
+        private bool _isDisposed;
+
         public SingleResourceManager()
         {
-            IUnitOfWork uow = this.GetUnitOfWork();
-            this.SingleResourceRepo = uow.GetReadOnlyRepository<R.SingleResource>();
-            //this.BookingTimeGranularityRepo = uow.GetReadOnlyRepository<R.BookingTimeGranularity>();
-            this.ResourceGroupRepo = uow.GetReadOnlyRepository<R.ResourceGroup>();
+            _guow = this.GetIsolatedUnitOfWork();
+            this.SingleResourceRepo = _guow.GetReadOnlyRepository<R.SingleResource>();
+            //this.BookingTimeGranularityRepo = _guow.GetReadOnlyRepository<R.BookingTimeGranularity>();
+            this.ResourceGroupRepo = _guow.GetReadOnlyRepository<R.ResourceGroup>();
         }
+
+        ~SingleResourceManager()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                if (disposing)
+                {
+                    if (_guow != null)
+                        _guow.Dispose();
+                    _isDisposed = true;
+                }
+            }
+        }
+
 
         #region SingleResource
 
@@ -226,8 +253,6 @@ namespace BExIS.Rbm.Services.Resource
         {
             return ResourceGroupRepo.Query();
         }
-
-
 
         #endregion
 

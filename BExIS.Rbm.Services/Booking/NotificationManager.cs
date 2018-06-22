@@ -8,13 +8,39 @@ using Vaiona.Persistence.Api;
 
 namespace BExIS.Rbm.Services.Booking
 {
-    public class NotificationManager
+    public class NotificationManager : IDisposable
     {
+        private readonly IUnitOfWork _guow;
+        private bool _isDisposed;
+
         public NotificationManager()
         {
-            IUnitOfWork uow = this.GetUnitOfWork();
-            this.NotificationRepo = uow.GetReadOnlyRepository<Notification>();
-            this.NotificationDependencyRepo = uow.GetReadOnlyRepository<NotificationDependency>();
+            _guow = this.GetIsolatedUnitOfWork();
+            this.NotificationRepo = _guow.GetReadOnlyRepository<Notification>();
+            this.NotificationDependencyRepo = _guow.GetReadOnlyRepository<NotificationDependency>();
+        }
+
+        ~NotificationManager()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                if (disposing)
+                {
+                    if (_guow != null)
+                        _guow.Dispose();
+                    _isDisposed = true;
+                }
+            }
         }
 
         #region Data Readers
@@ -141,7 +167,6 @@ namespace BExIS.Rbm.Services.Booking
         {
             return NotificationDependencyRepo.Query(a => a.Notification.Id == id).ToList();
         }
-
 
         #endregion
     }

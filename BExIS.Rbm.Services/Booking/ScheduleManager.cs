@@ -11,12 +11,38 @@ using BExIS.Rbm.Services.Users;
 
 namespace BExIS.Rbm.Services.Booking
 {
-    public class ScheduleManager
+    public class ScheduleManager : IDisposable
     {
+        private readonly IUnitOfWork _guow;
+        private bool _isDisposed;
+
         public ScheduleManager()
         {
-            IUnitOfWork uow = this.GetUnitOfWork();
-            this.ScheduleRepo = uow.GetReadOnlyRepository<Schedule>();
+            _guow = this.GetIsolatedUnitOfWork();
+            this.ScheduleRepo = _guow.GetReadOnlyRepository<Schedule>();
+        }
+
+        ~ScheduleManager()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                if (disposing)
+                {
+                    if (_guow != null)
+                        _guow.Dispose();
+                    _isDisposed = true;
+                }
+            }
         }
 
         #region Data Readers
@@ -148,6 +174,7 @@ namespace BExIS.Rbm.Services.Booking
         {
             return ScheduleRepo.Query(a => (eventIds.Contains(a.Event.Id)) && (((DateTime)a.StartDate >= startDate && (DateTime)a.StartDate <= endDate) || ((DateTime)a.EndDate >= startDate && (DateTime)a.EndDate <= endDate))).ToList();
         }
+
         #endregion
     }
 }

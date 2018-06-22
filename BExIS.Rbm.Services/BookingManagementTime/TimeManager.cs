@@ -9,17 +9,42 @@ using Vaiona.Persistence.Api;
 
 namespace BExIS.Rbm.Services.BookingManagementTime
 {
-    public class TimeManager
+    public class TimeManager : IDisposable
     {
+        private readonly IUnitOfWork _guow;
+        private bool _isDisposed;
+
         public TimeManager()
         {
-            IUnitOfWork uow = this.GetUnitOfWork();
-            this.TimeInstantRepo = uow.GetReadOnlyRepository<TimeInstant>();
-            this.TimeIntervalRepo = uow.GetReadOnlyRepository<TimeInterval>();
-            this.TimeDurationRepo = uow.GetReadOnlyRepository<TimeDuration>();
-            this.PeriodicTimeInstantRepo = uow.GetReadOnlyRepository<PeriodicTimeInstant>();
-            this.PeriodicTimeIntervalRepo = uow.GetReadOnlyRepository<PeriodicTimeInterval>();
+            _guow = this.GetIsolatedUnitOfWork();
+            this.TimeInstantRepo = _guow.GetReadOnlyRepository<TimeInstant>();
+            this.TimeIntervalRepo = _guow.GetReadOnlyRepository<TimeInterval>();
+            this.TimeDurationRepo = _guow.GetReadOnlyRepository<TimeDuration>();
+            this.PeriodicTimeInstantRepo = _guow.GetReadOnlyRepository<PeriodicTimeInstant>();
+            this.PeriodicTimeIntervalRepo = _guow.GetReadOnlyRepository<PeriodicTimeInterval>();
+        }
 
+        ~TimeManager()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                if (disposing)
+                {
+                    if (_guow != null)
+                        _guow.Dispose();
+                    _isDisposed = true;
+                }
+            }
         }
 
         #region Data Readers

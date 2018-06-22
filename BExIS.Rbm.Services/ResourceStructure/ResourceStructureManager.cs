@@ -13,18 +13,44 @@ using R= BExIS.Rbm.Entities.Resource;
 
 namespace BExIS.Rbm.Services.ResourceStructure
 {
-   public class ResourceStructureManager
+   public class ResourceStructureManager : IDisposable
     {
-       public ResourceStructureManager()
+        private readonly IUnitOfWork _guow;
+        private bool _isDisposed;
+
+        public ResourceStructureManager()
        {
-           IUnitOfWork uow = this.GetUnitOfWork();
-           this.ResourceStructureRepo = uow.GetReadOnlyRepository<RS.ResourceStructure>();
-           this.ResourceRepo = uow.GetReadOnlyRepository<R.SingleResource>();
+            _guow = this.GetIsolatedUnitOfWork();
+           this.ResourceStructureRepo = _guow.GetReadOnlyRepository<RS.ResourceStructure>();
+           this.ResourceRepo = _guow.GetReadOnlyRepository<R.SingleResource>();
        }
 
-       #region ResourceStructure
+        ~ResourceStructureManager()
+        {
+            Dispose(true);
+        }
 
-       public RS.ResourceStructure Create(string name, string description, List<RS.ResourceAttributeUsage> resourceAttributeUsage, RS.ResourceStructure parent)
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                if (disposing)
+                {
+                    if (_guow != null)
+                        _guow.Dispose();
+                    _isDisposed = true;
+                }
+            }
+        }
+
+        #region ResourceStructure
+
+        public RS.ResourceStructure Create(string name, string description, List<RS.ResourceAttributeUsage> resourceAttributeUsage, RS.ResourceStructure parent)
        {
            Contract.Requires(!string.IsNullOrWhiteSpace(name));
            Contract.Requires(!String.IsNullOrWhiteSpace(description));

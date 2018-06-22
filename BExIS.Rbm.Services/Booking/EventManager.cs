@@ -10,13 +10,39 @@ using R = BExIS.Rbm.Entities.Resource;
 
 namespace BExIS.Rbm.Services.Booking
 {
-    public class EventManager
+    public class EventManager : IDisposable
     {
+        private readonly IUnitOfWork _guow;
+        private bool _isDisposed;
+
         public EventManager()
         {
-            IUnitOfWork uow = this.GetUnitOfWork();
-            this.EventRepo = uow.GetReadOnlyRepository<E.BookingEvent>();
-            this.BookingTemplateRepo = uow.GetReadOnlyRepository<E.BookingTemplate>();
+            _guow = this.GetIsolatedUnitOfWork();
+            this.EventRepo = _guow.GetReadOnlyRepository<E.BookingEvent>();
+            this.BookingTemplateRepo = _guow.GetReadOnlyRepository<E.BookingTemplate>();
+        }
+
+        ~EventManager()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        public void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                if (disposing)
+                {
+                    if (_guow != null)
+                        _guow.Dispose();
+                    _isDisposed = true;
+                }
+            }
         }
 
         #region Data Readers
