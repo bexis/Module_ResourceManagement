@@ -35,7 +35,7 @@ using System.Web.Services;
 using System.Data;
 using BExIS.Security.Entities.Authorization;
 
-namespace BExIS.Web.Shell.Areas.RBM.Controllers
+namespace BExIS.Modules.RBM.UI.Controllers
 {
     public class ScheduleController : Controller
     {
@@ -413,6 +413,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Controllers
                     SingleResource resource = srManager.GetResourceById(rIds[i]);
                     ResourceCart cartItem = new ResourceCart();
                     cartItem.Id = resource.Id;
+                    //ToDo: User or Default
                     User createdBy = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
                     //cartItem.ByPersonName = createdBy.FullName;
                     cartItem.ByPersonUserId = createdBy.Id;

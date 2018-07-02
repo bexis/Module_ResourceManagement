@@ -1,4 +1,5 @@
-﻿<link rel='stylesheet' href="@Url.Content("~/Areas/RBM/Scripts/fullcalendar/dist/fullcalendar.css")" />
+﻿@using Telerik.Web.Mvc.UI
+<link rel='stylesheet' href="@Url.Content("~/Areas/RBM/Scripts/fullcalendar/dist/fullcalendar.css")" />
 <script src="@Url.Content("~/Areas/RBM/Scripts/moment.min.js")"></script>
 <script src="@Url.Content("~/Areas/RBM/Scripts/fullcalendar/dist/fullcalendar.js")"></script>
 
@@ -11,17 +12,17 @@
     </p>
 }
 
- <div class="editor-field">
-     @Html.ActionLink("Book Resource", "Create", "Schedule", new { area = "RBM" }, new { @class = "bx-button function", title="Book one more more resources" })
+<div class="editor-field">
+    @Html.ActionLink("Book Resource", "Create", "Schedule", new { area = "RBM" }, new { @class = "bx-button function", title = "Book one more more resources" })
 </div><br />
 <div id='calendar'></div>
 <div id="eventList"></div>
 <div id="scheduleList"></div>
 
-@section LeftPane 
-{ 
+@section LeftPane
+{
     <div id="Content_Filter">
-        
+
     </div>
 }
 
@@ -44,25 +45,25 @@
 
 
 @(Html.Telerik().Window()
-    .Name("Window_Show")
-    .Title("Show Event")
-    .Draggable(true)
-    .Modal(true)
-    .Visible(false)
-    .Scrollable(true)
-    .Width(900)
-    .ContentHtmlAttributes(new { @style="overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px"})
-    .Content(@<text>
+            .Name("Window_Show")
+            .Title("Show Event")
+            .Draggable(true)
+            .Modal(true)
+            .Visible(false)
+            .Scrollable(true)
+            .Width(900)
+            .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+            .Content(@<text>
                 <div id="Content_Creation2"></div>
             </text>)
-    .ClientEvents(clientEvents => clientEvents
-        .OnClose("Window_Creation_OnClose")
-    ))
+                            .ClientEvents(clientEvents => clientEvents
+                                .OnClose("Window_Creation_OnClose")
+                            ))
 
 
 <script type="text/javascript">
 
-  
+
 
     var calsources = {
 
@@ -127,7 +128,7 @@
 
         userschedulesource: {
             events: function (start, end, timezone, callback) {
-                
+
                 $.ajax({
                     url: '@Url.Content("~/RBM/Schedule/GetSchedulesByUser")',
                     dataType: 'json',
@@ -184,10 +185,10 @@
 
     }
 
-    
+
 
     $(window).load(function () {
-        
+
         var selectedRadio = $("input[name='CalendarView']:checked").val();
         var view = 'month,agendaWeek,agendaDay';
         //alert($("input[name='CalendarView']:checked").val());
@@ -197,7 +198,7 @@
         //{ view = 'month,agendaWeek,agendaDay'; }
 
         var calendar = $('#calendar').fullCalendar({
-           
+
             height: 550,
             header:
             {
@@ -220,7 +221,7 @@
 
             editable: false,
             eventSources: [ calsources.eventsource],
-           
+
             dayClick: function (date, jsEvent, view) {
                 $.get('@Url.Action("SetFilter", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', { startdate: date.format() }, function (data) {
                     window.location.href = 'Create';
@@ -242,8 +243,8 @@
         });
     })
 
- 
-   
+
+
 
     function AddEvent(e) {
 

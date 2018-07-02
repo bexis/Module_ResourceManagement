@@ -22,7 +22,7 @@
 
     <many-to-one name="Duration" class="BExIS.Rbm.Entities.BookingManagementTime.TimeDuration, BExIS.Rbm.Entities" column="Duration" unique="true" cascade="all-delete-orphan"/>
 
-    <one-to-one name="ResourceConstraint" class="BExIS.Rbm.Entities.ResourceConstraint.ResourceConstraint, BExIS.RBM.Entities" />
+    <one-to-one name="ResourceConstraint" class="BExIS.Rbm.Entities.ResourceConstraint.ResourceConstraint, BExIS.Rbm.Entities" />
 
 
 

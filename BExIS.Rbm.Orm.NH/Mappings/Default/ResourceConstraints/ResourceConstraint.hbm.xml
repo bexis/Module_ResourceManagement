@@ -24,7 +24,7 @@
       <column name="Description" />
     </property>
 
-    <property name="Mode" type="BExIS.Rbm.Entities.ResourceConstraint.ConstraintMode, BExIS.RBM.Entities">
+    <property name="Mode" type="BExIS.Rbm.Entities.ResourceConstraint.ConstraintMode, BExIS.Rbm.Entities">
     </property>
 
     <property name="AllUsers" type="Boolean">
@@ -48,7 +48,7 @@
 
     <many-to-one name="ForTimeInterval" class="BExIS.Rbm.Entities.BookingManagementTime.TimeInterval" column="ForTimeInterval" cascade="all-delete-orphan"/>
 
-    <many-to-one name="ForPeriodicTimeInterval" class="BExIS.Rbm.Entities.BookingManagementTime.PeriodicTimeInterval, BExIS.RBM.Entities" column="ForPeriodicTimeInterval" cascade="all-delete-orphan" unique="true"/>
+    <many-to-one name="ForPeriodicTimeInterval" class="BExIS.Rbm.Entities.BookingManagementTime.PeriodicTimeInterval, BExIS.Rbm.Entities" column="ForPeriodicTimeInterval" cascade="all-delete-orphan" unique="true"/>
 
     <many-to-one name="ForResource" class="BExIS.Rbm.Entities.Resource.Resource" column="ForResource" cascade="all-delete-orphan"/>
 

@@ -21,7 +21,7 @@
 
     <many-to-one name="Contact" class="BExIS.Security.Entities.Subjects.User" not-null="false" column="Contact"/>
 
-    <!--<one-to-one name="ResourceConstraint" class="BExIS.Rbm.Entities.ResourceConstraint.ResourceConstraint, BExIS.RBM.Entities" />-->
+    <!--<one-to-one name="ResourceConstraint" class="BExIS.Rbm.Entities.ResourceConstraint.ResourceConstraint, BExIS.Rbm.Entities" />-->
 
   </class>
 </hibernate-mapping>

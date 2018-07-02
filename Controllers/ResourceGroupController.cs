@@ -10,7 +10,7 @@ using Telerik.Web.Mvc;
 using Vaiona.Web.Mvc.Models;
 using Vaiona.Web.Extensions;
 
-namespace BExIS.Web.Shell.Areas.RBM.Controllers
+namespace BExIS.Modules.RBM.UI.Controllers
 {
     public class ResourceGroupController : Controller
     {

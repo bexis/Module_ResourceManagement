@@ -6,7 +6,7 @@ using System.Web.Mvc;
 using Vaiona.Web.Extensions;
 using Vaiona.Web.Mvc.Models;
 
-namespace BExIS.Web.Shell.Areas.RBM.Controllers
+namespace BExIS.Modules.RBM.UI.Controllers
 {
     public class HelpController : Controller
     {

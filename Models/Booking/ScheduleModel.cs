@@ -372,7 +372,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             {
                 PersonGroup pGroup = (PersonGroup)schedule.ForPerson.Self;
                 Contact = new PersonInSchedule(pGroup.Id, pGroup.Contact, true);
-                ContactName = pGroup.Contact.FullName;
+                //ContactName = pGroup.Contact.FullName;
                 foreach (User u in pGroup.Users)
                 {
                     if (u.Id == pGroup.Contact.Id)
@@ -395,7 +395,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             {
                 IndividualPerson iPersonBy = (IndividualPerson)schedule.ByPerson.Self;
                 //ByPerson = new PersonInSchedule(iPersonBy.Id,iPersonBy.Person, true);
-                ByPerson = iPersonBy.Person.FullName;
+                //ByPerson = iPersonBy.Person.FullName;
             }
         }
     }

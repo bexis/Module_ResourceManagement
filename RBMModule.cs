@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BExIS.Modules.RBM.UI.Helper;
+using System;
 using Vaiona.Logging;
 using Vaiona.Web.Mvc.Modularity;
 
@@ -6,31 +7,16 @@ namespace BExIS.Modules.RBM.UI
 {
     public class RBMModule : ModuleBase
     {
-        public RBMModule(): base("rbm")
+        public RBMModule() : base("RBM")
         {
+
         }
 
-        /// <summary>
-        /// Registers current area with the routing engine.
-        /// The default route is automatically registred. Using the AreaName as route prefix and url sapce.
-        /// </summary>
-        /// <remarks>
-        /// <list type="number">
-        ///     <item>If you are happy with the defaul route, either leave the method as is or comment it all (prefered).</item>
-        ///     <item>if you want to register other than the default, comment the call to the base method and write your own ones.</item>
-        ///     <item>If you want to register additional routes, write them after the call to the base method.</item>
-        /// </list>
-        /// </remarks>
-        /// <param name="context"></param>
-        //public override void RegisterArea(AreaRegistrationContext context)
-        //{
-        //    base.RegisterArea(context);
-        //    //context.MapRoute(
-        //    //    AreaName + "_default",
-        //    //    AreaName+"/{controller}/{action}/{id}",
-        //    //    new { action = "Index", id = UrlParameter.Optional }
-        //    //);
-        //}
+        public override void Start()
+        {
+            base.Start();
+            LoggerFactory.GetFileLogger().LogCustom("Start RBM");
+        }
 
         public override void Install()
         {
@@ -38,7 +24,10 @@ namespace BExIS.Modules.RBM.UI
             try
             {
                 base.Install();
-                //LUISeedDataGenerator.CreateFeatures();
+                using (var rbmSeedDataGenerator = new RbmSeedDataGenerator())
+                {
+                    rbmSeedDataGenerator.GenerateSeedData();
+                }
             }
             catch (Exception e)
             {

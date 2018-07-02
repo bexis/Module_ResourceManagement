@@ -18,15 +18,15 @@
 
     <!-- Mapping Entity properties -->
     
-    <property name="TimeUnit" type="BExIS.Rbm.Entities.BookingManagementTime.SystemDefinedUnit, BExIS.RBM.Entities">
+    <property name="TimeUnit" type="BExIS.Rbm.Entities.BookingManagementTime.SystemDefinedUnit, BExIS.Rbm.Entities">
     </property>
 
     <property name="Value" type="Int32">
       <column name="Value" />
     </property>
 
-    <one-to-one name="Resource" class="BExIS.Rbm.Entities.Resource.Resource, BExIS.RBM.Entities" />
-    <!--<one-to-one name="PeriodicTimeInterval" class="BExIS.Rbm.Entities.BookingManagementTime.PeriodicTimeInterval, BExIS.RBM.Entities" />-->
+    <one-to-one name="Resource" class="BExIS.Rbm.Entities.Resource.Resource, BExIS.Rbm.Entities" />
+    <!--<one-to-one name="PeriodicTimeInterval" class="BExIS.Rbm.Entities.BookingManagementTime.PeriodicTimeInterval, BExIS.Rbm.Entities" />-->
 
 
   </class>

@@ -18,7 +18,7 @@
 
     <!-- Mapping Entity properties -->
     
-    <property name="ResetFrequency" type="BExIS.Rbm.Entities.BookingManagementTime.ResetFrequency, BExIS.RBM.Entities">
+    <property name="ResetFrequency" type="BExIS.Rbm.Entities.BookingManagementTime.ResetFrequency, BExIS.Rbm.Entities">
     </property>
 
     <property name="ResetInterval" type="Int32">
@@ -29,10 +29,10 @@
       <column name="Off_Set" />
     </property>
 
-    <property name="Off_Set_Unit" type="BExIS.Rbm.Entities.BookingManagementTime.SystemDefinedUnit, BExIS.RBM.Entities">
+    <property name="Off_Set_Unit" type="BExIS.Rbm.Entities.BookingManagementTime.SystemDefinedUnit, BExIS.Rbm.Entities">
     </property>
 
-    <!--<one-to-one name="PeriodicTimeInterval" class="BExIS.Rbm.Entities.BookingManagementTime.PeriodicTimeInterval, BExIS.RBM.Entities" />-->
+    <!--<one-to-one name="PeriodicTimeInterval" class="BExIS.Rbm.Entities.BookingManagementTime.PeriodicTimeInterval, BExIS.Rbm.Entities" />-->
 
 
   </class>

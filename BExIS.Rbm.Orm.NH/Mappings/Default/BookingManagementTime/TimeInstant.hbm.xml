@@ -22,7 +22,7 @@
       <column name="Instant" />
     </property>
 
-    <property name="Precision" type="BExIS.Rbm.Entities.BookingManagementTime.SystemDefinedUnit, BExIS.RBM.Entities">
+    <property name="Precision" type="BExIS.Rbm.Entities.BookingManagementTime.SystemDefinedUnit, BExIS.Rbm.Entities">
     </property>
 
 

@@ -4,7 +4,7 @@
 
     <!-- Mapping Entity properties -->
 
-    <property name="GroupMode" type="BExIS.Rbm.Entities.Resource.Mode, BExIS.RBM.Entities">
+    <property name="GroupMode" type="BExIS.Rbm.Entities.Resource.Mode, BExIS.Rbm.Entities">
     </property>
 
     <!-- Mapping Entity Associations -->

@@ -22,7 +22,7 @@
     <!-- Mapping BusinessEntity properties -->
 
 
-      <property name="ResourceStatus" type="BExIS.Rbm.Entities.Resource.Status, BExIS.RBM.Entities">
+      <property name="ResourceStatus" type="BExIS.Rbm.Entities.Resource.Status, BExIS.Rbm.Entities">
       </property>
       <property name="StatusChangeDate" type="DateTime">
         <column name="StatusChangeDate" />

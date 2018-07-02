@@ -30,7 +30,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             Id = id;
             Index = index;
             UserId = user.Id;
-            UserFullName = user.FullName;
+            //UserFullName = user.FullName;
         }
     }
 
@@ -55,7 +55,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         {
             Id = id;
             UserId = user.Id;
-            UserFullName = user.FullName;
+            //UserFullName = user.FullName;
             IsContactPerson = isContactPerson;
             IsSelected = false;
         }

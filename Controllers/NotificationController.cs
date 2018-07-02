@@ -19,8 +19,10 @@ using BExIS.Rbm.Entities.Users;
 using BExIS.Web.Shell.Areas.RBM.Helpers;
 using Vaiona.Web.Extensions;
 using BExIS.Security.Entities.Authorization;
+using BExIS.Modules.RBM.UI.Helper;
+using BExIS.Security.Services.Objects;
 
-namespace BExIS.Web.Shell.Areas.RBM.Controllers
+namespace BExIS.Modules.RBM.UI.Controllers
 {
     public class NotificationController : Controller
     {
@@ -34,13 +36,15 @@ namespace BExIS.Web.Shell.Areas.RBM.Controllers
 
         public ActionResult CreateN()
         {
-            SingleResourceManager rManager = new SingleResourceManager();
-            List<SingleResource> resources = rManager.GetAllResources().ToList();
-            List<ResourceModel> rModelList = new List<ResourceModel>();
-            resources.ToList().ForEach(r => rModelList.Add(new ResourceModel(r)));
-            EditNotificationModel model = new EditNotificationModel(rModelList);
-            Session["FilterOptions"] = model.AttributeDomainItems;
-            return PartialView("_editNotification", model);
+            using (SingleResourceManager rManager = new SingleResourceManager())
+            {
+                List<SingleResource> resources = rManager.GetAllResources().ToList();
+                List<ResourceModel> rModelList = new List<ResourceModel>();
+                resources.ToList().ForEach(r => rModelList.Add(new ResourceModel(r)));
+                EditNotificationModel model = new EditNotificationModel(rModelList);
+                Session["FilterOptions"] = model.AttributeDomainItems;
+                return PartialView("_editNotification", model);
+            }
         }
 
         [HttpPost]
@@ -124,14 +128,17 @@ namespace BExIS.Web.Shell.Areas.RBM.Controllers
                 {
                     //Start -> add security ----------------------------------------
 
-                    EntityPermissionManager pManager = new EntityPermissionManager();
-                    SubjectManager subManager = new SubjectManager();
-
-                    User user = subManager.Subjects.Where(u => u.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-                    foreach (RightType rightType in Enum.GetValues(typeof(RightType)).Cast<RightType>())
+                    using (var pManager = new EntityPermissionManager())
+                    using (var entityTypeManager = new EntityManager())
                     {
-                        pManager.CreateDataPermission(user.Id, 5, notification.Id, rightType);
+                        UserManager userManager = new UserManager();
+                        var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                        userTask.Wait();
+                        var user = userTask.Result;
+
+                        Entity entityType = entityTypeManager.FindByName("Notification");
+
+                        pManager.Create(user, entityType, notification.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
                     }
 
                     //End -> add security ------------------------------------------
@@ -280,16 +287,20 @@ namespace BExIS.Web.Shell.Areas.RBM.Controllers
 
         public ActionResult Delete(long id)
         {
-            NotificationManager nManager = new NotificationManager();
-            Notification notification = nManager.GetNotificationById(id);
-
-            bool deleted = nManager.DeleteNotification(notification);
-
-            if (deleted)
+            using (var nManager = new NotificationManager())
+            using (var permissionManager = new EntityPermissionManager())
+            using (var entityTypeManager = new EntityManager())
             {
-                //delete security 
-                EntityPermissionManager pManager = new EntityPermissionManager();
-                pManager.DeleteDataPermissionsByEntity(5, id);
+                Notification notification = nManager.GetNotificationById(id);
+
+                bool deleted = nManager.DeleteNotification(notification);
+
+                if (deleted)
+                {
+                    Type entityType = entityTypeManager.FindByName("Notification").EntityType;
+                    //delete security 
+                    permissionManager.Delete(entityType, id);
+                }
             }
 
             return RedirectToAction("Notification");
@@ -328,26 +339,33 @@ namespace BExIS.Web.Shell.Areas.RBM.Controllers
         [GridAction]
         public ActionResult Notification_Select()
         {
-            NotificationManager nManager = new NotificationManager();
-            EntityPermissionManager permissionManager = new EntityPermissionManager();
-            List<Notification> data = nManager.GetAllNotifications().ToList();
-
-            List<NotificationModel> notifications = new List<NotificationModel>();
-
-            foreach (Notification n in data)
+            using (var nManager = new NotificationManager())
+            using (var permissionManager = new EntityPermissionManager())
+            using (var entityTypeManager = new EntityManager())
             {
-                NotificationModel temp = new NotificationModel(n);
+                List<Notification> data = nManager.GetAllNotifications().ToList();
+                List<NotificationModel> notifications = new List<NotificationModel>();
 
-                //get permission from logged in user
-                temp.EditAccess = permissionManager.HasRight((HttpContext.User.Identity.Name, 5, n.Id, RightType.Write);
-                temp.DeleteAccess = permissionManager.HasUserDataAccess(HttpContext.User.Identity.Name, 5, n.Id, RightType.Delete);
+                //get id from loged in user
+                long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+                //get entity type id
+                long entityTypeId = entityTypeManager.FindByName("Notification").Id;
 
-                notifications.Add(temp);
+                foreach (Notification n in data)
+                {
+                    NotificationModel temp = new NotificationModel(n);
+
+                    //get permission from logged in user
+                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, n.Id, RightType.Write);
+                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, n.Id, RightType.Delete);
+
+                    notifications.Add(temp);
+                }
+
+                //data.ToList().ForEach(r => notifications.Add(new NotificationModel(r)));
+
+                return View("NotificationManager", new GridModel<NotificationModel> { Data = notifications });
             }
-
-            //data.ToList().ForEach(r => notifications.Add(new NotificationModel(r)));
-
-            return View("NotificationManager", new GridModel<NotificationModel> { Data = notifications });
         }
 
         //Add all for notification affected resource filter (by domain constraints on resource attributes) to a Dictionary in a session

@@ -28,8 +28,9 @@ using BExIS.Web.Shell.Areas.RBM.Models.BookingManagementTime;
 using Vaiona.Web.Extensions;
 using BExIS.Security.Entities.Authorization;
 using BExIS.Modules.RBM.UI.Helper;
+using BExIS.Security.Services.Objects;
 
-namespace BExIS.Web.Shell.Areas.RBM.Controllers
+namespace BExIS.Modules.RBM.UI.Controllers
 {
     public class ResourceController : Controller
     {
@@ -186,19 +187,23 @@ namespace BExIS.Web.Shell.Areas.RBM.Controllers
                         SaveConstraint(resource, rc.Index);
                     }
                 }
-               
+
                 // End -> constraints saving -----------------------------------
 
                 //Start -> add security ----------------------------------------
 
-                EntityPermissionManager pManager = new EntityPermissionManager();
-                SubjectManager subManager = new SubjectManager();
-
-                User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-                foreach (RightType rightType in Enum.GetValues(typeof(RightType)).Cast<RightType>())
+                using (var pManager = new EntityPermissionManager())
+                using (var entityTypeManager = new EntityManager())
                 {
-                    //pManager.CreateDataPermission(user.Id, 2, resource.Id, rightType);
+                    UserManager userManager = new UserManager();
+                    var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    userTask.Wait();
+                    var user = userTask.Result;
+
+                    //get entity type
+                    Entity entityType = entityTypeManager.FindByName("Resource");
+
+                    pManager.Create(user, entityType, resource.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
                 }
 
                 //End -> add security ------------------------------------------
@@ -557,19 +562,25 @@ namespace BExIS.Web.Shell.Areas.RBM.Controllers
 
         public ActionResult Delete(long id)
         {
-            SingleResourceManager rManager = new SingleResourceManager();
-            SingleResource resource = rManager.GetResourceById(id);
-            ResourceStructureAttributeManager valueManager = new ResourceStructureAttributeManager();
-            //Delete values before delete resource
-            List<ResourceAttributeValue> valuesToDelete = valueManager.GetValuesByResource(resource);
-            valueManager.DeleteResourceStructureAttributeValues(valuesToDelete);
-
-            bool deleted = rManager.DeleteResource(resource);
-            if (deleted)
+            using (var rManager = new SingleResourceManager())
+            using (var valueManager = new ResourceStructureAttributeManager())
+            using (var permissionManager = new EntityPermissionManager())
+            using (var entityTypeManager = new EntityManager())
             {
-                //delete security 
-                EntityPermissionManager pManager = new EntityPermissionManager();
-                pManager.DeleteDataPermissionsByEntity(2, id);
+                SingleResource resource = rManager.GetResourceById(id);
+
+                //Delete values before delete resource
+                List<ResourceAttributeValue> valuesToDelete = valueManager.GetValuesByResource(resource);
+                valueManager.DeleteResourceStructureAttributeValues(valuesToDelete);
+
+                bool deleted = rManager.DeleteResource(resource);
+
+                if (deleted)
+                {
+                    Type entityType = entityTypeManager.FindByName("Resource").EntityType;
+                    //delete security 
+                    permissionManager.Delete(entityType, id);
+                }
             }
 
             return RedirectToAction("Resource");

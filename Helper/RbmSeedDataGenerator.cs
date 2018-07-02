@@ -1,4 +1,6 @@
-﻿using BExIS.Rbm.Entities.Resource;
+﻿using BExIS.Rbm.Entities.Booking;
+using BExIS.Rbm.Entities.Resource;
+using BExIS.Rbm.Entities.ResourceStructure;
 using BExIS.Security.Entities.Objects;
 using BExIS.Security.Services.Objects;
 using System;
@@ -19,27 +21,28 @@ namespace BExIS.Modules.RBM.UI.Helper
         {
             #region ENTITIES
 
-            List<string> rbmEntities = new List<string>();
-            rbmEntities.Add("Activity");
-            rbmEntities.Add("SingleResource");
-            rbmEntities.Add("Event");
-            rbmEntities.Add("Notification");
-            rbmEntities.Add("Schedule");
+            Dictionary<string, Type> rbmEntities = new Dictionary<string,Type>();
+            rbmEntities.Add("SingleResource", typeof(SingleResource));
+            rbmEntities.Add("ResourceStructure", typeof(ResourceStructure));
+            rbmEntities.Add("Activity", typeof(Activity));
+            rbmEntities.Add("Event", typeof(RealEvent));
+            rbmEntities.Add("Notification", typeof(Notification));
+            rbmEntities.Add("Schedule", typeof(Schedule));
 
             using (var entityManager = new EntityManager())
             {
-                foreach (string et in rbmEntities)
+                foreach (var et in rbmEntities)
                 {
-                    Entity entity = entityManager.Entities.Where(e => e.Name.ToUpperInvariant() == et.ToUpperInvariant()).FirstOrDefault();
+                    Entity entity = entityManager.Entities.Where(e => e.Name.ToUpperInvariant() == et.Key.ToUpperInvariant()).FirstOrDefault();
 
                     if (entity == null)
                     {
                         entity = new Entity();
-                        entity.Name = et;
-                        entity.EntityType = Type.GetType(et);
+                        entity.Name = et.Key;
+                        entity.EntityType = et.Value;
                         //entity.EntityStoreType = typeof(Xml.Helpers.DatasetStore);
                         //entity.UseMetadata = true;
-                        //entity.Securable = true;
+                        entity.Securable = true;
 
                         entityManager.Create(entity);
                     }
@@ -49,6 +52,13 @@ namespace BExIS.Modules.RBM.UI.Helper
 
             #region SECURITY
 
+            using (var featureManager = new FeatureManager())
+            {
+                List<Feature> features = featureManager.FeatureRepository.Get().ToList();
+
+                Feature ResourceBooking = features.FirstOrDefault(f => f.Name.Equals("Resource Booking"));
+                if (ResourceBooking == null) ResourceBooking = featureManager.Create("Resource Booking", "Resource Booking");
+            }
 
 
             #endregion

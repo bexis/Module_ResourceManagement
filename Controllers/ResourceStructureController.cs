@@ -17,8 +17,10 @@ using Vaiona.Web.Mvc.Models;
 using BExIS.Web.Shell.Areas.RBM.Helpers;
 using Vaiona.Web.Extensions;
 using BExIS.Security.Entities.Authorization;
+using BExIS.Security.Services.Objects;
+using BExIS.Modules.RBM.UI.Helper;
 
-namespace BExIS.Web.Shell.Areas.RBM.Controllers
+namespace BExIS.Modules.RBM.UI.Controllers
 {
     public class ResourceStructureController : Controller
     {
@@ -48,25 +50,28 @@ namespace BExIS.Web.Shell.Areas.RBM.Controllers
 
             if (ModelState.IsValid)
             {
-                    ResourceStructure rS = rsManager.Create(model.Name, model.Description, null, null);
+                ResourceStructure rS = rsManager.Create(model.Name, model.Description, null, null);
 
                 //Start -> add security ----------------------------------------
 
-                EntityPermissionManager pManager = new EntityPermissionManager();
-                    SubjectManager subManager = new SubjectManager();
+                using (var pManager = new EntityPermissionManager())
+                using (var entityTypeManager = new EntityManager())
+                {
+                    UserManager userManager = new UserManager();
+                    var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    userTask.Wait();
+                    var user = userTask.Result;
 
-                    User user = subManager.Subjects.Where(u => u.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
+                    Entity entityType = entityTypeManager.FindByName("ResourceStructure");
 
-                foreach (RightType rightType in Enum.GetValues(typeof(RightType)).Cast<RightType>())
-                    {
-                        pManager.CreateDataPermission(user.Id, 3, rS.Id, rightType);
-                    }
-
-                    //End -> add security ------------------------------------------
-
-
-                    return View("_editResourceStructure", new ResourceStructureModel(rS));
+                    pManager.Create(user, entityType, rS.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
                 }
+
+               //End -> add security ------------------------------------------
+
+
+                  return View("_editResourceStructure", new ResourceStructureModel(rS));
+            }
             
             else
             {
@@ -167,44 +172,56 @@ namespace BExIS.Web.Shell.Areas.RBM.Controllers
 
         public ActionResult Delete(long id)
         {
-            ResourceStructureManager rsManager = new ResourceStructureManager();
-            ResourceStructure resourceStructure = rsManager.GetResourceStructureById(id);
-            bool deleted = rsManager.Delete(resourceStructure);
-
-            if (deleted)
+            using (var rsManager = new ResourceStructureManager())
+            using (var permissionManager = new EntityPermissionManager())
+            using(var entityTypeManager = new EntityManager())
             {
-                //delete security 
-                EntityPermissionManager pManager = new EntityPermissionManager();
-                pManager.DeleteDataPermissionsByEntity(3, id);
+                ResourceStructure resourceStructure = rsManager.GetResourceStructureById(id);
+                bool deleted = rsManager.Delete(resourceStructure);
+
+                if (deleted)
+                {
+                    Type entityType = entityTypeManager.FindByName("ResourceStructure").EntityType;
+                    //delete security 
+                    permissionManager.Delete(entityType, id);
+                }
             }
 
             return RedirectToAction("ResourceStructure");
-
         }
 
         [GridAction]
         public ActionResult ResourceStructure_Select()
         {
-            ResourceStructureManager rsManager = new ResourceStructureManager();
-            EntityPermissionManager permissionManager = new EntityPermissionManager();
-
-            IQueryable<ResourceStructure> data = rsManager.GetAllResourceStructures();
-
-            //List<ResourceStructureModel> resourceStructures = new List<ResourceStructureModel>();
-            List<ResourceStructureManagerModel> resourceStructures = new List<ResourceStructureManagerModel>();
-
-            foreach (ResourceStructure rs in data)
+            using (var rsManager = new ResourceStructureManager())
+            using (var permissionManager = new EntityPermissionManager())
+            using (var entityTypeManager = new EntityManager())
             {
-                ResourceStructureManagerModel temp = new ResourceStructureManagerModel(rs);
-                temp.InUse = rsManager.IsResourceStructureInUse(rs.Id);
-                //get permission from logged in user
-                temp.EditAccess = permissionManager.HasUserDataAccess(HttpContext.User.Identity.Name, 3, rs.Id, RightType.Write);
-                temp.DeleteAccess = permissionManager.HasUserDataAccess(HttpContext.User.Identity.Name, 3, rs.Id, RightType.Delete);
+                IQueryable<ResourceStructure> data = rsManager.GetAllResourceStructures();
 
-                resourceStructures.Add(temp);
+                //List<ResourceStructureModel> resourceStructures = new List<ResourceStructureModel>();
+                List<ResourceStructureManagerModel> resourceStructures = new List<ResourceStructureManagerModel>();
+
+                //get id from loged in user
+                long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+                //get entity type id
+                long entityTypeId = entityTypeManager.FindByName("ResourceStructure").Id;
+
+                foreach (ResourceStructure rs in data)
+                {
+                    ResourceStructureManagerModel temp = new ResourceStructureManagerModel(rs);
+                    temp.InUse = rsManager.IsResourceStructureInUse(rs.Id);
+
+                    //get permission from logged in user
+                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, rs.Id, RightType.Write);
+                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, rs.Id, RightType.Delete);
+
+                    resourceStructures.Add(temp);
+                }
+
+
+                return View("ResourceStructureManager", new GridModel<ResourceStructureManagerModel> { Data = resourceStructures });
             }
-
-            return View("ResourceStructureManager", new GridModel<ResourceStructureManagerModel> { Data = resourceStructures });
         }
 
         public ActionResult ChooseParentResourceStructure(long id)
@@ -336,14 +353,17 @@ namespace BExIS.Web.Shell.Areas.RBM.Controllers
                 {
                     //Start -> add security ----------------------------------------
 
-                    EntityPermissionManager pManager = new EntityPermissionManager();
-                    SubjectManager subManager = new SubjectManager();
-
-                    User user = subManager.Subjects.Where(u => u.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-                    foreach (RightType rightType in Enum.GetValues(typeof(RightType)).Cast<RightType>())
+                    using (EntityPermissionManager pManager = new EntityPermissionManager())
+                    using (var entityTypeManager = new EntityManager())
                     {
-                        pManager.CreateDataPermission(user.Id, 4, rsa.Id, rightType);
+                        UserManager userManager = new UserManager();
+                        var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                        userTask.Wait();
+                        var user = userTask.Result;
+
+                        Entity entityType = entityTypeManager.FindByName("ResourceStructureAttribute");
+
+                        pManager.Create(user, entityType, rsa.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
                     }
 
                     //End -> add security ------------------------------------------
@@ -434,22 +454,26 @@ namespace BExIS.Web.Shell.Areas.RBM.Controllers
 
         public ActionResult DeleteResourceStructureAttribute(long id)
         {
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-            ResourceStructureAttribute rsa = rsaManager.GetResourceStructureAttributesById(id);
-            if (rsa != null)
+            using (var rsaManager = new ResourceStructureAttributeManager())
+            using (var permissionManager = new EntityPermissionManager())
+            using (var entityTypeManager = new EntityManager())
             {
-                bool deleted = rsaManager.DeleteResourceStructureAttribute(rsa);
-
-                if (deleted)
+                ResourceStructureAttribute rsa = rsaManager.GetResourceStructureAttributesById(id);
+                if (rsa != null)
                 {
-                    //delete security 
-                    EntityPermissionManager pManager = new EntityPermissionManager();
-                    pManager.DeleteDataPermissionsByEntity(4, id);
+                    bool deleted = rsaManager.DeleteResourceStructureAttribute(rsa);
+
+                    if (deleted)
+                    {
+                        Type entityType = entityTypeManager.FindByName("Notification").EntityType;
+                        //delete security 
+                        permissionManager.Delete(entityType, id);
+                    }
                 }
-            }
-            else
-            {
-                //rsa not exsits, need implemention here
+                else
+                {
+                    //rsa not exsits, need implemention here
+                }
             }
             return View("ResourceStructureAttributeManager");
         }
@@ -482,26 +506,32 @@ namespace BExIS.Web.Shell.Areas.RBM.Controllers
         [GridAction]
         public ActionResult ResourceStructureAttributesAllManager_Select()
         {
-            ResourceStructureManager rsManager = new ResourceStructureManager();
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-            EntityPermissionManager permissionManager = new EntityPermissionManager();
-
-            IQueryable<ResourceStructureAttribute> rsaList = rsaManager.GetAllResourceStructureAttributes();
-            List<ResourceStructureAttributeModel> list = new List<ResourceStructureAttributeModel>();
-
-            foreach (ResourceStructureAttribute a in rsaList)
+            using (var rsManager = new ResourceStructureManager())
+            using (var rsaManager = new ResourceStructureAttributeManager())
+            using (var permissionManager = new EntityPermissionManager())
+            using (var entityTypeManager = new EntityManager())
             {
-                ResourceStructureAttributeModel rsaModel = new ResourceStructureAttributeModel(a);
-                if (rsaManager.IsAttributeInUse(a.Id))
-                    rsaModel.InUse = true;
+                IQueryable<ResourceStructureAttribute> rsaList = rsaManager.GetAllResourceStructureAttributes();
+                List<ResourceStructureAttributeModel> list = new List<ResourceStructureAttributeModel>();
 
-                //get permission from logged in user
-                rsaModel.EditAccess = permissionManager.HasUserDataAccess(HttpContext.User.Identity.Name, 4, a.Id, RightType.Write);
-                rsaModel.DeleteAccess = permissionManager.HasUserDataAccess(HttpContext.User.Identity.Name, 4, a.Id, RightType.Delete);
+                foreach (ResourceStructureAttribute a in rsaList)
+                {
+                    ResourceStructureAttributeModel rsaModel = new ResourceStructureAttributeModel(a);
+                    if (rsaManager.IsAttributeInUse(a.Id))
+                        rsaModel.InUse = true;
 
-                list.Add(rsaModel);
+                    //get id from loged in user
+                    long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+                    //get entity type id
+                    long entityTypeId = entityTypeManager.FindByName("Notification").Id;
+
+                    //get permission from logged in user
+                    rsaModel.EditAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, a.Id, RightType.Write);
+                    rsaModel.DeleteAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, a.Id, RightType.Delete);
+                    list.Add(rsaModel);
+                }
+                return View("ResourceStructureAttributeManager", new GridModel<ResourceStructureAttributeModel> { Data = list });
             }
-            return View("ResourceStructureAttributeManager", new GridModel<ResourceStructureAttributeModel> { Data = list });
         }
 
         #endregion

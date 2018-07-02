@@ -15,8 +15,10 @@ using Vaiona.Web.Mvc.Models;
 using BExIS.Web.Shell.Areas.RBM.Helpers;
 using Vaiona.Web.Extensions;
 using BExIS.Security.Entities.Authorization;
+using BExIS.Modules.RBM.UI.Helper;
+using BExIS.Security.Services.Objects;
 
-namespace BExIS.Web.Shell.Areas.RBM.Controllers
+namespace BExIS.Modules.RBM.UI.Controllers
 {
     public class ActivityController : Controller
     {
@@ -50,64 +52,78 @@ namespace BExIS.Web.Shell.Areas.RBM.Controllers
 
                 //Start -> add security ----------------------------------------
 
-                EntityPermissionManager pManager = new EntityPermissionManager();
-                SubjectManager subManager = new SubjectManager();
-
-                User user = subManager.Subjects.Where(u=>u.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-                foreach (RightType rightType in Enum.GetValues(typeof(RightType)).Cast<RightType>())
+                using (EntityPermissionManager pManager = new EntityPermissionManager())
+                using (SubjectManager subManager = new SubjectManager())
+                using (var entityTypeManager = new EntityManager())
                 {
-                    //pManager.CreateDataPermission(user.Id, 7, a.Id, rightType);
+
+                    UserManager userManager = new UserManager();
+                    var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    userTask.Wait();
+                    var user = userTask.Result;
+
+                    Entity entityType = entityTypeManager.FindByName("Notification");
+
+                    pManager.Create(user, entityType, a.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+
+                    //End -> add security ------------------------------------------
                 }
 
-                //End -> add security ------------------------------------------
-
-                //return View("ActivityManager");
-                return Json(new { success = true });
-            }
+                    //return View("ActivityManager");
+                    return Json(new { success = true });
+                }
             else
             {
-                return PartialView("_createActivity", model);
+                    return PartialView("_createActivity", model);
             }
+            
+            
         }
 
         public ActionResult Edit(long id)
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Edit Activity", this.Session.GetTenant());
-            ActivityManager aManager = new ActivityManager();
-            Activity activity = aManager.GetActivityById(id);
 
-            return PartialView("_editActivity", new ActivityModel(activity));
+            using (var aManager = new ActivityManager())
+            {
+                Activity activity = aManager.GetActivityById(id);
+
+                return PartialView("_editActivity", new ActivityModel(activity));
+            }
         }
 
         [HttpPost]
         public ActionResult Edit(ActivityModel model)
         {
-            ActivityManager aManager = new ActivityManager();
-
-            //check name
-            Activity temp = aManager.GetActivityByName(StringHelper.CutSpaces(model.Name));
-            if (temp != null && temp.Id != model.Id)
-                ModelState.AddModelError("NameExist", "Name already exist");
-
-            if (ModelState.IsValid)
+            using (ActivityManager aManager = new ActivityManager())
             {
-                Activity activity = aManager.GetActivityById(model.Id);
 
-                if (activity != null)
+                //check name
+                Activity temp = aManager.GetActivityByName(StringHelper.CutSpaces(model.Name));
+                if (temp != null && temp.Id != model.Id)
+                    ModelState.AddModelError("NameExist", "Name already exist");
+
+                if (ModelState.IsValid)
                 {
-                    activity.Name = model.Name;
-                    activity.Description = model.Description;
-                    activity.Disable = model.Disable;
-                    aManager.UpdateActivity(activity);
+                    Activity activity = aManager.GetActivityById(model.Id);
+
+                    if (activity != null)
+                    {
+                        activity.Name = model.Name;
+                        activity.Description = model.Description;
+                        activity.Disable = model.Disable;
+                        aManager.UpdateActivity(activity);
+                    }
+
+
+                    //return View("ActivityManager");
+                    return Json(new { success = true });
                 }
 
-                //return View("ActivityManager");
-                return Json(new { success = true });
-            }
-            else
-            {
-                return PartialView("_editActivity", model);
+                else
+                {
+                    return PartialView("_editActivity", model);
+                }
             }
         }
 
@@ -128,26 +144,33 @@ namespace BExIS.Web.Shell.Areas.RBM.Controllers
         [GridAction]
         public ActionResult Activity_Select()
         {
-            ActivityManager rManager = new ActivityManager();
-            EntityPermissionManager permissionManager = new EntityPermissionManager();
-
-            List<Activity> data = rManager.GetAllActivities().ToList();
-
-            List<ActivityModel> activities = new List<ActivityModel>();
-            foreach (Activity a in data)
+            using (var rManager = new ActivityManager())
+            using (var permissionManager = new EntityPermissionManager())
+            using(var entityTypeManager = new EntityManager())
             {
-                ActivityModel temp = new ActivityModel(a);
-                temp.InUse = rManager.IsInEvent(a.Id);
+                List<Activity> data = rManager.GetAllActivities().ToList();
+                List<ActivityModel> activities = new List<ActivityModel>();
 
-                //get permission from logged in user
-                temp.EditAccess = permissionManager.HasUserDataAccess(HttpContext.User.Identity.Name, 7, a.Id, RightType.Read);
-                temp.DeleteAccess = permissionManager.HasUserDataAccess(HttpContext.User.Identity.Name, 7, a.Id, RightType.Delete);
+                //get id from loged in user
+                long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+                //get entity type id
+                long entityTypeId = entityTypeManager.FindByName("Activity").Id;
 
-                activities.Add(temp);
+                foreach (Activity a in data)
+                {
+                    ActivityModel temp = new ActivityModel(a);
+                    temp.InUse = rManager.IsInEvent(a.Id);
+
+                    //get permission from logged in user
+                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, a.Id, RightType.Read);
+                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, a.Id, RightType.Delete);
+
+                    activities.Add(temp);
+                }
+                //data.ToList().ForEach(r => activities.Add(new ActivityModel(r)));
+
+                return View("ActivityManager", new GridModel<ActivityModel> { Data = activities });
             }
-            //data.ToList().ForEach(r => activities.Add(new ActivityModel(r)));
-
-            return View("ActivityManager", new GridModel<ActivityModel> { Data = activities });
         }
 
     }
