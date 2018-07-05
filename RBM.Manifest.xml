@@ -24,10 +24,19 @@
         extends="./menubarRoot/rbmAdminMenu" />
 
     <Export tag="menubar" id="rbmMenu_ResouceStructure" order="15"
-        title="Manage Resouce Structures" description="Cal" icon=""
-        controller="ResourceStructure" action="ResourceStructure"
+        title="Manage Activities" description="Cal" icon=""
+        controller="Activity" action="Activity"
         extends="./menubarRoot/rbmAdminMenu" />
 
+    <Export tag="menubar" id="rbmMenu_ResouceStructure" order="15"
+        title="Manage Notification" description="Cal" icon=""
+        controller="Notification" action="Notification"
+        extends="./menubarRoot/rbmAdminMenu" />
+
+    <Export tag="menubar" id="rbmMenu_ResouceStructure" order="15"
+      title="Manage Resource Groups" description="Cal" icon=""
+      controller="ResourceGroup" action="ResourceGroup"
+      extends="./menubarRoot/rbmAdminMenu" />
 
     <Export tag="menubar" id="rbmMenu" order="16"
             title="Resource Calendar" description="RBM desc" icon=""
