@@ -93,7 +93,7 @@
     }
 
     function Create() {
-        $.get('@Url.Action("CreateN", "Notification", new RouteValueDictionary { { "area", "RBM" } })', function (data) {
+        $.get('@Url.Action("CreateNotification", "Notification", new RouteValueDictionary { { "area", "RBM" } })', function (data) {
 
             $('#Content').html(data);
 
