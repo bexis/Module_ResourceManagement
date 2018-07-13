@@ -30,7 +30,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         }
 
 
-        public ActionResult CreateA()
+        public ActionResult CreateActivity()
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Create Activity", this.Session.GetTenant());
             return PartialView("_createActivity", new ActivityModel());
@@ -62,9 +62,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     userTask.Wait();
                     var user = userTask.Result;
 
-                    Entity entityType = entityTypeManager.FindByName("Notification");
+                    Entity entityType = entityTypeManager.FindByName("Activity");
 
-                    pManager.Create(user, entityType, a.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+                    //31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
+                    pManager.Create(user, entityType, a.Id, 31);
 
                     //End -> add security ------------------------------------------
                 }

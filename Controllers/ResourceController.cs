@@ -29,6 +29,8 @@ using Vaiona.Web.Extensions;
 using BExIS.Security.Entities.Authorization;
 using BExIS.Modules.RBM.UI.Helper;
 using BExIS.Security.Services.Objects;
+using BExIS.Dlm.Services.Party;
+using BExIS.Dlm.Entities.Party;
 
 namespace BExIS.Modules.RBM.UI.Controllers
 {
@@ -201,9 +203,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     var user = userTask.Result;
 
                     //get entity type
-                    Entity entityType = entityTypeManager.FindByName("Resource");
+                    Entity entityType = entityTypeManager.FindByName("SingleResource");
 
-                    pManager.Create(user, entityType, resource.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+                    //31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
+                    pManager.Create(user, entityType, resource.Id, 31);
                 }
 
                 //End -> add security ------------------------------------------
@@ -726,23 +729,25 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             using (var rManager = new SingleResourceManager())
             using (var permissionManager = new EntityPermissionManager())
+                using (var entityTypeManager = new EntityManager())
             {
                 IQueryable<SingleResource> data = rManager.GetAllResources();
                 List<ResourceManagerModel> resources = new List<ResourceManagerModel>();
 
                 long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+                Entity entity = entityTypeManager.FindByName("SingleResource");
 
                 foreach (SingleResource r in data)
                 {
                     ResourceManagerModel temp = new ResourceManagerModel(r);
                     temp.InUse = rManager.IsResourceInSet(r.Id);
+
                     //get permission from logged in user
-                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, 2, r.Id, RightType.Write);
-                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, 2, r.Id, RightType.Delete);
+                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, entity.Id, r.Id, RightType.Write);
+                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, entity.Id, r.Id, RightType.Delete);
 
                     resources.Add(temp);
                 }
-
 
                 //ResourceManagerModel temp = new ResourceManagerModel();
                 //data.ToList().ForEach(r => resources.Add(temp.Convert(r)));
@@ -1139,35 +1144,64 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             EditResourceModel model = (EditResourceModel)Session["Resource"];
 
-            UserManager userManager = new UserManager();
-            List<User> users = userManager.Users.ToList();
-            List<PersonInConstraint> personList = new List<PersonInConstraint>();
-
-            List<PersonInConstraint> personListSelected = new List<PersonInConstraint>();
-
-            ResourceConstraintModel tempConstraint = model.ResourceConstraints.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
-
-            foreach (User u in users)
+            using (var partyManager = new PartyManager())
+            using (var partyTypeManager = new PartyTypeManager())
             {
-                PersonInConstraint pc = new PersonInConstraint(u, 0, int.Parse(index));
-                pc.Index = int.Parse(index);
-                if (tempConstraint.ForPersons.Select(a=>a.UserId).ToList().Contains(pc.UserId))
+                UserManager userManager = new UserManager();
+                //get party type person
+                var partyType = partyTypeManager.PartyTypes.Where(p => p.Title == "person").FirstOrDefault();
+                //get all parties with person party type
+                List<Party> partyPersons = partyManager.PartyRepository.Query(p => p.PartyType == partyType).ToList();
+
+                List<PersonInConstraint> personListSelected = new List<PersonInConstraint>();
+                List<PersonInConstraint> personList = new List<PersonInConstraint>();
+                ResourceConstraintModel tempConstraint = model.ResourceConstraints.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
+
+                foreach (var partyPerson in partyPersons)
                 {
-                    pc.Id = tempConstraint.ForPersons.Where(a => a.UserId == pc.UserId).FirstOrDefault().Id;
-                    pc.IsSelected = true;
-                    personListSelected.Add(pc);
+                    var userTask = userManager.FindByIdAsync(partyManager.GetUserIdByParty(partyPerson.Id));
+                    userTask.Wait();
+                    var user = userTask.Result;
+                  
+                    PersonInConstraint pc = new PersonInConstraint(user, 0, int.Parse(index));
+                    pc.UserFullName = partyPerson.Name;
+                    pc.Index = int.Parse(index);
+                    if (tempConstraint.ForPersons.Select(a => a.UserId).ToList().Contains(pc.UserId))
+                    {
+                        pc.Id = tempConstraint.ForPersons.Where(a => a.UserId == pc.UserId).FirstOrDefault().Id;
+                        pc.IsSelected = true;
+                        personListSelected.Add(pc);
+                    }
+
+                    personList.Add(pc);
                 }
 
-                personList.Add(pc);
+                tempConstraint.ForPersons = personListSelected;
+
+                var i = model.ResourceConstraints.FindIndex(p => p.Index == int.Parse(index));
+                model.ResourceConstraints[i] = tempConstraint;
+
+                Session["Resource"] = model;
+
+                return PartialView("_chooseUsers", personList);
+
             }
-            tempConstraint.ForPersons = personListSelected;
 
-            var i = model.ResourceConstraints.FindIndex(p=>p.Index==int.Parse(index));
-            model.ResourceConstraints[i] = tempConstraint;
+            //foreach (User u in users)
+            //{
+            //    PersonInConstraint pc = new PersonInConstraint(u, 0, int.Parse(index));
+            //    pc.Index = int.Parse(index);
+            //    if (tempConstraint.ForPersons.Select(a=>a.UserId).ToList().Contains(pc.UserId))
+            //    {
+            //        pc.Id = tempConstraint.ForPersons.Where(a => a.UserId == pc.UserId).FirstOrDefault().Id;
+            //        pc.IsSelected = true;
+            //        personListSelected.Add(pc);
+            //    }
 
-            Session["Resource"] = model;
+            //    personList.Add(pc);
+            //}
 
-            return PartialView("_chooseUsers", personList);
+           
         }
 
         public ActionResult ChangeSelectedUserConstraint(string userId, string selected, string index)
@@ -1180,11 +1214,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
             PersonManager pManager = new PersonManager();
 
             User user = subManager.Subjects.Where(a => a.Id == Convert.ToInt64(userId)).FirstOrDefault() as User;
-            PersonInConstraint pUser = new PersonInConstraint(user, 0, int.Parse(index));
+            //PersonInConstraint pUser = new PersonInConstraint(user, 0, int.Parse(index));
 
             if (selected == "true")
             {
-                tempConstraint.ForPersons.Add(pUser);
+                //tempConstraint.ForPersons.Add(pUser);
                 //constraintUsers.Add(pUser);
             }
             else

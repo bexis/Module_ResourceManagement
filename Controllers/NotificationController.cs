@@ -34,7 +34,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return View("NotificationManager");
         }
 
-        public ActionResult CreateN()
+        public ActionResult CreateNotification()
         {
             using (SingleResourceManager rManager = new SingleResourceManager())
             {
@@ -138,7 +138,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                         Entity entityType = entityTypeManager.FindByName("Notification");
 
-                        pManager.Create(user, entityType, notification.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+                        //31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
+                        pManager.Create(user, entityType, notification.Id, 31);
                     }
 
                     //End -> add security ------------------------------------------
