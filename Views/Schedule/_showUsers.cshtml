@@ -9,7 +9,7 @@
 <li id="@Model[i].UserId" class="fullName" style="font-size:10px;">@Model[i].UserFullName <input type="hidden" name="user" value="@Model[i].UserId"  />
          @if(Model[i].IsContactPerson)
          {
-            <b> (Is Contact)</b>
+            <b> (Is Contact, Mobil: @Model[i].MobileNumber)</b>
          }
     <span id="removeUser" class="bx bx-trash" onclick="RemoveUserFromSchedule(@Model[i].UserId, @Model[i].Index)"></span></li>
 }
