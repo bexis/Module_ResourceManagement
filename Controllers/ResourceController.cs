@@ -59,162 +59,163 @@ namespace BExIS.Modules.RBM.UI.Controllers
         //Save Resource after create or edit
         public ActionResult Save()
         {
-            SingleResourceManager rManager = new SingleResourceManager();
-            ResourceStructureManager rsManager = new ResourceStructureManager();
-            ResourceStructureAttributeManager valueManager = new ResourceStructureAttributeManager();
-
-            //get filled model
-            EditResourceModel model = (EditResourceModel) Session["Resource"];
-
-            ValidateResource(model);
-
-            if (ModelState.IsValid)
+            using (var rManager = new SingleResourceManager())
+            using (var rsManager = new ResourceStructureManager())
+            using (var valueManager = new ResourceStructureAttributeManager())
             {
-                //start check model state
-                ResourceStructure rs = rsManager.GetResourceStructureById(model.ResourceStructure.Id);
-                SingleResource resource = new SingleResource();
-                if (model.Id == 0)
+                //get filled model
+                EditResourceModel model = (EditResourceModel)Session["Resource"];
+
+                ValidateResource(model);
+
+                if (ModelState.IsValid)
                 {
-                    resource = rManager.CreateResource(model.Name, model.Description, model.Quantity, model.Color,model.WithActivity, rs, model.Duration);
-                }
-                else
-                {
-                    resource = rManager.GetResourceById(model.Id);
-                    resource.Name = model.Name;
-                    resource.Description = model.Description;
-                    resource.Quantity = model.Quantity;
-                    resource.Color = model.Color;
-                    resource.Duration = model.Duration;
-                    resource.WithActivity = model.WithActivity;
-                    resource.ResourceStructure = rs;
-                   
-                    //remove constrains
-                    List<ResourceConstraintModel> tempList = model.ResourceConstraints;
-                    if (tempList != null)
+                    //start check model state
+                    ResourceStructure rs = rsManager.GetResourceStructureById(model.ResourceStructure.Id);
+                    SingleResource resource = new SingleResource();
+                    if (model.Id == 0)
                     {
-                        if (tempList.Count() > 0)
+                        resource = rManager.CreateResource(model.Name, model.Description, model.Quantity, model.Color, model.WithActivity, rs, model.Duration);
+                    }
+                    else
+                    {
+                        resource = rManager.GetResourceById(model.Id);
+                        resource.Name = model.Name;
+                        resource.Description = model.Description;
+                        resource.Quantity = model.Quantity;
+                        resource.Color = model.Color;
+                        resource.Duration = model.Duration;
+                        resource.WithActivity = model.WithActivity;
+                        resource.ResourceStructure = rs;
+
+                        //remove constrains
+                        List<ResourceConstraintModel> tempList = model.ResourceConstraints;
+                        if (tempList != null)
                         {
-                           for(int i = 0; i<tempList.Count(); i++)
+                            if (tempList.Count() > 0)
                             {
-                                if(tempList[i].Deleted)
+                                for (int i = 0; i < tempList.Count(); i++)
                                 {
-                                    //remove it from resource
-                                    ResourceConstraint rc = resource.ResourceConstraints.Where(e => e.Id == tempList[i].Id).FirstOrDefault();
-                                    resource.ResourceConstraints.Remove(rc);
-                                    //remove it from model
-                                    ResourceConstraintModel temp = model.ResourceConstraints.Where(a => a.Id == tempList[i].Id).FirstOrDefault();
-                                    model.ResourceConstraints.Remove(temp);
+                                    if (tempList[i].Deleted)
+                                    {
+                                        //remove it from resource
+                                        ResourceConstraint rc = resource.ResourceConstraints.Where(e => e.Id == tempList[i].Id).FirstOrDefault();
+                                        resource.ResourceConstraints.Remove(rc);
+                                        //remove it from model
+                                        ResourceConstraintModel temp = model.ResourceConstraints.Where(a => a.Id == tempList[i].Id).FirstOrDefault();
+                                        model.ResourceConstraints.Remove(temp);
+                                    }
                                 }
                             }
                         }
+
+                        rManager.UpdateResource(resource);
                     }
 
-                    rManager.UpdateResource(resource);
-                }
+                    //Begin -> save/update resource structure attribute values -------------------------
 
-                //Begin -> save/update resource structure attribute values -------------------------
-
-                if (model.TextValues.Count > 0)
-                {
-                    //if one text value which is not optional has no Id the RS has changed and all old text values must be deleted
-                    if(model.TextValues.Where(u=>u.ResourceAttributeUsage.IsValueOptional == false).ToList().Select(a=>a.Id).ToList().Contains(0))
+                    if (model.TextValues.Count > 0)
                     {
-                        if (model.Id != 0)
+                        //if one text value which is not optional has no Id the RS has changed and all old text values must be deleted
+                        if (model.TextValues.Where(u => u.ResourceAttributeUsage.IsValueOptional == false).ToList().Select(a => a.Id).ToList().Contains(0))
                         {
-                            SingleResource r = rManager.GetResourceById(model.Id);
-                            List<ResourceAttributeValue> oldValues = valueManager.GetValuesByResource(r);
-                            foreach(ResourceAttributeValue v in oldValues)
+                            if (model.Id != 0)
                             {
-                                valueManager.DeleteResourceAttributeValue(v);
+                                SingleResource r = rManager.GetResourceById(model.Id);
+                                List<ResourceAttributeValue> oldValues = valueManager.GetValuesByResource(r);
+                                foreach (ResourceAttributeValue v in oldValues)
+                                {
+                                    valueManager.DeleteResourceAttributeValue(v);
+                                }
+                            }
+                        }
+
+                        foreach (TextValueModel tv in model.TextValues)
+                        {
+                            ResourceAttributeUsage usage = valueManager.GetResourceAttributeUsageById(tv.ResourceAttributeUsageId);
+                            if (tv.Id == 0)
+                            {
+                                valueManager.CreateResourceAttributeValue(tv.Value, rManager.GetResourceById(resource.Id), usage);
+                            }
+                            else
+                            {
+                                TextValue tValue = valueManager.GetTextValueById(tv.Id);
+                                tValue.Value = tv.Value;
+                                valueManager.UpdateResourceAttributeValue(tValue);
+                            }
+                        }
+                    }
+                    if (model.FileValues.Count > 0)
+                    {
+                        //if one text value has no Id the RS has changed and all old text values must be deleted
+                        if (model.FileValues.Select(a => a.Id).ToList().Contains(0))
+                        {
+                            if (model.Id != 0)
+                            {
+                                SingleResource r = rManager.GetResourceById(model.Id);
+                                List<ResourceAttributeValue> oldValues = valueManager.GetValuesByResource(r);
+                                foreach (ResourceAttributeValue v in oldValues)
+                                {
+                                    valueManager.DeleteResourceAttributeValue(v);
+                                }
+                            }
+                        }
+
+                        foreach (FileValueModel fv in model.FileValues)
+                        {
+                            if (fv.Id == 0)
+                                valueManager.CreateResourceAttributeValue(fv.Name, fv.Extention, fv.Minmetype, fv.Data, fv.NeedConfirmation, rManager.GetResourceById(resource.Id), valueManager.GetResourceAttributeUsageById(fv.ResourceAttributeUsageId));
+                            else
+                            {
+                                FileValue fValue = valueManager.GetFileValueById(fv.Id);
+                                fValue.Name = fv.Name;
+                                fValue.Extention = fv.Extention;
+                                fValue.Minmetype = fv.Minmetype;
+                                fValue.Data = fv.Data;
+                                fv.NeedConfirmation = fv.NeedConfirmation;
+                                valueManager.UpdateResourceAttributeValue(fValue);
                             }
                         }
                     }
 
-                    foreach (TextValueModel tv in model.TextValues)
+                    // End -> save resource structure attribute values -------------------------
+
+                    // Begin -> constraints saving, Index says from wich row the specialConstaint cames to get the non spezific values like mode, description
+
+                    if (model.ResourceConstraints != null && model.ResourceConstraints.Count() > 0)
                     {
-                        ResourceAttributeUsage usage = valueManager.GetResourceAttributeUsageById(tv.ResourceAttributeUsageId);
-                        if (tv.Id == 0)
+                        foreach (ResourceConstraintModel rc in model.ResourceConstraints)
                         {
-                            valueManager.CreateResourceAttributeValue(tv.Value, rManager.GetResourceById(resource.Id), usage);
-                        }
-                        else
-                        {
-                            TextValue tValue = valueManager.GetTextValueById(tv.Id);
-                            tValue.Value = tv.Value;
-                            valueManager.UpdateResourceAttributeValue(tValue);
-                        }
-                    }
-                }
-                if (model.FileValues.Count > 0)
-                {
-                    //if one text value has no Id the RS has changed and all old text values must be deleted
-                    if (model.FileValues.Select(a => a.Id).ToList().Contains(0))
-                    {
-                        if (model.Id != 0)
-                        {
-                            SingleResource r = rManager.GetResourceById(model.Id);
-                            List<ResourceAttributeValue> oldValues = valueManager.GetValuesByResource(r);
-                            foreach (ResourceAttributeValue v in oldValues)
-                            {
-                                valueManager.DeleteResourceAttributeValue(v);
-                            }
+                            SaveConstraint(resource, rc.Index);
                         }
                     }
 
-                    foreach (FileValueModel fv in model.FileValues)
+                    // End -> constraints saving -----------------------------------
+
+                    //Start -> add security ----------------------------------------
+
+                    using (var pManager = new EntityPermissionManager())
+                    using (var entityTypeManager = new EntityManager())
                     {
-                        if (fv.Id == 0)
-                            valueManager.CreateResourceAttributeValue(fv.Name, fv.Extention, fv.Minmetype, fv.Data, fv.NeedConfirmation, rManager.GetResourceById(resource.Id), valueManager.GetResourceAttributeUsageById(fv.ResourceAttributeUsageId));
-                        else
-                        {
-                            FileValue fValue = valueManager.GetFileValueById(fv.Id);
-                            fValue.Name = fv.Name;
-                            fValue.Extention = fv.Extention;
-                            fValue.Minmetype = fv.Minmetype;
-                            fValue.Data = fv.Data;
-                            fv.NeedConfirmation = fv.NeedConfirmation;
-                            valueManager.UpdateResourceAttributeValue(fValue);
-                        }
+                        UserManager userManager = new UserManager();
+                        var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                        userTask.Wait();
+                        var user = userTask.Result;
+
+                        //get entity type
+                        Entity entityType = entityTypeManager.FindByName("SingleResource");
+
+                        //31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
+                        pManager.Create(user, entityType, resource.Id, 31);
                     }
+
+                    //End -> add security ------------------------------------------
+
+                    return View("ResourceManager");
                 }
-
-                // End -> save resource structure attribute values -------------------------
-
-                // Begin -> constraints saving, Index says from wich row the specialConstaint cames to get the non spezific values like mode, description
-
-                if(model.ResourceConstraints != null && model.ResourceConstraints.Count() > 0)
-                {
-                    foreach(ResourceConstraintModel rc in model.ResourceConstraints)
-                    {
-                        SaveConstraint(resource, rc.Index);
-                    }
-                }
-
-                // End -> constraints saving -----------------------------------
-
-                //Start -> add security ----------------------------------------
-
-                using (var pManager = new EntityPermissionManager())
-                using (var entityTypeManager = new EntityManager())
-                {
-                    UserManager userManager = new UserManager();
-                    var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    userTask.Wait();
-                    var user = userTask.Result;
-
-                    //get entity type
-                    Entity entityType = entityTypeManager.FindByName("SingleResource");
-
-                    //31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
-                    pManager.Create(user, entityType, resource.Id, 31);
-                }
-
-                //End -> add security ------------------------------------------
-
-                return View("ResourceManager");
+                else
+                    return View("EditResource", model);
             }
-            else
-                return View("EditResource", model);
         }
 
         private void ValidateResource(EditResourceModel model)
@@ -1072,72 +1073,73 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         private Person UpdatePerson(List<PersonInConstraint> forPersons)
         {
-            PersonManager pManager = new PersonManager();
-            SubjectManager subManager = new SubjectManager();
+            UserManager userManager = new UserManager();
 
-            Person newPerson = new Person();
-
-            if (forPersons.Count() > 1)
+            using (var pManager = new PersonManager())
             {
-                //exsists a PersonsGroup? is there any person with a id
-                var e = forPersons.Where(a => a.Id != 0).ToList();
-                if (e.Count() > 0)
-                {
-                    Person person = pManager.GetPersonById(e[0].Id);
-                    PersonGroup pGroup = new PersonGroup();
+                Person newPerson = new Person();
 
-                     List<User> users = new List<User>();
-                     foreach (PersonInConstraint p in forPersons)
-                     {
-                        users.Add(subManager.Subjects.Where(a => a.Id == p.UserId).FirstOrDefault() as User);
-                     }
-
-                     if (person.Self is IndividualPerson)
-                     {
-                         IndividualPerson iPerson = (IndividualPerson)person.Self;
-                         forPersons.Remove(e.Where(a=>a.Id == person.Self.Id).FirstOrDefault());
-                         pManager.DeletePerson(iPerson);
-                         newPerson = pManager.CreatePersonGroup(users);
-                     }
-                     else
-                     {
-                         pGroup = (PersonGroup)person.Self;
-                         pGroup.Users = users;
-                         newPerson = pManager.UpdatePersonGroup(pGroup);
-                     }   
-                }
-                else
+                if (forPersons.Count() > 1)
                 {
-                    newPerson= CreatePerson(forPersons);
-                }
-            }
-            else
-            {
-                if (forPersons[0].Id != 0)
-                {
-                    Person person = pManager.GetPersonById(forPersons[0].Id);
-                    if (person.Self is PersonGroup)
+                    //exsists a PersonsGroup? is there any person with a id
+                    var e = forPersons.Where(a => a.Id != 0).ToList();
+                    if (e.Count() > 0)
                     {
-                        //PersonGroup pG = (PersonGroup)person;
-                        //pManager.DeletePersonGroup(pG);
+                        Person person = pManager.GetPersonById(e[0].Id);
+                        PersonGroup pGroup = new PersonGroup();
 
-                        newPerson= pManager.CreateIndividualPerson(subManager.Subjects.Where(a => a.Id == forPersons[0].UserId).FirstOrDefault() as User);
+                        List<User> users = new List<User>();
+                        foreach (PersonInConstraint p in forPersons)
+                        {
+                            users.Add(userManager.FindByIdAsync(p.UserId).Result);
+                        }
+
+                        if (person.Self is IndividualPerson)
+                        {
+                            IndividualPerson iPerson = (IndividualPerson)person.Self;
+                            forPersons.Remove(e.Where(a => a.Id == person.Self.Id).FirstOrDefault());
+                            pManager.DeletePerson(iPerson);
+                            newPerson = pManager.CreatePersonGroup(users);
+                        }
+                        else
+                        {
+                            pGroup = (PersonGroup)person.Self;
+                            pGroup.Users = users;
+                            newPerson = pManager.UpdatePersonGroup(pGroup);
+                        }
                     }
-                    else if (person.Self is IndividualPerson)
+                    else
                     {
-                        IndividualPerson iPerson = pManager.GetIndividualPersonById(forPersons[0].Id);
-                        iPerson.Person = subManager.Subjects.Where(a => a.Id == forPersons[0].UserId).FirstOrDefault() as User;
-
-                        newPerson = pManager.UpdateIndividualPerson(iPerson);
+                        newPerson = CreatePerson(forPersons);
                     }
                 }
                 else
                 {
-                    newPerson = pManager.CreateIndividualPerson(subManager.Subjects.Where(a => a.Id == forPersons[0].UserId).FirstOrDefault() as User);
-                }
-            }
+                    if (forPersons[0].Id != 0)
+                    {
+                        Person person = pManager.GetPersonById(forPersons[0].Id);
+                        if (person.Self is PersonGroup)
+                        {
+                            //PersonGroup pG = (PersonGroup)person;
+                            //pManager.DeletePersonGroup(pG);
+                            newPerson = pManager.CreateIndividualPerson(userManager.FindByIdAsync(forPersons[0].UserId).Result);
+                        }
+                        else if (person.Self is IndividualPerson)
+                        {
+                            IndividualPerson iPerson = pManager.GetIndividualPersonById(forPersons[0].Id);
+                            iPerson.Person = userManager.FindByIdAsync(forPersons[0].UserId).Result;
 
-            return newPerson;
+                            newPerson = pManager.UpdateIndividualPerson(iPerson);
+                        }
+                    }
+                    else
+                    {
+                        newPerson = pManager.CreateIndividualPerson(userManager.FindByIdAsync(forPersons[0].UserId).Result);
+                    }
+                }
+
+                return newPerson;
+            }
         }
 
         public ActionResult LoadUsers(string index)
@@ -1207,30 +1209,29 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult ChangeSelectedUserConstraint(string userId, string selected, string index)
         {
             EditResourceModel model = (EditResourceModel)Session["Resource"];
-
             ResourceConstraintModel tempConstraint = model.ResourceConstraints.Where(p=>p.Index == int.Parse(index)).FirstOrDefault();
 
-            SubjectManager subManager = new SubjectManager();
-            PersonManager pManager = new PersonManager();
-
-            User user = subManager.Subjects.Where(a => a.Id == Convert.ToInt64(userId)).FirstOrDefault() as User;
-            //PersonInConstraint pUser = new PersonInConstraint(user, 0, int.Parse(index));
-
-            if (selected == "true")
+            UserManager userManager = new UserManager();
+            using (var pManager = new PersonManager())
             {
-                //tempConstraint.ForPersons.Add(pUser);
-                //constraintUsers.Add(pUser);
-            }
-            else
-            {
-                int i = tempConstraint.ForPersons.FindIndex(a => a.UserId == Convert.ToInt64(userId));
-                tempConstraint.ForPersons.RemoveAt(i);
-            }
+                User user = userManager.FindByIdAsync(Convert.ToInt64(userId)).Result;
 
-            var pos = model.ResourceConstraints.FindIndex(p => p.Index == int.Parse(index));
-            model.ResourceConstraints[pos] = tempConstraint;
+                if (selected == "true")
+                {
+                    //tempConstraint.ForPersons.Add(pUser);
+                    //constraintUsers.Add(pUser);
+                }
+                else
+                {
+                    int i = tempConstraint.ForPersons.FindIndex(a => a.UserId == Convert.ToInt64(userId));
+                    tempConstraint.ForPersons.RemoveAt(i);
+                }
 
-            Session["Resource"] = model;
+                var pos = model.ResourceConstraints.FindIndex(p => p.Index == int.Parse(index));
+                model.ResourceConstraints[pos] = tempConstraint;
+
+                Session["Resource"] = model;
+            }
 
             return View();
         }
@@ -1242,6 +1243,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             ResourceConstraintModel tempConstraint = tempListContraints.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
 
+            tempConstraint.ForPersons.ForEach(a =>
+            {
+                Party partyPerson = UserHelper.GetPartyByUserId(a.UserId);
+                a.UserFullName = partyPerson.Name;
+            });
+
             if (tempConstraint.ForPersons != null)
                 return PartialView("_constraintUsers", tempConstraint.ForPersons);
             else
@@ -1252,6 +1259,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             EditResourceModel model = (EditResourceModel)Session["Resource"];
             ResourceConstraintModel tempConstraint = model.ResourceConstraints.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
+            tempConstraint.ForPersons.ForEach(a =>
+            {
+                Party partyPerson = UserHelper.GetPartyByUserId(a.UserId);
+                a.UserFullName = partyPerson.Name;
+            });
 
             return PartialView("_showUsers", tempConstraint.ForPersons);
         }
@@ -1301,27 +1313,27 @@ namespace BExIS.Modules.RBM.UI.Controllers
             switch (type)
             {
                 case "Blocking":
-                BlockingConstraintModel bcModel = new BlockingConstraintModel();
-                bcModel.SelectedType = type;
-                bcModel.Index = index;
-                //tempList.Add(bcModel);
-                model.BlockingConstraints.Add(bcModel);
-                model.ResourceConstraints.Add(bcModel);
-                //tempResource.ResourceConstraints.AddRange(tempList);
-                Session["Resource"] = model;
-                //Session["ResourceConstraints"] = tempList;
-                return PartialView("_rowConstraint", bcModel);
+                    BlockingConstraintModel bcModel = new BlockingConstraintModel();
+                    bcModel.SelectedType = type;
+                    bcModel.Index = index;
+                    //tempList.Add(bcModel);
+                    model.BlockingConstraints.Add(bcModel);
+                    model.ResourceConstraints.Add(bcModel);
+                    //tempResource.ResourceConstraints.AddRange(tempList);
+                    Session["Resource"] = model;
+                    //Session["ResourceConstraints"] = tempList;
+                    return PartialView("_rowConstraint", bcModel);
                 case "Quantity":
-                QuantityConstraintModel qcModel = new QuantityConstraintModel();
-                qcModel.SelectedType = type;
-                qcModel.Index = index;
-                //tempList.Add(qcModel);
-                model.QuantityConstraints.Add(qcModel);
-                model.ResourceConstraints.Add(qcModel);
-               //tempResource.ResourceConstraints.AddRange(tempList);
-                Session["Resource"] = model;
-                //Session["ResourceConstraints"] = tempList;
-                return PartialView("_rowConstraint", qcModel);
+                    QuantityConstraintModel qcModel = new QuantityConstraintModel();
+                    qcModel.SelectedType = type;
+                    qcModel.Index = index;
+                    //tempList.Add(qcModel);
+                    model.QuantityConstraints.Add(qcModel);
+                    model.ResourceConstraints.Add(qcModel);
+                    //tempResource.ResourceConstraints.AddRange(tempList);
+                    Session["Resource"] = model;
+                    //Session["ResourceConstraints"] = tempList;
+                    return PartialView("_rowConstraint", qcModel);
                 case "Dependency":
                     DependencyConstraintModel dcModel = new DependencyConstraintModel();
                     dcModel.SelectedType = type;
@@ -1334,14 +1346,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     //Session["ResourceConstraints"] = tempList;
                     return PartialView("_rowConstraint", dcModel);
                 default:
-                ResourceConstraintModel rcModel = new ResourceConstraintModel();
-                rcModel.SelectedType = type;
-                rcModel.Index = index;
-                //tempList.Add(rcModel);
-                //tempResource.ResourceConstraints.AddRange(tempList);
-                Session["Resource"] = model;
-                //Session["ResourceConstraints"] = tempList;
-                return PartialView("_rowConstraint", rcModel);
+                    ResourceConstraintModel rcModel = new ResourceConstraintModel();
+                    rcModel.SelectedType = type;
+                    rcModel.Index = index;
+                    //tempList.Add(rcModel);
+                    //tempResource.ResourceConstraints.AddRange(tempList);
+                    Session["Resource"] = model;
+                    //Session["ResourceConstraints"] = tempList;
+                    return PartialView("_rowConstraint", rcModel);
             }
         }
 
