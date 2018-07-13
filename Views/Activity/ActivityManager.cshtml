@@ -126,8 +126,8 @@
 
 
 
-<script type="text/javascript">
-    
+        <script type="text/javascript">
+
         function onDataBound() {
         resetAllTelerikIconTitles();
         addTooltips();
@@ -135,7 +135,7 @@
 
     function Create() {
 
-        $.get('@Url.Action("CreateA", "Activity", new RouteValueDictionary { { "area", "RBM" } })', function (data) {
+        $.get('@Url.Action("CreateActivity", "Activity", new RouteValueDictionary { { "area", "RBM" } })', function (data) {
 
             $('#Content_Creation').html(data);
 
@@ -146,7 +146,7 @@
     }
    @* function OnCommand(e) {
         if (e.name == "Create") {
-            $.get('@Url.Action("CreateA", "Activity", new RouteValueDictionary { { "area", "RBM" } })', function (data) {
+            $.get('@Url.Action("CreateActivity", "Activity", new RouteValueDictionary { { "area", "RBM" } })', function (data) {
 
                 $('#Content_Creation').html(data);
 
@@ -209,4 +209,4 @@
         }
     }
 
-   </script>
+        </script>
