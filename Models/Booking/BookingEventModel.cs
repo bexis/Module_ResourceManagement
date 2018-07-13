@@ -16,6 +16,8 @@ using BExIS.Security.Entities.Subjects;
 using BExIS.Security.Services.Subjects;
 using System.ComponentModel.DataAnnotations;
 using BExIS.Rbm.Entities.BookingManagementTime;
+using BExIS.Dlm.Services.Party;
+using BExIS.Dlm.Entities.Party;
 
 namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 {
@@ -49,29 +51,34 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
         public EventModel(List<ResourceCart> cart)
         {
-            SingleResourceManager rManager = new SingleResourceManager();
-            Schedules = new List<ScheduleEventModel>();
-            DeletedSchedules = new List<long>();
-
-            foreach (ResourceCart rc in cart)
+            using (var rManager = new SingleResourceManager())
             {
-                SingleResource resource = rManager.GetResourceById(rc.Id);
-                ScheduleEventModel s = new ScheduleEventModel(resource);
-                s.ScheduleDurationModel.StartDate = rc.PreselectedStartDate;
-                s.ScheduleDurationModel.EndDate = rc.PreselectedEndDate;
-                s.ScheduleDurationModel.Index = rc.Index;
-                s.ScheduleQuantity = rc.PreselectdQuantity;
-                s.ResourceQuantity = resource.Quantity;
-                s.ByPerson = rc.ByPersonName;
+                Schedules = new List<ScheduleEventModel>();
+                DeletedSchedules = new List<long>();
 
-                //add as default resvered by user as reserved for user
-                SubjectManager subManager = new SubjectManager();
-                User user = subManager.Subjects.Where(a => a.Id == rc.ByPersonUserId).FirstOrDefault() as User;
-                PersonInSchedule byPerson = new PersonInSchedule(0, user, false);
-                s.ForPersons.Add(byPerson);
+                foreach (ResourceCart rc in cart)
+                {
+                    SingleResource resource = rManager.GetResourceById(rc.Id);
+                    ScheduleEventModel s = new ScheduleEventModel(resource);
+                    s.ScheduleDurationModel.StartDate = rc.PreselectedStartDate;
+                    s.ScheduleDurationModel.EndDate = rc.PreselectedEndDate;
+                    s.ScheduleDurationModel.Index = rc.Index;
+                    s.ScheduleQuantity = rc.PreselectdQuantity;
+                    s.ResourceQuantity = resource.Quantity;
+                    s.ByPerson = rc.ByPersonName;
 
-                s.Index = rc.Index;
-                Schedules.Add(s);
+                    //add as default resvered by user as reserved for user
+                    UserManager userManager = new UserManager();
+                    var userTask = userManager.FindByIdAsync(rc.ByPersonUserId);
+                    userTask.Wait();
+                    var user = userTask.Result;
+
+                    PersonInSchedule byPerson = new PersonInSchedule(0, user, false);
+                    s.ForPersons.Add(byPerson);
+
+                    s.Index = rc.Index;
+                    Schedules.Add(s);
+                }
             }
         }
 

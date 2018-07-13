@@ -179,12 +179,12 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Resource
                 if (constraint.ForPerson.Self is PersonGroup)
                 {
                     PersonGroup pGroup = (PersonGroup)constraint.ForPerson.Self;
-                    pGroup.Users.ToList().ForEach(u => ForPersons.Add(new PersonInConstraint(u, pGroup.Id, constraint.Index)));
+                   // pGroup.Users.ToList().ForEach(u => ForPersons.Add(new PersonInConstraint(u, pGroup.Id, constraint.Index)));
                 }
                 else if (constraint.ForPerson.Self is IndividualPerson)
                 {
                     IndividualPerson iPerson = (IndividualPerson)constraint.ForPerson.Self;
-                    ForPersons.Add(new PersonInConstraint(iPerson.Person, iPerson.Id, constraint.Index));
+                    //ForPersons.Add(new PersonInConstraint(iPerson.Person, iPerson.Id, constraint.Index));
                 }
             }
 
@@ -243,12 +243,12 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Resource
                 if (constraint.ForPerson.Self is PersonGroup)
                 {
                     PersonGroup pGroup = (PersonGroup)constraint.ForPerson.Self;
-                    pGroup.Users.ToList().ForEach(u => ForPersons.Add(new PersonInConstraint(u, pGroup.Id, constraint.Index)));
+                    //pGroup.Users.ToList().ForEach(u => ForPersons.Add(new PersonInConstraint(u, pGroup.Id, constraint.Index)));
                 }
                 else if (constraint.ForPerson.Self is IndividualPerson)
                 {
                     IndividualPerson iPerson = (IndividualPerson)constraint.ForPerson.Self;
-                    ForPersons.Add(new PersonInConstraint(iPerson.Person, iPerson.Id, constraint.Index));
+                    //ForPersons.Add(new PersonInConstraint(iPerson.Person, iPerson.Id, constraint.Index));
                 }
             }
 

@@ -1,4 +1,5 @@
-﻿using BExIS.Rbm.Entities.Users;
+﻿using BExIS.Dlm.Entities.Party;
+using BExIS.Rbm.Entities.Users;
 using BExIS.Security.Entities.Subjects;
 using System;
 using System.Collections.Generic;
@@ -7,13 +8,13 @@ using System.Web;
 
 namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 {
-    public class PersonUserModel
+    public class PersonModel
     {
         public long UserId { get; set; }
         public string UserFullName { get; set; }
     }
 
-    public class PersonInConstraint : PersonUserModel
+    public class PersonInConstraint : PersonModel
     {
         public long Id { get; set; }
         public int Index { get; set; }
@@ -30,20 +31,20 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             Id = id;
             Index = index;
             UserId = user.Id;
-            //UserFullName = user.FullName;
         }
     }
 
     //for user in Schedules
-    public class PersonInSchedule: PersonUserModel
+    public class PersonInSchedule: PersonModel
     {
         public long Id { get; set; }
         public int Index { get; set; }
         public bool IsContactPerson { get; set; }
         public bool IsSelected { get; set; }
         public bool EditMode { get; set; }
+        public string MobileNumber { get; set; }
 
-        //define if user has edit access to the schedule
+        //define if user has edit rights for the schedule
         public bool EditAccess { get; set; }
 
         public PersonInSchedule()
@@ -55,7 +56,6 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         {
             Id = id;
             UserId = user.Id;
-            //UserFullName = user.FullName;
             IsContactPerson = isContactPerson;
             IsSelected = false;
         }

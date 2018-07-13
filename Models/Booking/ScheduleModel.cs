@@ -14,6 +14,7 @@ using BExIS.Rbm.Entities.ResourceStructure;
 using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
 using BExIS.Rbm.Services.ResourceStructure;
 using BExIS.Rbm.Entities.BookingManagementTime;
+using BExIS.Modules.RBM.UI.Helper;
 
 namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 {
@@ -371,8 +372,10 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             if (schedule.ForPerson.Self is PersonGroup)
             {
                 PersonGroup pGroup = (PersonGroup)schedule.ForPerson.Self;
+
                 Contact = new PersonInSchedule(pGroup.Id, pGroup.Contact, true);
-                //ContactName = pGroup.Contact.FullName;
+                ContactName = UserHelper.GetPartyByUserId(pGroup.Contact.Id).Name;
+
                 foreach (User u in pGroup.Users)
                 {
                     if (u.Id == pGroup.Contact.Id)
@@ -388,12 +391,14 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             else if (schedule.ForPerson.Self is IndividualPerson)
             {
                 IndividualPerson iPerson = (IndividualPerson)schedule.ForPerson.Self;
+
                 ForPersons.Add(new PersonInSchedule(iPerson.Id,iPerson.Person, false));
             }
 
             if (schedule.ByPerson.Self is IndividualPerson)
             {
                 IndividualPerson iPersonBy = (IndividualPerson)schedule.ByPerson.Self;
+
                 //ByPerson = new PersonInSchedule(iPersonBy.Id,iPersonBy.Person, true);
                 //ByPerson = iPersonBy.Person.FullName;
             }
