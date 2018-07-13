@@ -1,4 +1,6 @@
-﻿using BExIS.Security.Services.Subjects;
+﻿using BExIS.Dlm.Entities.Party;
+using BExIS.Dlm.Services.Party;
+using BExIS.Security.Services.Subjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +13,15 @@ namespace BExIS.Modules.RBM.UI.Helper
         public static long GetUserId(string userName)
         {
             UserManager userManager = new UserManager();
-            return userManager.FindByNameAsync(userName).Id;
+            return userManager.FindByNameAsync(userName).Result.Id;
+        }
+
+        public static Party GetPartyByUserId(long userId)
+        {
+            using (var partyManager = new PartyManager())
+            {
+                return partyManager.GetPartyByUser(userId);
+            }
         }
 
     }
