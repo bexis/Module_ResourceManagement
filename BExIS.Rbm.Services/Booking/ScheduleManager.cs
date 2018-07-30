@@ -114,7 +114,9 @@ namespace BExIS.Rbm.Services.Booking
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<Schedule> repo = uow.GetRepository<Schedule>();
-                repo.Put(schedule);
+                repo.Merge(schedule);
+                var merged = repo.Get(schedule.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
             return schedule;

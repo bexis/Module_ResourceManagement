@@ -116,18 +116,19 @@ namespace BExIS.Rbm.Services.ResourceStructure
            return (true);
        }
 
-       public RS.ResourceStructure Update(RS.ResourceStructure resourceStruc)
+       public RS.ResourceStructure Update(RS.ResourceStructure resourceStructure)
        {
-           Contract.Requires(resourceStruc != null);
+           Contract.Requires(resourceStructure != null);
 
            using (IUnitOfWork uow = this.GetUnitOfWork())
            {
                IRepository<RS.ResourceStructure> repo = uow.GetRepository<RS.ResourceStructure>();
-               repo.Put(resourceStruc);
-               uow.Commit();
+                repo.Merge(resourceStructure);
+                var merged = repo.Get(resourceStructure.Id);
+                repo.Put(merged); uow.Commit();
            }
 
-           return resourceStruc;
+           return resourceStructure;
        }
 
        public IQueryable<RS.ResourceStructure> GetAllResourceStructures()

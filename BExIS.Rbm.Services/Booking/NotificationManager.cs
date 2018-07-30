@@ -80,7 +80,9 @@ namespace BExIS.Rbm.Services.Booking
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<Notification> repo = uow.GetRepository<Notification>();
-                repo.Put(notification);
+                repo.Merge(notification);
+                var merged = repo.Get(notification.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
             return notification;

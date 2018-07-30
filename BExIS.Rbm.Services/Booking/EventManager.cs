@@ -103,7 +103,9 @@ namespace BExIS.Rbm.Services.Booking
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<E.BookingEvent> repo = uow.GetRepository<E.BookingEvent>();
-                repo.Put(eEvent);
+                repo.Merge(eEvent);
+                var merged = repo.Get(eEvent.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
 

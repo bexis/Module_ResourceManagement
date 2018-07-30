@@ -112,7 +112,9 @@ namespace BExIS.Rbm.Services.ResourceConstraints
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<DependencyConstraint> repo = uow.GetRepository<DependencyConstraint>();
-                repo.Put(constraint);
+                repo.Merge(constraint);
+                var merged = repo.Get(constraint.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
             return constraint;
@@ -168,7 +170,9 @@ namespace BExIS.Rbm.Services.ResourceConstraints
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<BlockingConstraint> repo = uow.GetRepository<BlockingConstraint>();
-                repo.Put(constraint);
+                repo.Merge(constraint);
+                var merged = repo.Get(constraint.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
             return constraint;
@@ -221,7 +225,9 @@ namespace BExIS.Rbm.Services.ResourceConstraints
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<QuantityConstraint> repo = uow.GetRepository<QuantityConstraint>();
-                repo.Put(constraint);
+                repo.Merge(constraint);
+                var merged = repo.Get(constraint.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
             return constraint;
@@ -275,7 +281,9 @@ namespace BExIS.Rbm.Services.ResourceConstraints
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<TimeCapacityConstraint> repo = uow.GetRepository<TimeCapacityConstraint>();
-                repo.Put(constraint);
+                repo.Merge(constraint);
+                var merged = repo.Get(constraint.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
             return constraint;

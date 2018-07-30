@@ -97,7 +97,9 @@ namespace BExIS.Rbm.Services.BookingManagementTime
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<TimeInstant> repo = uow.GetRepository<TimeInstant>();
-                repo.Put(timeInstant);
+                repo.Merge(timeInstant);
+                var merged = repo.Get(timeInstant.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
             return timeInstant;
@@ -145,7 +147,9 @@ namespace BExIS.Rbm.Services.BookingManagementTime
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<TimeInterval> repo = uow.GetRepository<TimeInterval>();
-                repo.Put(timeInterval);
+                repo.Merge(timeInterval);
+                var merged = repo.Get(timeInterval.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
             return timeInterval;
@@ -193,7 +197,9 @@ namespace BExIS.Rbm.Services.BookingManagementTime
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<TimeDuration> repo = uow.GetRepository<TimeDuration>();
-                repo.Put(timeDuration);
+                repo.Merge(timeDuration);
+                var merged = repo.Get(timeDuration.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
             return timeDuration;
@@ -243,7 +249,9 @@ namespace BExIS.Rbm.Services.BookingManagementTime
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<PeriodicTimeInstant> repo = uow.GetRepository<PeriodicTimeInstant>();
-                repo.Put(periodicTimeInstant);
+                repo.Merge(periodicTimeInstant);
+                var merged = repo.Get(periodicTimeInstant.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
             return periodicTimeInstant;

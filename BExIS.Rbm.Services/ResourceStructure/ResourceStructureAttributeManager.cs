@@ -117,18 +117,20 @@ namespace BExIS.Rbm.Services.ResourceStructure
             return true;
         }
 
-        public RS.ResourceStructureAttribute UpdateResourceStructureAttribute(RS.ResourceStructureAttribute resourceStrucAtt)
+        public RS.ResourceStructureAttribute UpdateResourceStructureAttribute(RS.ResourceStructureAttribute resourceStructureAttribute)
         {
-            Contract.Requires(resourceStrucAtt != null);
+            Contract.Requires(resourceStructureAttribute != null);
 
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<RS.ResourceStructureAttribute> repo = uow.GetRepository<RS.ResourceStructureAttribute>();
-                repo.Put(resourceStrucAtt);
+                repo.Merge(resourceStructureAttribute);
+                var merged = repo.Get(resourceStructureAttribute.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
 
-            return resourceStrucAtt;
+            return resourceStructureAttribute;
         }
 
         public bool IsAttributeInUse(long attrId)
@@ -237,7 +239,9 @@ namespace BExIS.Rbm.Services.ResourceStructure
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<RS.ResourceAttributeUsage> repo = uow.GetRepository<RS.ResourceAttributeUsage>();
-                repo.Put(usage);
+                repo.Merge(usage);
+                var merged = repo.Get(usage.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
 
@@ -381,7 +385,9 @@ namespace BExIS.Rbm.Services.ResourceStructure
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<RS.ResourceAttributeValue> repo = uow.GetRepository<RS.ResourceAttributeValue>();
-                repo.Put(value);
+                repo.Merge(value);
+                var merged = repo.Get(value.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
 

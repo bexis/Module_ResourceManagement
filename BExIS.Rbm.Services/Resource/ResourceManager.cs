@@ -128,7 +128,9 @@ namespace BExIS.Rbm.Services.Resource
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<R.SingleResource> repo = uow.GetRepository<R.SingleResource>();
-                repo.Put(resource);
+                repo.Merge(resource);
+                var merged = repo.Get(resource.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
 
