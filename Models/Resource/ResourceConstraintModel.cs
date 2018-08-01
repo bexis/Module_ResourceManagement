@@ -184,7 +184,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Resource
                 else if (constraint.ForPerson.Self is IndividualPerson)
                 {
                     IndividualPerson iPerson = (IndividualPerson)constraint.ForPerson.Self;
-                    //ForPersons.Add(new PersonInConstraint(iPerson.Person, iPerson.Id, constraint.Index));
+                    ForPersons.Add(new PersonInConstraint(iPerson.Person, iPerson.Id, constraint.Index));
                 }
             }
 
