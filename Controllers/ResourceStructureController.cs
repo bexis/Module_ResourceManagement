@@ -364,7 +364,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                         Entity entityType = entityTypeManager.FindByName("ResourceStructureAttribute");
 
-                        pManager.Create(user, entityType, rsa.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+                        pManager.Create(user, entityType, rsa.Id, 31);
                     }
 
                     //End -> add security ------------------------------------------
