@@ -581,7 +581,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                 if (deleted)
                 {
-                    Type entityType = entityTypeManager.FindByName("Resource").EntityType;
+                    Type entityType = entityTypeManager.FindByName("SingleResource").EntityType;
                     //delete security 
                     permissionManager.Delete(entityType, id);
                 }
@@ -937,7 +937,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 }
                 else
                 {
-                    bc.ForTimeInterval = timeManager.UpdateTimeInterval(bcm.ForTimeInterval);
+                    if(bc.ForTimeInterval != null)
+                        bc.ForTimeInterval = timeManager.UpdateTimeInterval(bcm.ForTimeInterval);
 
                     if (rcm.ForPeriodicTimeInterval != null)
                     {
@@ -1151,7 +1152,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             {
                 UserManager userManager = new UserManager();
                 //get party type person
-                var partyType = partyTypeManager.PartyTypes.Where(p => p.Title == "person").FirstOrDefault();
+                var partyType = partyTypeManager.PartyTypes.Where(p => p.Title == "Person").FirstOrDefault();
                 //get all parties with person party type
                 List<Party> partyPersons = partyManager.PartyRepository.Query(p => p.PartyType == partyType).ToList();
 
@@ -1218,8 +1219,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                 if (selected == "true")
                 {
-                    //tempConstraint.ForPersons.Add(pUser);
-                    //constraintUsers.Add(pUser);
+                    tempConstraint.ForPersons.Add(new PersonInConstraint(user, 0, int.Parse(index)));
                 }
                 else
                 {
