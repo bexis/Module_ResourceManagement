@@ -98,7 +98,9 @@ namespace BExIS.Rbm.Services.Users
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<IndividualPerson> repo = uow.GetRepository<IndividualPerson>();
-                repo.Put(individualPerson);
+                repo.Merge(individualPerson);
+                var merged = repo.Get(individualPerson.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
 
@@ -180,7 +182,9 @@ namespace BExIS.Rbm.Services.Users
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<PersonGroup> repo = uow.GetRepository<PersonGroup>();
-                repo.Put(personGroup);
+                repo.Merge(personGroup);
+                var merged = repo.Get(personGroup.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
 
@@ -218,7 +222,9 @@ namespace BExIS.Rbm.Services.Users
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<Person> repo = uow.GetRepository<Person>();
-                repo.Put(person);
+                repo.Merge(person);
+                var merged = repo.Get(person.Id);
+                repo.Put(merged);
                 uow.Commit();
             }
 
