@@ -131,7 +131,7 @@ namespace BExIS.Rbm.Services.Users
 
         public IndividualPerson GetIndividualPersonById(long id)
         {
-            return IndividualPersonRepo.Query(u => u.Id == id).FirstOrDefault();
+            return IndividualPersonRepo.Query(u => u.Person.Id == id).FirstOrDefault();
         }
 
 
