@@ -94,6 +94,17 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             EditAccess = false;
             DeleteAccess = false;
 
+            //foreach(Schedule s in e.Schedules)
+            //{
+            //    ScheduleEventModel seM = new ScheduleEventModel(s);
+            //    seM.Index = s.Index;
+            //    seM.EditMode = false;
+            //    seM.EventId = e.Id;
+            //    seM.Activities = new List<ActivityEventModel>();
+            //    s.Activities.ToList().ForEach(r => seM.Activities.Add(new ActivityEventModel(r)));
+            //    Schedules.Add(seM);
+            //}
+
             ScheduleManager schManager = new ScheduleManager();
             List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
 
@@ -136,13 +147,16 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
         public CalendarItemsModel(BookingEvent e)
         {
-            ScheduleManager schManager = new ScheduleManager();
-            List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
-            eventId = e.Id;
-            title = e.Name;
-            start = (from d in schedules select d.StartDate).Min();
-            end = (from d in schedules select d.EndDate).Max();
-            color = "#3868c8"; // fix color, maybe later a other solution for the event color
+            using (var schManager = new ScheduleManager())
+            {
+                List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
+
+                eventId = e.Id;
+                title = e.Name;
+                start = (from d in schedules select d.StartDate).Min();
+                end = (from d in schedules select d.EndDate).Max();
+                color = "#3868c8"; // fix color, maybe later a other solution for the event color
+            }
         }
 
         public CalendarItemsModel(R.SingleResource resource, DateTime startDate, DateTime endDate, long eId)
