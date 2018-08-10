@@ -391,8 +391,10 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             else if (schedule.ForPerson.Self is IndividualPerson)
             {
                 IndividualPerson iPerson = (IndividualPerson)schedule.ForPerson.Self;
+                Contact = new PersonInSchedule(iPerson.Id, iPerson.Contact, true);
+                ContactName = UserHelper.GetPartyByUserId(iPerson.Contact.Id).Name;
 
-                ForPersons.Add(new PersonInSchedule(iPerson.Id,iPerson.Person, false));
+                ForPersons.Add(new PersonInSchedule(iPerson.Id,iPerson.Person, true));
             }
 
             if (schedule.ByPerson.Self is IndividualPerson)
