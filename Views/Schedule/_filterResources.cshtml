@@ -102,7 +102,7 @@
         {
             var quantity = $("#Quantity").val();
 
-            $.get('@Url.Action("ApplyFilter", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', { startdate: startdate, enddate: enddate, quantity: quantity }, function (data) {
+            $.get('@Url.Action("ApplyFilter", "Event", new RouteValueDictionary { { "area", "RBM"} })', { startdate: startdate, enddate: enddate, quantity: quantity }, function (data) {
 
                 $('#Content_Resources').html(data);
             });

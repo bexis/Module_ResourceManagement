@@ -18,13 +18,13 @@
               }
               else
               {
-                  color = "background-color: #EFF7F6;";
+                  color = "background-color: #d2e8e3;";
               }
             }
             <div class="itemHeader" style="border: 2px solid black; padding:5px; @color " onclick="Toogle(@Model[i].Index)" title="Click here to open the schedule">
                 @Html.HiddenFor(m=>m[i].Index)
                 @Html.HiddenFor(m=>m[i].ResourceId)
-                <table style="background-color:#EFF7F6;">
+                <table style="background-color:#d2e8e3;">
                     <tr>
                         <td><b>@Html.DisplayFor(m=>m[i].ResourceName)</b></td>
                         <td style="text-align:right">
@@ -72,8 +72,9 @@
                         <td  style="width:200px" colspan="2">
                           <div id="users_@Model[i].Index"></div>
                         </td>
-                         <td>
-                             <small>@Html.ValidationMessage("UserMissing_" + Model[i].Index.ToString())</small>
+                        <td>
+                            <small>@Html.ValidationMessage("UserMissing_" + Model[i].Index.ToString())</small>
+                            <small>@Html.ValidationMessage("ContactMissing_" + Model[i].Index.ToString())</small>
                         </td>
                     </tr>
                @*     <tr>

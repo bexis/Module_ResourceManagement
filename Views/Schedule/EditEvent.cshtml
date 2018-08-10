@@ -73,7 +73,7 @@
             @Html.ActionLink("Delete", "Delete", "Schedule",  new { area = "RBM", id = Model.Id}, new{ @class = "t-button action", @title = "Delete", @tabindex = "5" })
         }
 
-        @Html.ActionLink("Cancel", "Schedule", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Cancel", @tabindex = "5" })
+        @Html.ActionLink("Cancel", "Calendar", "Calendar", new { area = "RBM", @class = "t-button action", @title = "Cancel", @tabindex = "5" })
     </div>
 
 </div>
@@ -200,7 +200,7 @@
     }
 
     function Toogle(index) {
-        $("#scheduleDetails_" + index).toggle();
+        $("#scheduleDetails_" + index).slideToggle("slow");
     }
 
 @*    function saveEvent() {

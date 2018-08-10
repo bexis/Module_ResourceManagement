@@ -14,14 +14,14 @@
             </td>
         </tr>
         <tr>
-            <td style="vertical-align:middle;">
+            <td style="vertical-align:middle; background-color:#d2e8e3;">
                 <div>
                     <small>Startdate: @rc.PreselectedStartDate</small><br />
                     <small>Enddate: @rc.PreselectedEndDate</small><br />
                     <small>Quantity: @rc.PreselectdQuantity</small><br />
                 </div>
             </td>
-            <td style="vertical-align:middle;">
+            <td style="vertical-align:middle; background-color:#d2e8e3;">
                 <div id="remove" class="bx bx-grid-function bx-trash" onclick="removeRourceFromCart(@rc.Index)" title="Remove resource from cart"></div>
 
             </td>
@@ -41,7 +41,7 @@
     });
 
     function removeRourceFromCart(index) {
-        $.get('@Url.Action("RemoveResourceFromCart", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', { index: index }, function (data) {
+        $.get('@Url.Action("RemoveResourceFromCart", "Event", new RouteValueDictionary { { "area", "RBM"} })', { index: index }, function (data) {
             $('#ResourceCart').html(data);
         });
     }
