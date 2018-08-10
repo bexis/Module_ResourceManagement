@@ -46,12 +46,12 @@
 
     <Export tag="menubar" id="rbmMenu" order="16"
             title="Resource Calendar" description="RBM desc" icon=""
-            controller="Schedule" action="Schedule"
+            controller="Calendar" action="Calendar"
             extends="./menubarRoot" />
 
     <Export tag="menubar" id="rbmMenu_Cal" order="17"
           title="Calendar" description="Cal" icon=""
-          controller="Schedule" action="Schedule"
+          controller="Calendar" action="Calendar"
           extends="./menubarRoot/rbmMenu" />
     
 	<!-- Settings Example-->
