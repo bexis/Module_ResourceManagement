@@ -43,34 +43,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 {
     public class ScheduleController : Controller
     {
-        public ActionResult Schedule()
-        {
-            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Schedule Calendar", this.Session.GetTenant());
-            Session["Filter"] = null;
-            Session["FilterSchedules"] = null;
-            return View("Schedule");
-        }
-      
         #region Create Event -- Filter Resources
-
-        //internal useage for resóurce filtering
-
-        private struct FilterTreeItem
-        {
-            public long Id;
-            public string Value;
-        }
-
-        //internal usage to store a filter query
-        private struct Filter
-        {
-            public DateTime StartDate;
-            public DateTime EndDate;
-            public int Quantity;
-            //true if filter is active
-            public bool IsSet;
-            public List<FilterTreeItem> TreeFilterItems;
-        }
 
         //internal usage to store seleced resources schedules in a session
         private struct TempSchedule
@@ -98,18 +71,18 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<ResourceAttributeValueModel> treeDomainList = new List<ResourceAttributeValueModel>();
             List<SelectResourceForEventModel> resultFromTreeFilter = new List<SelectResourceForEventModel>();
 
-                SingleResourceManager rManager = new SingleResourceManager();
+            SingleResourceManager rManager = new SingleResourceManager();
 
-                ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-                List<SingleResource> resources = rManager.GetAllResources().ToList();
+            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
+            List<SingleResource> resources = rManager.GetAllResources().ToList();
 
-                //Create for each Resource TreeDomainModel witch includes all Attribute Ids and all values
-                foreach (SingleResource r in resources)
-                {
-                    ResourceAttributeValueModel treeDomainModel = new ResourceAttributeValueModel(r);
-                    treeDomainList.Add(treeDomainModel);
-                }
-            
+            //Create for each Resource TreeDomainModel witch includes all Attribute Ids and all values
+            foreach (SingleResource r in resources)
+            {
+                ResourceAttributeValueModel treeDomainModel = new ResourceAttributeValueModel(r);
+                treeDomainList.Add(treeDomainModel);
+            }
+
             //else
             //{
             //    List<SelectResourceForEventModel> tempResults = new List<SelectResourceForEventModel>();
@@ -121,14 +94,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             //}
 
-            List<FilterTreeItem> filterList = new List<FilterTreeItem>();
-           
+            List<ResourceFilterHelper.FilterTreeItem> filterList = new List<ResourceFilterHelper.FilterTreeItem>();
+
             //split Id and DomainItem and add it to a FilterItem list
             foreach (string item in items)
             {
                 //index 0 = attrbute id, index1 domainvalue
                 List<string> i = item.Split('_').ToList();
-                FilterTreeItem filterItem = new FilterTreeItem();
+                ResourceFilterHelper.FilterTreeItem filterItem = new ResourceFilterHelper.FilterTreeItem();
                 filterItem.Id = Convert.ToInt64(i[0]);
                 filterItem.Value = i[1].ToString();
                 filterList.Add(filterItem);
@@ -136,34 +109,34 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
 
             //Dictionary to save every Filter (domain items) to one attr
-            Dictionary<long, List<string>> filterDic = GetFilterDic(filterList);
+            Dictionary<long, List<string>> filterDic = ResourceFilterHelper.GetFilterDic(filterList);
 
             List<ResourceAttributeValueModel> temp = new List<ResourceAttributeValueModel>();
 
             //check for every TreeDomainModel (resource) if fits the filter
             foreach (ResourceAttributeValueModel m in treeDomainList)
             {
-                if (CheckTreeDomainModel(m, filterDic))
+                if (ResourceFilterHelper.CheckTreeDomainModel(m, filterDic))
                 {
-                        resultFromTreeFilter.Add(new SelectResourceForEventModel(m.Resource));
+                    resultFromTreeFilter.Add(new SelectResourceForEventModel(m.Resource));
                 }
             }
 
             List<SelectResourceForEventModel> endResultList = new List<SelectResourceForEventModel>();
-            Filter filter = new Filter();
+            ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
             if (Session["Filter"] != null)
-                filter = (Filter)Session["Filter"];
+                filter = (ResourceFilterHelper.Filter)Session["Filter"];
 
             //if filter is set apply it on the results
             if (filter.IsSet == true)
             {
-                endResultList = ApplyFilter(resultFromTreeFilter, filter);
+                endResultList = ResourceFilterHelper.ApplyFilter(resultFromTreeFilter, filter);
             }
             else
                 endResultList = resultFromTreeFilter;
 
             Session["TreeFilterResults"] = endResultList;
-            
+
             return PartialView("_gridResources", endResultList);
         }
 
@@ -171,7 +144,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             Session["Filter"] = null;
 
-            Filter filter = new Filter();
+            ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
             filter.StartDate = DateTime.Parse(startdate);
             filter.EndDate = DateTime.Parse(enddate);
             filter.Quantity = int.Parse(quantity);
@@ -191,111 +164,19 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 List<SingleResource> resources = rManager.GetAllResources().ToList();
                 resources.ForEach(r => resourcesEventList.Add(new SelectResourceForEventModel(r)));
             }
-            
+
             List<SelectResourceForEventModel> resultList = new List<SelectResourceForEventModel>();
-            resultList = ApplyFilter(resourcesEventList, filter);
+            resultList = ResourceFilterHelper.ApplyFilter(resourcesEventList, filter);
             Session["FilterResults"] = resultList;
 
             return PartialView("_gridResources", resultList);
         }
 
-        private List<SelectResourceForEventModel> ApplyFilter(List<SelectResourceForEventModel> list, Filter filter)
-        {
-            List<SelectResourceForEventModel> endResultList = new List<SelectResourceForEventModel>();
-            ScheduleManager schManager = new ScheduleManager();
-
-            //Filter the result list withe the other criterias if given
-            foreach (SelectResourceForEventModel r in list)
-            {
-                int resourceQuantity = 0;
-                if (r.ResourceQuantity == "no limitation")
-                    resourceQuantity = 0;
-                else
-                    resourceQuantity = int.Parse(r.ResourceQuantity);
-
-                
-                //get all schedule where resource is booked
-                List<Schedule> allSchedules = schManager.GetAllSchedulesByResource(r.Id);
-                List<Schedule> inTimeSchedules = new List<Schedule>();
-                int schedulesQunatity = 0;
-                foreach (Schedule s in allSchedules)
-                {
-                    //get all schedule in the given time period
-                    if ((DateTime.Compare(filter.StartDate, s.StartDate) >= 0 && DateTime.Compare(filter.StartDate, s.EndDate) <= 0) || (DateTime.Compare(filter.EndDate, s.StartDate) >= 0 && DateTime.Compare(filter.EndDate, s.EndDate) <= 0))
-                    {
-                        //Count all quantities in in time schedules
-                        schedulesQunatity = schedulesQunatity + s.Quantity;
-                    }
-                }
-                if (resourceQuantity != 0)
-                {
-                    //if diff of resourceQuantity and schedulesQunatity minus requested quantity is posive add to resultlist
-                    if (((resourceQuantity - schedulesQunatity) - filter.Quantity) >= 0)
-                    {
-                        r.AvailableQuantity = resourceQuantity - schedulesQunatity;
-                        endResultList.Add(r);
-                    }
-                }
-                else
-                    endResultList.Add(r);
-            }
-
-            return endResultList;
-        }
-
+       
         public ActionResult RemoveFilter(string selectedItems)
         {
             Session["Filter"] = null;
             return RedirectToAction("OnChangeFilter", new RouteValueDictionary(new { controller = "Schedule", action = "Main", selectedItems = selectedItems }));
-        }
-
-        private bool CheckTreeDomainModel(ResourceAttributeValueModel model, Dictionary<long, List<string>> filters)
-        {
-            foreach (KeyValuePair<long, List<string>> kp in filters)
-            {
-                if (IsResult(model, kp.Key, kp.Value) == false) return false;
-            }
-
-            return true;
-        }
-
-        //Create dictionary for every attribute filter, e.g. attr id 1 with 3 domain items
-        private Dictionary<long, List<string>> GetFilterDic(List<FilterTreeItem> filters)
-        {
-            Dictionary<long, List<string>> filterDic = new Dictionary<long, List<string>>();
-
-            foreach (FilterTreeItem item in filters)
-            {
-                if (filterDic.Keys.Contains(item.Id))
-                    filterDic[item.Id].Add(item.Value);
-                else
-                {
-                    List<string> values = new List<string>();
-                    values.Add(item.Value);
-                    filterDic.Add(item.Id, values);
-                }
-            }
-
-            return filterDic;
-        }
-
-        //checks if is a filter result
-        private bool IsResult(ResourceAttributeValueModel model, long id, List<string> values)
-        {
-            bool temp = false;
-
-            foreach (string value in values)
-            {
-                //int index = model.AttributeIds.IndexOf(id);
-
-                //if (model.Values.ElementAt(index).Equals(value))
-                if(model.Values.Contains(value))
-                {
-                    temp = true;
-                }
-            }
-
-            return temp;
         }
 
         #endregion
@@ -309,7 +190,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             //if event creation starting point from ´date(time) in calender set date to clicked date
             if (Session["Filter"] != null)
             {
-                Filter filter = (Filter)Session["Filter"];
+                ResourceFilterHelper.Filter filter = (ResourceFilterHelper.Filter)Session["Filter"];
                 model.StartDate = filter.StartDate;
                 model.EndDate = filter.EndDate;
                 model.IsPreSelected = true;
@@ -350,9 +231,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             if (Session["Filter"] != null)
             {
-                Filter filter = new Filter();
-                filter = (Filter)Session["Filter"];
-                results = ApplyFilter(allResourceList, filter);
+                ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
+                filter = (ResourceFilterHelper.Filter)Session["Filter"];
+                results = ResourceFilterHelper.ApplyFilter(allResourceList, filter);
             }
             else
                 results = allResourceList;
@@ -370,9 +251,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
         }
 
         //Temp adding resource to event, schedules are not stored in this step
-        public ActionResult AddResourceToCart(string resources)
+
+
+        public ActionResult AddResourceToCart(string id)
         {
-            if (resources == "")
+            if (id == "")
             {
                 ModelState.AddModelError("ResourceList", "You must select an resource to add it to the event.");
             }
@@ -385,10 +268,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     model = new List<ResourceCart>();
 
                 //get filter values
-                Filter filter = new Filter();
+                ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
                 if (Session["Filter"] != null)
                 {
-                    filter = (Filter)Session["Filter"];
+                    filter = (ResourceFilterHelper.Filter)Session["Filter"];
                 }
                 else
                 {
@@ -398,45 +281,45 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 }
 
                 //get all selected resource ids
-                var rIds = resources.Split(',').Select(Int64.Parse).ToList();
+                //var rIds = resources.Split(',').Select(Int64.Parse).ToList();
 
                 using (var srManager = new SingleResourceManager())
                 using (var pManager = new PersonManager())
                 {
                     UserManager userManager = new UserManager();
 
-                    for (int i = 0; i < rIds.Count(); i++)
+                    //for (int i = 0; i < rIds.Count(); i++)
+                    //{
+                    //set index for resource in cart
+                    int index = 0;
+                    if (model.Count() == 0)
+                        index = 1;
+                    else
+                        index = model.Select(e => e.Index).Max() + 1;
+
+                    SingleResource resource = srManager.GetResourceById(long.Parse(id));
+                    ResourceCart cartItem = new ResourceCart();
+
+                    cartItem.Id = resource.Id;
+                    //ToDo: User or Default
+                    long createdByUserId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+
+                    cartItem.ByPersonName = UserHelper.GetPartyByUserId(createdByUserId).Name;
+                    cartItem.ByPersonUserId = createdByUserId;
+
+                    cartItem.Name = resource.Name;
+                    cartItem.Index = index;
+                    cartItem.NewInCart = true;
+
+                    if (filter.IsSet)
                     {
-                        //set index for resource in cart
-                        int index = 0;
-                        if (model.Count() == 0)
-                            index = 1;
-                        else
-                            index = model.Select(e => e.Index).Max() + 1;
-
-                        SingleResource resource = srManager.GetResourceById(rIds[i]);
-                        ResourceCart cartItem = new ResourceCart();
-
-                        cartItem.Id = resource.Id;
-                        //ToDo: User or Default
-                        long createdByUserId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
-
-                        cartItem.ByPersonName = UserHelper.GetPartyByUserId(createdByUserId).Name;
-                        cartItem.ByPersonUserId = createdByUserId;
-
-                        cartItem.Name = resource.Name;
-                        cartItem.Index = index;
-                        cartItem.NewInCart = true;
-
-                        if (filter.IsSet)
-                        {
-                            cartItem.PreselectdQuantity = filter.Quantity;
-                            cartItem.PreselectedStartDate = filter.StartDate;
-                            cartItem.PreselectedEndDate = filter.EndDate;
-                        }
-
-                        model.Add(cartItem);
+                        cartItem.PreselectdQuantity = filter.Quantity;
+                        cartItem.PreselectedStartDate = filter.StartDate;
+                        cartItem.PreselectedEndDate = filter.EndDate;
                     }
+
+                    model.Add(cartItem);
+                    //}
                 }
                 //model.AddRange(temp);
                 Session["ResourceCart"] = model;
@@ -537,7 +420,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             Session["Filter"] = null;
             if (startDate != null)
             {
-                Filter filter = new Filter();
+                ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
                 filter.StartDate = DateTime.Parse(startDate);
                 filter.EndDate = DateTime.Parse(startDate);
                 Session["Filter"] = filter;
@@ -559,7 +442,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             //    if (!filter.IsPredefined)
             //        Session["Filter"] = null;
             //}
-          
+
             return View("SelectResources");
         }
 
@@ -665,11 +548,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         //name validierung rein
                         model.Name = value;
                         Session["Event"] = model;
-                    break;
+                        break;
                     case "Description":
                         model.Description = value;
                         Session["Event"] = model;
-                    break;
+                        break;
                     case "Start":
                         seModel = model.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
                         seModel.ScheduleDurationModel.StartDate = DateTime.Parse(value);
@@ -687,7 +570,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         i = model.Schedules.FindIndex(p => p.Index == int.Parse(index));
                         model.Schedules[i] = seModel;
                         Session["Event"] = model;
-                    break;
+                        break;
                     case "Quantity":
                         seModel = model.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
                         seModel.ScheduleQuantity = int.Parse(value);
@@ -695,7 +578,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         i = model.Schedules.FindIndex(p => p.Index == int.Parse(index));
                         model.Schedules[i] = seModel;
                         Session["Event"] = model;
-                    break;
+                        break;
 
                 }
             }
@@ -709,367 +592,394 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             int countSchedulesCurrent = model.Schedules.Count();
             int countSchedulesBefor = 0;
-
-            SingleResourceManager rManager = new SingleResourceManager();
-
-            //Validate schedules ----------------------------------------------------------
-            List<ScheduleEventModel> tempScheduleList = new List<ScheduleEventModel>();
-            tempScheduleList.AddRange(model.Schedules);
-
-            //set if one or more errors in event schedules
-            bool isError = false;
-
-            //check name
-            if(model.Name == "" || model.Name == null)
+            using (var singleResourceManager = new SingleResourceManager())
             {
-                ModelState.AddModelError("Name", "Name is required.");
-                isError = true;
-            }
 
-            foreach (ScheduleEventModel s in tempScheduleList)
-            {
-                //set if error at this schedule
-                bool sError = false;
+                //Validate schedules ----------------------------------------------------------
+                List<ScheduleEventModel> tempScheduleList = new List<ScheduleEventModel>();
+                tempScheduleList.AddRange(model.Schedules);
 
-                //check date
-                string dateMismatch = CheckDateInconsistency(s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate);
-                if (dateMismatch != null)
+                //set if one or more errors in event schedules
+                bool isError = false;
+
+                //check name
+                if (model.Name == "" || model.Name == null)
                 {
-                    ModelState.AddModelError("DateMismatch_" + s.Index, dateMismatch);
+                    ModelState.AddModelError("Name", "Name is required.");
                     isError = true;
-                    sError = true;
                 }
 
-                //check time period against duration
-                string duration = CheckTimePeriodAgainstDuration(s.ScheduleDurationModel);
-                if (duration != null)
+                foreach (ScheduleEventModel s in tempScheduleList)
                 {
-                    ModelState.AddModelError("DurationError_" + s.Index, duration);
-                    isError = true;
-                    sError = true;
-                }
+                    //set if error at this schedule
+                    bool sError = false;
 
-                //check users
-                bool hasUser = HasScheduleUser(s);
-                if (!hasUser)
-                {
-                    ModelState.AddModelError("UserMissing_" + s.Index, "Reserved for user(s) are missing.");
-                    isError = true;
-                    sError = true;
-                }
-
-                //check achtivities
-                if (s.WithActivity)
-                {
-                    bool hasActivity = HasScheduleActivity(s);
-                    if (!hasActivity)
+                    //check date
+                    string dateMismatch = CheckDateInconsistency(s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate);
+                    if (dateMismatch != null)
                     {
+                        ModelState.AddModelError("DateMismatch_" + s.Index, dateMismatch);
                         isError = true;
                         sError = true;
-                        ModelState.AddModelError("ActivityMissing_" + s.Index, "Activities are missing.");
                     }
-                }
-                //check if selected number is available to the timeperiod
-                if (s.ResourceQuantity != 0)
-                {
-                    int availableQuantity = GetAvailableQuantity(s.ResourceId, s.ResourceQuantity, s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate, s.ScheduleQuantity, s.ScheduleId);
 
-                    if ((availableQuantity - s.ScheduleQuantity) < 0)
+                    //check time period against duration
+                    string duration = CheckTimePeriodAgainstDuration(s.ScheduleDurationModel);
+                    if (duration != null)
                     {
+                        ModelState.AddModelError("DurationError_" + s.Index, duration);
                         isError = true;
                         sError = true;
-                        ModelState.AddModelError("Quantity_" + s.Index, "Selected number not available.");
                     }
-                    if (s.ScheduleQuantity == 0)
+
+                    //check users
+                    bool hasUser = HasScheduleUser(s);
+                    if (!hasUser)
                     {
+                        ModelState.AddModelError("UserMissing_" + s.Index, "Reserved for user(s) are missing.");
                         isError = true;
                         sError = true;
-                        ModelState.AddModelError("Quantity_" + s.Index, "The Quantity must be greater than 0");
                     }
-                }
 
-                //check if file which need to confirm attached to confirmation it set
-                if (s.ResourceHasFiles)
-                {
-                    foreach(FileValueModel file in s.Files)
+                    //check contact person
+                    if(s.Contact.UserId == 0)
                     {
-                        if (file.NeedConfirmation && !s.FileConfirmation)
-                        {
-                            ModelState.AddModelError("FileConfirmation_" + s.Index, "You must confirm that you read the file(s).");
-                        }
+                        ModelState.AddModelError("ContactMissing_" + s.Index, "Contact person for is missing.");
+                        isError = true;
+                        sError = true;
                     }
-                }
 
-                //check Resource Constraints
-                SingleResource r = rManager.GetResourceById(s.ResourceId);
-                foreach (ResourceConstraint c in r.ResourceConstraints)
-                {
-                    if (c is DependencyConstraint)
+                    //check achtivities
+                    if (s.WithActivity)
                     {
-                        DependencyConstraint dc = (DependencyConstraint)c;
-                        ResourceConstraintData data = new ResourceConstraintData();
-
-                        List<Schedule> temp = new List<Schedule>();
-                        foreach(ScheduleEventModel t in model.Schedules)
-                        {
-                            Schedule tempS = new Rbm.Entities.Booking.Schedule();
-                            tempS.Resource = rManager.GetResourceById(t.ResourceId);
-                            tempS.Quantity = t.ScheduleQuantity;
-                            tempS.StartDate = t.ScheduleDurationModel.StartDate;
-                            tempS.EndDate = t.ScheduleDurationModel.EndDate;
-                            temp.Add(tempS);
-                        }
-                        data.SchedulesInEvent = temp;
-                        data.TimePeriodInSchedule = new TimeInterval(s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate);
-
-                        data.QuantityInSchedule = s.ScheduleQuantity;
-                        if (!dc.IsSatisfied(data))
+                        bool hasActivity = HasScheduleActivity(s);
+                        if (!hasActivity)
                         {
                             isError = true;
                             sError = true;
-                            ModelState.AddModelError("DependencyConstraint_" + s.Index, dc.ErrorMessage);
+                            ModelState.AddModelError("ActivityMissing_" + s.Index, "Activities are missing.");
                         }
                     }
-                    if (c is QuantityConstraint)
+                    //check if selected number is available to the timeperiod
+                    if (s.ResourceQuantity != 0)
                     {
-                        QuantityConstraint qc = (QuantityConstraint)c;
-                        ResourceConstraintData data = new ResourceConstraintData();
-                        data.PersonsInSchedule = s.ForPersons.Select(a=>a.UserId).ToList();
-                        data.TimePeriodInSchedule = new TimeInterval(s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate);
-                        data.QuantityInSchedule = s.ScheduleQuantity;
-                        if (!qc.IsSatisfied(data))
+                        int availableQuantity = GetAvailableQuantity(s.ResourceId, s.ResourceQuantity, s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate, s.ScheduleQuantity, s.ScheduleId);
+
+                        if ((availableQuantity - s.ScheduleQuantity) < 0)
                         {
                             isError = true;
                             sError = true;
-                            ModelState.AddModelError("QuantityConstraint_" + s.Index, qc.ErrorMessage);
+                            ModelState.AddModelError("Quantity_" + s.Index, "Selected number not available.");
                         }
-                    }
-                    if (c is BlockingConstraint)
-                    {
-                        BlockingConstraint bc = (BlockingConstraint)c;
-                        ResourceConstraintData data = new ResourceConstraintData();
-                        data.PersonsInSchedule = s.ForPersons.Select(a => a.UserId).ToList();
-                        data.TimePeriodInSchedule = new TimeInterval(s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate);
-                        if (!bc.IsSatisfied(data))
+                        if (s.ScheduleQuantity == 0)
                         {
                             isError = true;
                             sError = true;
-                            ModelState.AddModelError("BlockingConstraint_" + s.Index, bc.ErrorMessage);
+                            ModelState.AddModelError("Quantity_" + s.Index, "The Quantity must be greater than 0");
                         }
                     }
+
+                    //check if file which need to confirm attached to confirmation it set
+                    if (s.ResourceHasFiles)
+                    {
+                        foreach (FileValueModel file in s.Files)
+                        {
+                            if (file.NeedConfirmation && !s.FileConfirmation)
+                            {
+                                ModelState.AddModelError("FileConfirmation_" + s.Index, "You must confirm that you read the file(s).");
+                            }
+                        }
+                    }
+
+                    //check Resource Constraints
+                    SingleResource r = singleResourceManager.GetResourceById(s.ResourceId);
+                    foreach (ResourceConstraint c in r.ResourceConstraints)
+                    {
+                        if (c is DependencyConstraint)
+                        {
+                            DependencyConstraint dc = (DependencyConstraint)c;
+                            ResourceConstraintData data = new ResourceConstraintData();
+
+                            List<Schedule> temp = new List<Schedule>();
+                            foreach (ScheduleEventModel t in model.Schedules)
+                            {
+                                Schedule tempS = new Rbm.Entities.Booking.Schedule();
+                                tempS.Resource = singleResourceManager.GetResourceById(t.ResourceId);
+                                tempS.Quantity = t.ScheduleQuantity;
+                                tempS.StartDate = t.ScheduleDurationModel.StartDate;
+                                tempS.EndDate = t.ScheduleDurationModel.EndDate;
+                                temp.Add(tempS);
+                            }
+                            data.SchedulesInEvent = temp;
+                            data.TimePeriodInSchedule = new TimeInterval(s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate);
+
+                            data.QuantityInSchedule = s.ScheduleQuantity;
+                            if (!dc.IsSatisfied(data))
+                            {
+                                isError = true;
+                                sError = true;
+                                ModelState.AddModelError("DependencyConstraint_" + s.Index, dc.ErrorMessage);
+                            }
+                        }
+                        if (c is QuantityConstraint)
+                        {
+                            QuantityConstraint qc = (QuantityConstraint)c;
+                            ResourceConstraintData data = new ResourceConstraintData();
+                            data.PersonsInSchedule = s.ForPersons.Select(a => a.UserId).ToList();
+                            data.TimePeriodInSchedule = new TimeInterval(s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate);
+                            data.QuantityInSchedule = s.ScheduleQuantity;
+                            if (!qc.IsSatisfied(data))
+                            {
+                                isError = true;
+                                sError = true;
+                                ModelState.AddModelError("QuantityConstraint_" + s.Index, qc.ErrorMessage);
+                            }
+                        }
+                        if (c is BlockingConstraint)
+                        {
+                            BlockingConstraint bc = (BlockingConstraint)c;
+                            ResourceConstraintData data = new ResourceConstraintData();
+                            data.PersonsInSchedule = s.ForPersons.Select(a => a.UserId).ToList();
+                            data.TimePeriodInSchedule = new TimeInterval(s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate);
+                            if (!bc.IsSatisfied(data))
+                            {
+                                isError = true;
+                                sError = true;
+                                ModelState.AddModelError("BlockingConstraint_" + s.Index, bc.ErrorMessage);
+                            }
+                        }
+                    }
+
+                    if (sError)
+                        s.ScheduleError = true;
+                    else
+                        s.ScheduleError = false;
+
+                    var i = model.Schedules.FindIndex(p => p.Index == s.Index);
+                    model.Schedules[i] = s;
                 }
 
-                if (sError)
-                    s.ScheduleError = true;
-                else
-                    s.ScheduleError = false;
-
-                var i = model.Schedules.FindIndex(p => p.Index == s.Index);
-                model.Schedules[i] = s;
-            }
-
-            if (isError)
-            {
-                model.Schedules.ToList().ForEach(c => c.Errors = true);
-            }
-
-            //End Validation ----------------------------------------------------------
-
-            if (ModelState.IsValid)
-            {
-                UserManager userManager = new UserManager();
-
-                using (var scheduleManager = new ScheduleManager())
-                using (var singleResourceManager = new SingleResourceManager())
-                using (var personManager = new PersonManager())
-                using (var eventManager = new EventManager())
-                using (var permissionManager = new EntityPermissionManager())
-                using (var entityTypeManager = new EntityManager())
+                if (isError)
                 {
-                    Schedule newSchedule = new Schedule();
+                    model.Schedules.ToList().ForEach(c => c.Errors = true);
+                }
 
-                    try
+                //End Validation ----------------------------------------------------------
+
+                if (ModelState.IsValid)
+                {
+                    UserManager userManager = new UserManager();
+
+                    using (var scheduleManager = new ScheduleManager())
+                    using (var personManager = new PersonManager())
+                    using (var eventManager = new EventManager())
+                    using (var permissionManager = new EntityPermissionManager())
+                    using (var entityTypeManager = new EntityManager())
                     {
-                        // get event min und max date from schedules
-
-                        DateTime minDate = model.Schedules.Select(a => a.ScheduleDurationModel.StartDate).ToList().Min();
-                        DateTime maxDate = model.Schedules.Select(a => a.ScheduleDurationModel.EndDate).ToList().Max();
-
-                        //if event id = 0, create new event with note and description
-                        BookingEvent eEvent = new BookingEvent();
-                        if (model.Id == 0)
-                            eEvent = eventManager.CreateEvent(model.Name, model.Description, null, minDate, maxDate);
-                        else
+                        try
                         {
-                            eEvent = eventManager.GetEventById(model.Id);
-                            countSchedulesBefor = scheduleManager.GetAllSchedulesByEvent(model.Id).Count();
-                            eEvent.Name = model.Name;
-                            eEvent.Description = model.Description;
-                            eEvent.MinDate = minDate;
-                            eEvent.MaxDate = maxDate;
-                            eventManager.UpdateEvent(eEvent);
-                        }
+                            // get event min und max date from schedules
+                            DateTime minDate = model.Schedules.Select(a => a.ScheduleDurationModel.StartDate).ToList().Min();
+                            DateTime maxDate = model.Schedules.Select(a => a.ScheduleDurationModel.EndDate).ToList().Max();
 
-                        IndividualPerson createdBy = new IndividualPerson();
-                        List<Notification> notifications = new List<Notification>();
+                            SendNotificationHelper.BookingAction bookingAction = new SendNotificationHelper.BookingAction();
 
-                        //Create or update all schedules for this event
-                        foreach (ScheduleEventModel schedule in model.Schedules)
-                        {
+                            //if event id = 0, create new event with note and description
+                            BookingEvent eEvent = new BookingEvent();
+                            if (model.Id == 0)
+                            {
+                                eEvent = eventManager.CreateEvent(model.Name, model.Description, null, minDate, maxDate);
+                                bookingAction = SendNotificationHelper.BookingAction.created;
+                            }
+                            else
+                            {
+                                eEvent = eventManager.GetEventById(model.Id);
+                                countSchedulesBefor = scheduleManager.GetAllSchedulesByEvent(model.Id).Count();
+                                eEvent.Name = model.Name;
+                                eEvent.Description = model.Description;
+                                eEvent.MinDate = minDate;
+                                eEvent.MaxDate = maxDate;
+                                eventManager.UpdateEvent(eEvent);
+                                bookingAction = SendNotificationHelper.BookingAction.edited;
+                            }
+
                             //Delete deleted schedules in DB
                             foreach (long id in model.DeletedSchedules)
                             {
                                 scheduleManager.DeleteSchedule(scheduleManager.GetScheduleById(id));
                             }
 
-                            int index = 0;
-                            //if(schedule.Index.HasValue)
-                            index = schedule.Index;
+                            //get user who has created the event/schedule
+                            IndividualPerson createdBy = new IndividualPerson();
+                            User created = userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
+                            createdBy = personManager.CreateIndividualPerson(created);
 
-                            SingleResource tempResource = singleResourceManager.GetResourceById(schedule.ResourceId);
+                            List<Notification> notifications = new List<Notification>();
 
-                            //Users
-                            List<User> users = new List<User>();
-
-                            //Activities
-                            List<Activity> activityList = new List<Activity>();
-                            if (schedule.Activities.Count > 0)
+                            //Create or update all schedules for this event
+                            foreach (ScheduleEventModel schedule in model.Schedules)
                             {
-                                ActivityManager aManager = new ActivityManager();
-                                foreach (ActivityEventModel ae in schedule.Activities)
-                                {
-                                    activityList.Add(aManager.GetActivityById(ae.Id));
-                                }
-                            }
+                                Schedule newSchedule = new Schedule();
 
-                            //reserved for
-                            if (schedule.ForPersons.Count() > 1)
-                            {
-                                User contact = null;
+                                int index = 0;
+                                index = schedule.Index;
 
-                                foreach (PersonInSchedule user in schedule.ForPersons)
+                                //get scheduled resource
+                                SingleResource tempResource = singleResourceManager.GetResourceById(schedule.ResourceId);
+
+                                //Users
+                                List<User> users = new List<User>();
+
+                                //Activities
+                                List<Activity> activityList = new List<Activity>();
+
+                                //if schedule hat activities, add them to the list
+                                if (schedule.Activities.Count > 0)
                                 {
-                                    User u = userManager.FindByIdAsync(user.Id).Result;
-                                        
-                                    if (user.IsContactPerson == true)
+                                    using (var activityManager = new ActivityManager())
                                     {
-                                        contact = u;
+                                        foreach (ActivityEventModel ae in schedule.Activities)
+                                        {
+                                            activityList.Add(activityManager.GetActivityById(ae.Id));
+                                        }
                                     }
-                                    users.Add(u);
+                                }
+
+                                User contact = new User();
+                                Person person = new Person();
+                                //add all persons reserved for the user list
+                                if (schedule.ForPersons.Count() > 1)
+                                {
+                                    foreach (PersonInSchedule user in schedule.ForPersons)
+                                    {
+                                        User u = userManager.FindByIdAsync(user.Id).Result;
+
+                                        if (user.IsContactPerson == true)
+                                        {
+                                            contact = u;
+                                        }
+                                        users.Add(u);
+                                    }
+
+                                     person = personManager.CreatePersonGroup(users, contact);
+                                }
+                                else
+                                {
+                                    User u = userManager.FindByIdAsync(schedule.ForPersons[0].UserId).Result;
+                                    person = personManager.CreateIndividualPerson(u);
                                 }
 
                                 //Create or Update schedule
                                 if (model.Id == 0 || (countSchedulesCurrent > countSchedulesBefor && schedule.ScheduleId == 0))
-                                {
-                                    User created = userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
-                                    createdBy = personManager.CreateIndividualPerson(created);
-                                    PersonGroup pGroup = personManager.CreatePersonGroup(users, contact);
-                                    newSchedule = scheduleManager.CreateSchedule(schedule.ScheduleDurationModel.StartDate, schedule.ScheduleDurationModel.EndDate, eEvent, tempResource, pGroup, createdBy, activityList, schedule.ScheduleQuantity, index);
-                                }
+                                    newSchedule = scheduleManager.CreateSchedule(schedule.ScheduleDurationModel.StartDate, schedule.ScheduleDurationModel.EndDate, eEvent, tempResource, person, createdBy, activityList, schedule.ScheduleQuantity, index);
                                 else
-                                {
-                                    UpdateSchedule(schedule, activityList, users, contact);
-                                }
-                            }
-                            else
-                            {
-                                User u = userManager.FindByIdAsync(schedule.ForPersons[0].UserId).Result;
-                                IndividualPerson iPerson = personManager.CreateIndividualPerson(u);
+                                    UpdateSchedule(schedule, activityList, person, contact);
+
+
+                                //Get affected notificationen for the schedule
+                                List<Notification> temp = CheckNotificationForSchedule(schedule);
+                                notifications.AddRange(temp);
+
+                                //Add rights to the schedule for all user reserved for
                                 if (model.Id == 0)
                                 {
-                                    User created = userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
-                                    createdBy = personManager.CreateIndividualPerson(created);
-                                    newSchedule = scheduleManager.CreateSchedule(schedule.ScheduleDurationModel.StartDate, schedule.ScheduleDurationModel.EndDate, eEvent, tempResource, iPerson, createdBy, activityList, schedule.ScheduleQuantity, index);
+                                    //get entities types
+                                    var entityTypeSchedule = entityTypeManager.FindByName("Schedule");
+                                    var entityTypeEvent = entityTypeManager.FindByName("Event");
+
+                                    //add rights to logged in user
+                                    var userIdLoggedIn = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+
+                                    //rights on schedule 31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
+                                    permissionManager.Create(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id, 31);
+
+                                    //rights on event
+                                    permissionManager.Create(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id, 31);
+
+                                    foreach (PersonInSchedule user in schedule.ForPersons)
+                                    {
+                                        User us = userManager.FindByIdAsync(user.UserId).Result;
+                                        if (us.Id != userIdLoggedIn)
+                                        {
+                                            //rights on schedule 15 is the sum from this rights:  Read = 1, Download = 2, Write = 4, Delete = 8
+                                            permissionManager.Create(us.Id, entityTypeSchedule.Id, newSchedule.Id, 15);
+                                            //rights on event, Read = 1, Write = 4
+                                            permissionManager.Create(us.Id, entityTypeEvent.Id, eEvent.Id, 5);
+                                        }
+                                    }
                                 }
-                                else
-                                {
-                                    users.Add(u);
-                                    newSchedule = UpdateSchedule(schedule, activityList, users, u);
-                                }
+
+                                if (notifications.Count > 0)
+                                    SendNotification(notifications, model.Schedules);
                             }
 
-                            //Get affected notificationen
-                            List<Notification> temp = CheckNotificationForSchedule(schedule);
-                            notifications.AddRange(temp);
+                            SendNotificationHelper.SendBookingNotification(bookingAction, model);
 
-                            //Add rights to the schedule for all user reserved for
-                            if (model.Id == 0)
-                            {
-                                //get entities types
-                                var entityTypeSchedule = entityTypeManager.FindByName("Schedule");
-                                var entityTypeEvent = entityTypeManager.FindByName("Event");
-
-                                //add rights to logged in user
-                                var userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
-                              
-                                //rights on schedule 31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
-                                permissionManager.Create(userId, entityTypeSchedule.Id, newSchedule.Id, 31);
-
-                                //rights on event
-                                permissionManager.Create(userId, entityTypeSchedule.Id, eEvent.Id, 31);
-
-                                foreach (PersonInSchedule user in schedule.ForPersons)
-                                {
-                                    User us = userManager.FindByIdAsync(user.UserId).Result;
-                                    //rights on schedule 15 is the sum from this rights:  Read = 1, Download = 2, Write = 4, Delete = 8
-                                    permissionManager.Create(us.Id, entityTypeSchedule.Id, newSchedule.Id, 15);
-                                    //rights on event, Read = 1, Write = 4
-                                    permissionManager.Create(us.Id, entityTypeSchedule.Id, newSchedule.Id, 5);
-                                }
-                            }
-
-                            if (notifications.Count > 0)
-                                SendNotification(notifications, model.Schedules);
+                        }
+                        catch (Exception e)
+                        {
+                            ModelState.AddModelError("error", e.Message);
                         }
                     }
-                    catch (Exception e)
-                    {
-                        ModelState.AddModelError("error", e.Message);
-                    }
+                }
+
+                else
+                {
+                    return View("EditEvent", model);
                 }
             }
-            else
-            {
-                return View("EditEvent", model);
-            }
 
-                return View("Schedule");
+            return RedirectToAction("Calendar","Calendar");
         }
 
-        private Schedule UpdateSchedule(ScheduleEventModel schedule, List<Activity> activityList, List<User> users, User contact)
+        private Schedule UpdateSchedule(ScheduleEventModel schedule, List<Activity> activityList, Person person, User contact)
         {
-            PersonManager pManager = new PersonManager();
-            ScheduleManager schManager = new ScheduleManager();
-
-            Schedule s = new Schedule();
-            s = schManager.GetScheduleById(schedule.ScheduleId);
-            s.StartDate = schedule.ScheduleDurationModel.StartDate;
-            s.EndDate = schedule.ScheduleDurationModel.EndDate;
-            s.Quantity = schedule.ScheduleQuantity;
-
-            //Update ForPerson
-            if (users.Count() > 1)
+            using (var pManager = new PersonManager())
+            using (var schManager = new ScheduleManager())
             {
-                PersonGroup pGroup = pManager.GetPersonGroupById(schedule.ForPersons.Select(a => a.Id).FirstOrDefault());
-                pGroup.Users = users;
-                pGroup.Contact = contact;
-                pManager.UpdatePersonGroup(pGroup);
-                s.ForPerson = pGroup;
+                Schedule s = new Schedule();
+                s = schManager.GetScheduleById(schedule.ScheduleId);
+                s.StartDate = schedule.ScheduleDurationModel.StartDate;
+                s.EndDate = schedule.ScheduleDurationModel.EndDate;
+                s.Quantity = schedule.ScheduleQuantity;
+
+                if (person is PersonGroup)
+                {
+                    PersonGroup pGroup = (PersonGroup)person;
+                    pManager.UpdatePersonGroup(pGroup);
+                    s.ForPerson = pGroup;
+                }
+                else if(person is IndividualPerson)
+                {
+                    IndividualPerson iPerson = (IndividualPerson)person;
+                    pManager.UpdateIndividualPerson(iPerson);
+                    s.ForPerson = iPerson;
+                }
+
+                //Update ForPerson
+                //if (users.Count() > 1)
+                //{
+                //    PersonGroup pGroup = pManager.GetPersonGroupById(schedule.ForPersons.Select(a => a.Id).FirstOrDefault());
+                //    pGroup.Users = users;
+                //    pGroup.Contact = contact;
+                //    pManager.UpdatePersonGroup(pGroup);
+                //    s.ForPerson = pGroup;
+                //}
+                //else
+                //{
+                //    IndividualPerson iPerson = pManager.GetIndividualPersonById(users[0].Id);
+                //    pManager.UpdateIndividualPerson(iPerson);
+                //    s.ForPerson = iPerson;
+                //}
+
+                //Person pBy = pManager.GetIndividualPersonById(schedule.ByPerson.Id);
+                //s.ByPerson = pBy;
+                s.Activities = activityList;
+
+                schManager.UpdateSchedule(s);
+
+                return s;
             }
-            else
-            {
-                IndividualPerson iPerson = pManager.GetIndividualPersonById(users[0].Id);
-                pManager.UpdateIndividualPerson(iPerson);
-                s.ForPerson = iPerson;
-            }
-
-            //Person pBy = pManager.GetIndividualPersonById(schedule.ByPerson.Id);
-            //s.ByPerson = pBy;
-            s.Activities = activityList;
-
-            schManager.UpdateSchedule(s);
-
-            return s;
         }
 
         #endregion
@@ -1085,7 +995,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             if (model != null)
             {
                 model.EditMode = true;
-                for (int i = 0; i < model.Schedules.Count();i++)
+                for (int i = 0; i < model.Schedules.Count(); i++)
                 {
                     //Has user rights on schedule
                     User user = subjectManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
@@ -1103,7 +1013,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         model.Schedules[i].ForPersons[j].EditMode = true;
                     }
                 }
-                
+
                 return View("EditEvent", model);
             }
             else
@@ -1119,7 +1029,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return View("EditEvent", id);
         }
 
-      
+
         public ActionResult EditSchedules(long id)
         {
             return PartialView("_enterSchedules", id.ToString());
@@ -1169,13 +1079,13 @@ namespace BExIS.Modules.RBM.UI.Controllers
             {
                 tempSchedule.ForPersons.ForEach(a =>
                 {
-                  a.EditAccess = tempSchedule.EditAccess;
-                  a.EditMode = tempSchedule.EditMode;
-                  Party partyPerson = UserHelper.GetPartyByUserId(a.UserId);
-                  a.UserFullName = partyPerson.Name;
+                    a.EditAccess = tempSchedule.EditAccess;
+                    a.EditMode = tempSchedule.EditMode;
+                    Party partyPerson = UserHelper.GetPartyByUserId(a.UserId);
+                    a.UserFullName = partyPerson.Name;
                     //get party type attribute value
-                  a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
-                 
+                    a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
+
                 });
                 return PartialView("_scheduleUsers", tempSchedule.ForPersons);
             }
@@ -1198,7 +1108,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 UserManager userManager = new UserManager();
 
                 //get party type person
-                var partyType = partyTypeManager.PartyTypes.Where(p => p.Title == "person").FirstOrDefault();
+                var partyType = partyTypeManager.PartyTypes.Where(p => p.Title == "Person").FirstOrDefault();
                 //get all parties with person party type
                 List<Party> partyPersons = partyManager.PartyRepository.Query(p => p.PartyType == partyType).ToList();
 
@@ -1305,18 +1215,18 @@ namespace BExIS.Modules.RBM.UI.Controllers
             //List<PersonUser> personGroup = new List<PersonUser>();
             var userIdsBefore = tempSchedule.ForPersons.Select(a => a.UserId).ToList();
 
-            if (tempSchedule.ForPersons != null && tempSchedule.ForPersons.Count() > 1)
+            if (tempSchedule.ForPersons != null)
             {
                 foreach (PersonInSchedule pUser in tempSchedule.ForPersons)
                 {
+                    if (pUser.IsContactPerson == true)
+                    {
+                        tempSchedule.Contact = pUser;
+                        tempSchedule.ContactName = UserHelper.GetPartyByUserId(pUser.UserId).Name;
+                    }
                     //PersonUser pu = tempSchedule.ForPersons.Select(a=>a.UserId == userId).FirstOrDefault();
                     if (!userIdsBefore.Contains(pUser.UserId))
                     {
-                        if (pUser.IsContactPerson == true)
-                        {
-                            tempSchedule.Contact = pUser;
-                            tempSchedule.ContactName = UserHelper.GetPartyByUserId(pUser.Id).Name;
-                        }
                         tempSchedule.ForPersons.Add(pUser);
                     }
                 }
@@ -1541,9 +1451,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
             EventModel model = (EventModel)Session["Event"];
             ScheduleEventModel tempSchedule = model.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
 
-            foreach(ScheduleEventModel s in model.Schedules)
+            foreach (ScheduleEventModel s in model.Schedules)
             {
-                if(s.Index != int.Parse(index))
+                if (s.Index != int.Parse(index))
                 {
                     s.ForPersons = tempSchedule.ForPersons;
                     s.Activities = tempSchedule.Activities;
@@ -1565,7 +1475,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             {
                 var i = model.Schedules.FindIndex(p => p.Index == Convert.ToInt64(index));
 
-                if(model.Schedules[i].ScheduleId != 0)
+                if (model.Schedules[i].ScheduleId != 0)
                     model.DeletedSchedules.Add(model.Schedules[i].ScheduleId);
 
                 model.Schedules.RemoveAt(i);
@@ -1627,28 +1537,28 @@ namespace BExIS.Modules.RBM.UI.Controllers
             SingleResource resource = rManger.GetResourceById(id);
             List<Schedule> resourceSchedules = schManager.GetAllSchedulesByResource(id);
             List<Schedule> temp = new List<Rbm.Entities.Booking.Schedule>();
-                foreach (Schedule sch in resourceSchedules)
+            foreach (Schedule sch in resourceSchedules)
+            {
+                //if ((inputStart >= sch.StartDate && inputStart <= sch.EndDate) || (inputEnd >= sch.StartDate && inputEnd <= sch.EndDate))
+                if ((DateTime.Compare(inputStart.Date, sch.StartDate.Date) >= 0 && DateTime.Compare(inputStart.Date, sch.EndDate.Date) <= 0) || (DateTime.Compare(inputEnd.Date, sch.StartDate.Date) >= 0 && DateTime.Compare(inputEnd.Date, sch.EndDate.Date) <= 0))
                 {
-                    //if ((inputStart >= sch.StartDate && inputStart <= sch.EndDate) || (inputEnd >= sch.StartDate && inputEnd <= sch.EndDate))
-                    if ((DateTime.Compare(inputStart.Date, sch.StartDate.Date) >= 0 && DateTime.Compare(inputStart.Date, sch.EndDate.Date) <= 0) || (DateTime.Compare(inputEnd.Date, sch.StartDate.Date) >= 0 && DateTime.Compare(inputEnd.Date, sch.EndDate.Date) <= 0))
-                    {
-                        temp.Add(sch);
-                        //if (resourceSchedules.Count() >= resource.Quantity)
-                        //{
-                        //    available = false;
-                        //    break;
-                        //}
-                        //else
-                        //    available = true;
-                    }
+                    temp.Add(sch);
+                    //if (resourceSchedules.Count() >= resource.Quantity)
+                    //{
+                    //    available = false;
+                    //    break;
+                    //}
                     //else
                     //    available = true;
                 }
+                //else
+                //    available = true;
+            }
 
-            if(temp.Count()>0)
+            if (temp.Count() > 0)
             {
                 int bookedQuantity = 0;
-                foreach(Schedule s in temp)
+                foreach (Schedule s in temp)
                 {
                     bookedQuantity = bookedQuantity + s.Quantity;
                 }
@@ -1756,7 +1666,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 }
             }
 
-           
+
             Session["Event"] = sEventM;
             return Json(new { success = true });
         }
@@ -1845,39 +1755,39 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 {
                     List<NotificationDependency> depList = nManager.GetNotificationDependenciesByNotification(n.Id);
 
-               
-                        var param1 = Expression.Parameter(typeof(NotificationDependency), "p");
-                        Expression exp1 = null;
 
-                        foreach (TextValue tv in values)
-                        {
-                            //query += string.Format("tmp.AttributeId == {0} && tmp.DomainItem == {1}", tv.ResourceAttributeUsage.ResourceStructureAttribute.Id, tv.Value);
-                            var exp = Expression.AndAlso(
+                    var param1 = Expression.Parameter(typeof(NotificationDependency), "p");
+                    Expression exp1 = null;
 
-                                Expression.Equal(
-                                  Expression.Property(param1, "AttributeId"),
-                                  Expression.Constant(tv.ResourceAttributeUsage.ResourceStructureAttribute.Id)
-                                  ),
-                                Expression.Equal(
-                                  Expression.Property(param1, "DomainItem"),
-                                  Expression.Constant(tv.Value)
-                                  )
+                    foreach (TextValue tv in values)
+                    {
+                        //query += string.Format("tmp.AttributeId == {0} && tmp.DomainItem == {1}", tv.ResourceAttributeUsage.ResourceStructureAttribute.Id, tv.Value);
+                        var exp = Expression.AndAlso(
 
-                                );
-                            if (exp1 == null)
-                                exp1 = exp;
-                            else
-                                exp1 = Expression.Or(exp1, exp);
-                        }
+                            Expression.Equal(
+                              Expression.Property(param1, "AttributeId"),
+                              Expression.Constant(tv.ResourceAttributeUsage.ResourceStructureAttribute.Id)
+                              ),
+                            Expression.Equal(
+                              Expression.Property(param1, "DomainItem"),
+                              Expression.Constant(tv.Value)
+                              )
 
-                        var typedExpression = Expression.Lambda<Func<NotificationDependency, bool>>(exp1, new ParameterExpression[] { param1 });
-                        deps = depList.AsQueryable().Where(typedExpression).ToList();
-
-                        if (deps.Count() == values.Count())
-                            resultList.Add(n);
+                            );
+                        if (exp1 == null)
+                            exp1 = exp;
+                        else
+                            exp1 = Expression.Or(exp1, exp);
                     }
+
+                    var typedExpression = Expression.Lambda<Func<NotificationDependency, bool>>(exp1, new ParameterExpression[] { param1 });
+                    deps = depList.AsQueryable().Where(typedExpression).ToList();
+
+                    if (deps.Count() == values.Count())
+                        resultList.Add(n);
                 }
-            
+            }
+
 
             return resultList;
 
@@ -1890,36 +1800,37 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         private void SendNotification(List<Notification> notifications, List<ScheduleEventModel> schedules)
         {
-            SubjectManager subManager = new SubjectManager();
-            List<string> userToNotify = new List<string>();
-
-            foreach (ScheduleEventModel s in schedules)
+            using (var subManager = new SubjectManager())
             {
-                foreach (PersonInSchedule p in s.ForPersons)
+                List<string> userToNotify = new List<string>();
+
+                foreach (ScheduleEventModel s in schedules)
                 {
-                    User u = subManager.Subjects.Where(a => a.Id == p.UserId).FirstOrDefault() as User;
-                    if(!userToNotify.Contains(u.Email))
-                        userToNotify.Add(u.Email);
+                    foreach (PersonInSchedule p in s.ForPersons)
+                    {
+                        User u = subManager.Subjects.Where(a => a.Id == p.UserId).FirstOrDefault() as User;
+                        if (!userToNotify.Contains(u.Email))
+                            userToNotify.Add(u.Email);
+                    }
                 }
-            }
 
-            string message = "";
+                string message = "";
 
-            List<Notification> distinctNotifications = notifications.Distinct().ToList();
-  
-            foreach (Notification n in distinctNotifications)
-            {
-                message += "<b>" + n.Subject + "</b><br/>";
-                message += "Startdate:" + n.StartDate + "<br/>";
-                message += "EndDate:" + n.EndDate + "<br/>";
-                message += n.Message + "<br/><hr/>";
+                List<Notification> distinctNotifications = notifications.Distinct().ToList();
+
+                foreach (Notification n in distinctNotifications)
+                {
+                    message += "<b>" + n.Subject + "</b><br/>";
+                    message += "Startdate:" + n.StartDate + "<br/>";
+                    message += "EndDate:" + n.EndDate + "<br/>";
+                    message += n.Message + "<br/><hr/>";
+                }
+                string subject = "NoReply: BExIS Booking Notification to your Event";
+
+                SendNotificationHelper.SendNotification(userToNotify, "bexis@listserv.uni-jena.de", message, subject);
             }
-            string subject = "NoReply: BExIS Booking Notification to your Event";
-           
-            SendNotificationHelper.SendNotification(userToNotify, "bexis@listserv.uni-jena.de", message, subject, true);
 
         }
-
 
         #endregion
 
@@ -1942,7 +1853,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             EventModel model = (EventModel)Session["Event"];
             long rId = long.Parse(resourceId);
 
-            for(int i = 0; i<model.Schedules.Count(); i++)
+            for (int i = 0; i < model.Schedules.Count(); i++)
             {
                 if (model.Schedules[i].ResourceId == rId)
                 {
@@ -1968,23 +1879,31 @@ namespace BExIS.Modules.RBM.UI.Controllers
             Session["ScheduleActivities"] = null;
             Session["Event"] = null;
 
-            EventManager eManager = new EventManager();
-            BookingEvent e = eManager.GetEventById(id);
-            EventModel model = new EventModel(e);
-            model.EditMode = false;
+            using (var permissionManager = new EntityPermissionManager())
+            using (var entityTypeManager = new EntityManager())
+            using (var eManager = new EventManager())
+            {
+                BookingEvent e = eManager.GetEventById(id);
+                EventModel model = new EventModel(e);
+                model.EditMode = false;
 
-            EntityPermissionManager permissionManager = new EntityPermissionManager();
-            //get permission from logged in user
-            //model.EditAccess = permissionManager.HasUserDataAccess(HttpContext.User.Identity.Name, 6, id, RightType.Write);
-            //model.DeleteAccess = permissionManager.HasUserDataAccess(HttpContext.User.Identity.Name, 6, id, RightType.Delete);
+                //get permission from logged in user
+                long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+                Entity entity = entityTypeManager.FindByName("Schedule");
 
-            model.Schedules.ForEach(a => a.EditAccess = model.EditAccess);
-            model.Schedules.ForEach(a => a.DeleteAccess = model.DeleteAccess);
+                model.EditAccess = permissionManager.HasEffectiveRight(userId, entity.Id, id, RightType.Write);
+                model.DeleteAccess = permissionManager.HasEffectiveRight(userId, entity.Id, id, RightType.Delete);
+
+                model.Schedules.ForEach(a => a.EditAccess = model.EditAccess);
+                model.Schedules.ForEach(a => a.DeleteAccess = model.DeleteAccess);
 
 
-            Session["Event"] = model;
+                Session["Event"] = model;
 
-            return View("EditEvent", model);
+
+                return View("EditEvent", model);
+            }
+
         }
 
         //in show event view
@@ -2012,10 +1931,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             EventManager eManager = new EventManager();
             BookingEvent e = eManager.GetEventById(id);
-          
-            eManager.DeleteEvent(e);
 
-            return RedirectToAction("Schedule");
+            SendNotificationHelper.SendBookingNotification(SendNotificationHelper.BookingAction.deleted, new EventModel(e));
+            eManager.DeleteEvent(e);
+            
+            return RedirectToAction("Calendar", "Calendar");
         }
 
         #endregion
@@ -2065,7 +1985,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     break;
                 case SystemDefinedUnit.week:
                     diff = TimeHelper.GetDifferenceInDays(model.StartDate, model.EndDate);
-                    a = diff / (Convert.ToDouble(model.DurationValue)*7);
+                    a = diff / (Convert.ToDouble(model.DurationValue) * 7);
                     if (a % 1 != 0)
                         error = String.Format("You must book the resource in a duration of {0} week(s).", model.DurationValue);
                     break;
@@ -2077,7 +1997,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     break;
                 case SystemDefinedUnit.year:
                     diff = TimeHelper.GetDifferenceInDays(model.StartDate, model.EndDate);
-                    a = diff / (Convert.ToDouble(model.DurationValue)*365);
+                    a = diff / (Convert.ToDouble(model.DurationValue) * 365);
                     if (a % 1 != 0)
                         error = String.Format("You must book the resource in a duration of {0} month(s).", model.DurationValue);
                     break;
@@ -2089,15 +2009,15 @@ namespace BExIS.Modules.RBM.UI.Controllers
         private bool HasScheduleUser(ScheduleEventModel se)
         {
             bool hasUser = false;
-           
-                if (se.ForPersons.Count() == 0)
-                {
-                    hasUser = false;
-                    return hasUser;
-                }
-                else
-                    hasUser = true;
-            
+
+            if (se.ForPersons.Count() == 0)
+            {
+                hasUser = false;
+                return hasUser;
+            }
+            else
+                hasUser = true;
+
             return hasUser;
         }
 
@@ -2113,15 +2033,15 @@ namespace BExIS.Modules.RBM.UI.Controllers
             bool hasActivity = false;
             EventModel eventM = (EventModel)Session["Event"];
 
-                if (se.Activities.Count() == 0)
-                {
-                    hasActivity = false;
-                    return hasActivity;
-                }
-                else
-                {
-                    hasActivity = true;
-                }
+            if (se.Activities.Count() == 0)
+            {
+                hasActivity = false;
+                return hasActivity;
+            }
+            else
+            {
+                hasActivity = true;
+            }
 
             return hasActivity;
         }
@@ -2158,10 +2078,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 {
                     //if (t.ResourceId != resourceId)
                     //{
-                        if ((DateTime.Compare(startDate, t.ScheduleDurationModel.StartDate) >= 0 && DateTime.Compare(endDate, t.ScheduleDurationModel.EndDate) <= 0) || (DateTime.Compare(endDate, t.ScheduleDurationModel.StartDate) >= 0 && DateTime.Compare(startDate, t.ScheduleDurationModel.EndDate) <= 0))
-                        {
-                            tempScheduleQuantity = tempScheduleQuantity + t.ScheduleQuantity;
-                        }
+                    if ((DateTime.Compare(startDate, t.ScheduleDurationModel.StartDate) >= 0 && DateTime.Compare(endDate, t.ScheduleDurationModel.EndDate) <= 0) || (DateTime.Compare(endDate, t.ScheduleDurationModel.StartDate) >= 0 && DateTime.Compare(startDate, t.ScheduleDurationModel.EndDate) <= 0))
+                    {
+                        tempScheduleQuantity = tempScheduleQuantity + t.ScheduleQuantity;
+                    }
                     //}
                 }
                 availableQuantity = availableQuantity - tempScheduleQuantity;
@@ -2175,335 +2095,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
         #region Validation - Constraints
 
 
-
-        #endregion
-
-        #region Schedule Calendar
-
-        [WebMethod]
-        public JsonResult GetAllEvents(object st, object ed)
-        {
-            DateTime startDate = DateTime.Parse(st.ToString());
-            DateTime endDate = DateTime.Parse(ed.ToString());
-
-            List<BookingEvent> eventList = new List<BookingEvent>();
-            if (Session["FilterSchedules"] == null)
-            {
-                EventManager eManager = new EventManager();
-                eventList = eManager.GetAllEventByTimePeriod(startDate, endDate);
-            }
-            else
-            {
-                EventManager eManager = new EventManager();
-                List<Schedule> scheduleList = new List<Schedule>();
-                scheduleList = Session["FilterSchedules"] as List<Schedule>;
-                foreach (Schedule s in scheduleList)
-                {
-                    if(!eventList.Select(a=>a.Id).ToList().Contains(s.Event.Id)) 
-                        eventList.Add(eManager.GetEventById(s.Event.Id));
-                }
-
-            }
-        
-            List<object> eventObjectList = new List<object>();
-            foreach (BookingEvent e in eventList)
-            {
-                eventObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(e))});
-            }
-
-            return Json(eventObjectList.ToArray(), JsonRequestBehavior.AllowGet);
-        }
-
-        [HttpGet]
-        public JsonResult GetAllSchedules()
-        {
-            List<Schedule> scheduleList = new List<Schedule>();
-            scheduleList = Session["FilterSchedules"] as List<Schedule>;
-
-            if (scheduleList == null)
-            {
-                ScheduleManager schManager = new ScheduleManager();
-                scheduleList = schManager.GetAllSchedules().ToList();
-            }
-
-            List<object> scheduleObjectList = new List<object>();
-            foreach (Schedule s in scheduleList)
-            {
-                scheduleObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource, s.StartDate, s.EndDate, s.Event.Id)) });
-            }
-
-            Session["FilterSchedules"] = null;
-            return Json(scheduleObjectList.ToArray(), JsonRequestBehavior.AllowGet);
-        }
-
-
-        public JsonResult GetEventsByUser()
-        {
-            List<BookingEvent> eventList = new List<BookingEvent>();
-            SubjectManager subManager = new SubjectManager();
-
-            User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-            if (Session["FilterSchedules"] == null)
-            {
-                EventManager eManager = new EventManager();
-                ScheduleManager schManager = new ScheduleManager();
-
-                List<BookingEvent> temp = eManager.GetAllEvents().ToList();
-                foreach(BookingEvent e in temp)
-                {
-                    List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
-                    var s = schedules.Where(a=>a.ByPerson.Person.Id == user.Id).ToList();
-                    if (s.Count > 0)
-                        eventList.Add(e);
-                }
-            }
-
-            List<object> eventObjectList = new List<object>();
-            foreach (BookingEvent e in eventList)
-            {
-                eventObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(e)) });
-            }
-
-            return Json(eventObjectList.ToArray(), JsonRequestBehavior.AllowGet);
-
-        }
-
-        public JsonResult GetSchedulesByUser()
-        {
-            List<Schedule> scheduleList = new List<Schedule>();
-            SubjectManager subManager = new SubjectManager();
-
-            User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-            if (Session["FilterSchedules"] == null)
-            {
-                ScheduleManager schManager = new ScheduleManager();
-                List<Schedule> temp = schManager.GetAllSchedules().ToList();
-
-                foreach (Schedule s in temp)
-                {
-                   if(s.ByPerson.Person.Id == user.Id)
-                        scheduleList.Add(s);
-                }
-            }
-
-            List<object> scheduleObjectList = new List<object>();
-            foreach (Schedule s in scheduleList)
-            {
-                scheduleObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource, s.StartDate, s.EndDate, s.Event.Id)) });
-            }
-
-            Session["FilterSchedules"] = null;
-            return Json(scheduleObjectList.ToArray(), JsonRequestBehavior.AllowGet);
-
-        }
-
-        //use if resource not avalible in event creation
-        public JsonResult GetAllSchedulesFromResource(string resourceId)
-        {
-            ScheduleManager schManager = new ScheduleManager();
-            List<Schedule> allSchedules = schManager.GetAllSchedulesByResource(Convert.ToInt64(resourceId));
-
-            List<object> scheduleList = new List<object>();
-            foreach (Schedule s in allSchedules)
-            {
-                scheduleList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource, s.StartDate, s.EndDate, s.Event.Id)) });
-            }
-
-            return Json(scheduleList.ToArray(), JsonRequestBehavior.AllowGet);
-        }
-
-        public ActionResult TreeFilterSchedules()
-        {
-            ResourceFilterModel model = new ResourceFilterModel();
-            SingleResourceManager rManager = new SingleResourceManager();
-            List<SingleResource> singleResources = rManager.GetAllResources().ToList();
-
-            List<ResourceModel> resources = new List<ResourceModel>();
-            singleResources.ForEach(r => resources.Add(new ResourceModel(r)));
-
-            foreach (ResourceModel r in resources)
-            {
-                foreach (ResourceAttributeUsage usage in r.ResourceStructure.ResourceAttributeUsages)
-                {
-                    ResourceStructureAttribute attr = usage.ResourceStructureAttribute;
-                    AttributeDomainItemsModel item = new AttributeDomainItemsModel(attr);
-                    if (item.DomainItems.Count != 0)
-                    {
-                        if (!model.TreeItems.Any(a => a.AttrId == item.AttrId))
-                            model.TreeItems.Add(item);
-                    }
-                }
-            }
-
-            return PartialView("_treeFilterSchedules", model);
-        }
-
-
-        public ActionResult OnSelectTreeViewItemFilter(string selectedItems)
-        {
-            if (selectedItems == null)
-            {
-                Session["FilterSchedules"] = null;
-                return new EmptyResult();
-            }
-            else
-            {
-                //results after filtering
-                List<Schedule> resultScheduleList = new List<Schedule>();
-
-                //result resource list after filtering
-                List<SingleResource> resultResourceList = new List<SingleResource>();
-
-                //Filter is this format: AttrID_DomainItem, AttrID_Domain
-                List<string> items = selectedItems.Split(',').ToList();
-
-                //get all schedules
-                ScheduleManager schManager = new ScheduleManager();
-                List<Schedule> allSchedules = schManager.GetAllSchedules().ToList();
-
-                //get all scheduled resources 
-                List<SingleResource> scheduledResources = allSchedules.Select(r => r.Resource).ToList();
-
-                List<FilterTreeItem> filterList = new List<FilterTreeItem>();
-                //split Id and DomainItem and add it to a FilterItem list
-                foreach (string item in items)
-                {
-                    //index 0 = attrbute id, index1 domainvalue
-                    List<string> i = item.Split('_').ToList();
-                    FilterTreeItem filterItem = new FilterTreeItem();
-                    filterItem.Id = Convert.ToInt64(i[0]);
-                    filterItem.Value = i[1].ToString();
-                    filterList.Add(filterItem);
-                }
-
-                List<ResourceAttributeValueModel> treeDomainList = new List<ResourceAttributeValueModel>();
-
-                //Create for each Resource TreeDomainModel witch includes all Attribute Ids and all values
-                foreach (SingleResource r in scheduledResources)
-                {
-                    ResourceAttributeValueModel treeDomainModel = new ResourceAttributeValueModel(r);
-                    treeDomainList.Add(treeDomainModel);
-                }
-
-                //Dictionary to save every Filter (domain items) to one attr
-                Dictionary<long, List<string>> filterDic = GetFilterDic(filterList);
-
-                List<ResourceAttributeValueModel> temp = new List<ResourceAttributeValueModel>();
-
-                //check for every TreeDomainModel (resource) if fits the filter
-                foreach (ResourceAttributeValueModel m in treeDomainList)
-                {
-                    if (CheckTreeDomainModel(m, filterDic))
-                    {
-                        //if (selectedResources.Count > 0)
-                        //{
-                        //    if (selectedResources.Where(a => a.Id == m.Resource.Id).Count() > 0)
-                        //    {
-                        //        ResourceManagerModel rem = new ResourceManagerModel(m.Resource);
-                        //        //rem.InEvent = true;
-                        //        //TempSchedule tempS = selectedResources.Where(a => a.Id == m.Resource.Id).FirstOrDefault();
-                        //        //rem.StartDate = tempS.StartDate;
-                        //        //rem.EndDate = tempS.EndDate;
-                        //        resultList.Add(rem);
-                        //    }
-                        //}
-                        //else
-                        resultResourceList.Add(m.Resource);
-                    }
-                }
-
-                //create schedule resource list with selected resources
-                foreach (SingleResource sr in resultResourceList)
-                {
-                    if (allSchedules.Any(s => s.Resource == sr))
-                    {
-                        resultScheduleList.Add(allSchedules.Where(r => r.Resource == sr).FirstOrDefault());
-                    }
-                }
-
-                Session["FilterSchedules"] = resultScheduleList;
-
-                //return Redirect(Request.UrlReferrer.ToString());
-                return new EmptyResult();
-            }
-        }
-
-        #endregion
-
-        #region Schedule List
-
-        public ActionResult GetEventsAsList(string myBookings)
-        {
-            EventManager eManager = new EventManager();
-            ScheduleManager schManager = new ScheduleManager();
-            SubjectManager subManager = new SubjectManager();
-
-            List<EventModel> model = new List<EventModel>();
-
-            List<BookingEvent> allEvents = new List<BookingEvent>();
-
-            if (Session["FilterSchedules"] == null)
-               allEvents = eManager.GetAllEvents().ToList();
-            else
-            {
-                List<Schedule> scheduleList = new List<Schedule>();
-                scheduleList = Session["FilterSchedules"] as List<Schedule>;
-                foreach (Schedule s in scheduleList)
-                {
-                    allEvents.Add(eManager.GetEventById(s.Event.Id));
-                }
-            }
-
-            if (bool.Parse(myBookings))
-            {
-                User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-                foreach (BookingEvent e in allEvents)
-                {
-                    List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
-                    var s = schedules.Where(a => a.ByPerson.Person.Id == user.Id).ToList();
-                    if (s.Count > 0)
-                        model.Add(new EventModel(e));
-                }
-            }
-            else
-                allEvents.ForEach(r => model.Add(new EventModel(r)));
-
-            return PartialView("_listEvents", model);
-        }
-
-        public ActionResult GetSchedulesAsList(string myBookings)
-        {
-            ScheduleManager sManager = new ScheduleManager();
-            SubjectManager subManager = new SubjectManager();
-            List<Schedule> allSchedules = new List<Rbm.Entities.Booking.Schedule>();
-
-            if (Session["FilterSchedules"] == null)
-                allSchedules = sManager.GetAllSchedules().ToList();
-            else
-                allSchedules = Session["FilterSchedules"] as List<Schedule>;
-
-            List<ScheduleListModel> model = new List<ScheduleListModel>();
-
-            if(bool.Parse(myBookings))
-            {
-                User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-                foreach (Schedule s in allSchedules)
-               {
-                  //var s = schedules.Where(a => a.ByPerson.Person.Id == user.Id).ToList();
-                   if (s.ByPerson.Person.Id == user.Id)
-                     model.Add(new ScheduleListModel(s));
-               }
-               
-            }
-            else
-                allSchedules.ForEach(r => model.Add(new ScheduleListModel(r)));
-
-
-            return PartialView("_listSchedules", model);
-        }
 
         #endregion
 

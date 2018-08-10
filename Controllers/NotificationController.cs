@@ -248,7 +248,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             message += "EndDate:" + notification.EndDate + "<br/>";
             message += notification.Message + "<br/>";
 
-            SendNotificationHelper.SendNotification(userToNotify, "bexis@listserv.uni-jena.de", message, subject, true);
+            SendNotificationHelper.SendNotification(userToNotify, "bexis@listserv.uni-jena.de", message, subject);
 
         }
 
