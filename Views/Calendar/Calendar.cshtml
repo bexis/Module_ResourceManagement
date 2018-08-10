@@ -1,0 +1,268 @@
+﻿@using Telerik.Web.Mvc.UI
+<link rel='stylesheet' href="@Url.Content("~/Areas/RBM/Scripts/fullcalendar/dist/fullcalendar.css")" />
+<script src="@Url.Content("~/Areas/RBM/Scripts/moment.min.js")"></script>
+<script src="@Url.Content("~/Areas/RBM/Scripts/fullcalendar/dist/fullcalendar.js")"></script>
+
+@section Information
+{
+    With this interface you are able to manage (e.g. create, edit, delete) resource bookings. In the calendar all made reservations are shown.
+    Reservations are displayed as Event per Default. You can also switch to Schedule View. You can choose to see only your own bookings.
+    <p>
+        <a href="/RBM/Help/Index/#_Toc434570750" class="bx-informationLink" title="go to help" target="_blank">More</a>
+    </p>
+}
+
+<div class="editor-field">
+    @Html.ActionLink("Book Resource", "Create", "Schedule", new { area = "RBM" }, new { @class = "bx-button function", title = "Book one more more resources" })
+</div><br />
+<div id='calendar'></div>
+<div id="eventList"></div>
+<div id="scheduleList"></div>
+
+@section LeftPane
+{
+    <div id="Content_Filter">
+
+    </div>
+}
+
+
+@*@(Html.Telerik().Window()
+    .Name("Window_Add")
+    .Title("Book Resource")
+    .Draggable(true)
+    .Modal(true)
+    .Visible(false)
+    .Scrollable(false)
+    .Width(1000)
+    .ContentHtmlAttributes(new { @style="overflow:auto; height:auto; min-height:225px; min-width:400px"})
+    .Content(@<text>
+                <div id="Content_Creation"></div>
+            </text>)
+    .ClientEvents(clientEvents => clientEvents
+        .OnClose("Window_Creation_OnClose")
+    ))*@
+
+
+@(Html.Telerik().Window()
+            .Name("Window_Show")
+            .Title("Show Event")
+            .Draggable(true)
+            .Modal(true)
+            .Visible(false)
+            .Scrollable(true)
+            .Width(900)
+            .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+            .Content(@<text>
+                <div id="Content_Creation2"></div>
+            </text>)
+                            .ClientEvents(clientEvents => clientEvents
+                                .OnClose("Window_Creation_OnClose")
+                            ))
+
+
+<script type="text/javascript">
+
+
+
+    var calsources = {
+
+        eventsource: {
+            events: function (start, end, timezone, callback) {
+                var o = { st: start, ed:end };
+                $.ajax({
+                    url: '@Url.Content("~/RBM/Calendar/GetAllEvents")',
+                    dataType: 'json',
+                    type: 'POST',
+                    //data: {start:start, end: end},
+                    data: JSON.stringify(o),
+                    contentType: 'application/json; charset=utf-8',
+                        //data: '{"st":"' + start + '","ed":"' + end + '"}',
+
+                        success: function (doc) {
+                            var events = [];
+                            $.each(doc, function (key, value) {
+                                var val = $.parseJSON(value[0]);
+                                events.push({
+                                    allDay: true,
+                                    title: val['title'],
+                                    start: val['start'],
+                                    end: val['end'],
+                                    color: val['color'],
+                                    eventId: val['eventId']
+                                });
+                            });
+
+                            callback(events);
+                        }
+                    });
+                }
+        },
+
+        usereventsource: {
+            events: function (start, end, timezone, callback) {
+                $.ajax({
+                    url: '@Url.Content("~/RBM/Calendar/GetEventsByUser")',
+                    dataType: 'json',
+                    data: 'title=' + "titl" + '&start=' + start + '&end=' + end,
+
+                    success: function (doc) {
+                        var events = [];
+                        $.each(doc, function (key, value) {
+                            var val = $.parseJSON(value[0]);
+                            events.push({
+                                allDay: true,
+                                title: val['title'],
+                                start: val['start'],
+                                end: val['end'],
+                                color: val['color'],
+                                eventId: val['eventId']
+                            });
+                        });
+
+                        callback(events);
+                    }
+                });
+            }
+        },
+
+        userschedulesource: {
+            events: function (start, end, timezone, callback) {
+
+                $.ajax({
+                    url: '@Url.Content("~/RBM/Calendar/GetSchedulesByUser")',
+                    dataType: 'json',
+                    data: 'title=' + "titl" + '&start=' + start + '&end=' + end,
+
+                    success: function (doc) {
+                        var events = [];
+                        $.each(doc, function (key, value) {
+                            var val = $.parseJSON(value[0]);
+                            events.push({
+                                allDay: true,
+                                title: val['title'],
+                                start: val['start'],
+                                end: val['end'],
+                                color: val['color'],
+                                eventId: val['eventId']
+                            });
+                        });
+
+                        callback(events);
+                    }
+                });
+            }
+        },
+
+                schedulesource: {
+                    events: function (start, end, timezone, callback) {
+                        $.ajax({
+                            url: '@Url.Content("~/RBM/Calendar/GetAllSchedules")',
+                dataType: 'json',
+                data: 'title=' + "titl" + '&start=' + start + '&end=' + end,
+
+                success: function (doc) {
+                    var events = [];
+                    $.each(doc, function (key, value) {
+                        var val = $.parseJSON(value[0]);
+                        events.push({
+                            title: val['title'],
+                            start: val['start'],
+                            end: val['end'],
+                            color: val['color'],
+                            eventId: val['eventId'],
+                            allDay: val['allDay']
+                        });
+                    });
+
+                    callback(events);
+                }
+            });
+            }
+            }
+
+
+
+    }
+
+
+
+    $(window).load(function () {
+
+        var selectedRadio = $("input[name='CalendarView']:checked").val();
+        var view = 'month,agendaWeek,agendaDay';
+        //alert($("input[name='CalendarView']:checked").val());
+        //if (selectedRadio == "allDay")
+        //{ view = 'month,basicWeek,basicDay'; }
+        //else
+        //{ view = 'month,agendaWeek,agendaDay'; }
+
+        var calendar = $('#calendar').fullCalendar({
+
+            height: 550,
+            header:
+            {
+                left: 'prev,next today',
+                center: 'title',
+                right: view
+                //right: 'month,basicWeek,basicDay'
+               // right: 'month,agendaWeek,agendaDay'
+            },
+
+            eventLimit: true, // for all non-agenda views
+            views: {
+                agenda: {
+                    eventLimit: 5 // adjust to 6 only for agendaWeek/agendaDay
+                }
+            },
+
+            selectable: false,
+            selectHelper: false,
+
+            editable: false,
+            eventSources: [ calsources.eventsource],
+
+            dayClick: function (date, jsEvent, view) {
+                $.get('@Url.Action("SetFilter", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { startdate: date.format() }, function (data) {
+                    window.location.href = 'Create';
+                })
+            },
+
+            eventClick: function (event) {
+                var id = event.eventId;
+                $.get('@Url.Action("Show", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', { id: id }, function (data) {
+                    window.location.href = '../Schedule/Show/' + id;
+                })
+            },
+        });
+
+
+        $.get('@Url.Action("TreeFilterSchedules", "Calendar")', function (data) {
+
+            $('#Content_Filter').html(data);
+        });
+    })
+
+
+
+
+    function AddEvent(e) {
+
+          $.get('@Url.Action("Create", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', function (data) {
+              $('#Window_Add #Content_Creation').html(data);
+
+              var window = $('#Window_Add').data('tWindow');
+              window.center().open();
+          });
+    }
+
+
+
+    function Window_Creation_OnClose() {
+
+        $('#Content_Creation').empty();
+    }
+
+
+
+</script>
