@@ -19,7 +19,7 @@
       <column name="Data" />
     </property>
 
-    <property name="NeedConfirmation" type="byte">
+    <property name="NeedConfirmation" type="yes_no">
       <column name="NeedConfirmation" />
     </property>
 
