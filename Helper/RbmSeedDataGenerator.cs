@@ -14,7 +14,7 @@ namespace BExIS.Modules.RBM.UI.Helper
     {
         public void Dispose()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public void GenerateSeedData()
