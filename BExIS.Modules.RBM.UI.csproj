@@ -303,7 +303,6 @@
     <Folder Include="fonts\" />
     <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="Scripts\" />
-    <Folder Include="Views\Event\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Components\AAA\BExIS.Security.Entities\BExIS.Security.Entities.csproj">
