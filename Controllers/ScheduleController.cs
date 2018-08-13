@@ -956,24 +956,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     s.ForPerson = iPerson;
                 }
 
-                //Update ForPerson
-                //if (users.Count() > 1)
-                //{
-                //    PersonGroup pGroup = pManager.GetPersonGroupById(schedule.ForPersons.Select(a => a.Id).FirstOrDefault());
-                //    pGroup.Users = users;
-                //    pGroup.Contact = contact;
-                //    pManager.UpdatePersonGroup(pGroup);
-                //    s.ForPerson = pGroup;
-                //}
-                //else
-                //{
-                //    IndividualPerson iPerson = pManager.GetIndividualPersonById(users[0].Id);
-                //    pManager.UpdateIndividualPerson(iPerson);
-                //    s.ForPerson = iPerson;
-                //}
-
-                //Person pBy = pManager.GetIndividualPersonById(schedule.ByPerson.Id);
-                //s.ByPerson = pBy;
                 s.Activities = activityList;
 
                 schManager.UpdateSchedule(s);
