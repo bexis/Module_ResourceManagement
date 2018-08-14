@@ -41,7 +41,7 @@
     });
 
     function removeRourceFromCart(index) {
-        $.get('@Url.Action("RemoveResourceFromCart", "Event", new RouteValueDictionary { { "area", "RBM"} })', { index: index }, function (data) {
+        $.get('@Url.Action("RemoveResourceFromCart", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', { index: index }, function (data) {
             $('#ResourceCart').html(data);
         });
     }
