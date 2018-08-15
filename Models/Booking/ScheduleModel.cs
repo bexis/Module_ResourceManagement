@@ -289,6 +289,8 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             ScheduleQuantity = previousObject.ScheduleQuantity;
             ResourceQuantity = previousObject.ResourceQuantity;
             ContactName = previousObject.ContactName;
+            ResourceHasFiles = previousObject.ResourceHasFiles;
+            Files = previousObject.Files;
         }
 
         public ScheduleEventModel(R.SingleResource resource)
