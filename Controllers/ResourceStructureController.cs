@@ -325,86 +325,107 @@ namespace BExIS.Modules.RBM.UI.Controllers
         [HttpPost]
         public ActionResult SaveResourceStructureAttribute(EditResourceStructureAttributeModel model, string[] keys)
         {
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-            //check name
-            if (model.AttributeName != null)
+            using (var rsaManager = new ResourceStructureAttributeManager())
             {
-                ResourceStructureAttribute tempRS = rsaManager.GetResourceStructureAttributesByName(StringHelper.CutSpaces(model.AttributeName));
-                if (tempRS != null && tempRS.Id != model.Id)
-                    ModelState.AddModelError("NameExist", "Name already exist.");
-            }
-
-            if (ModelState.IsValid)
-            {
-                ResourceStructureManager rsManager = new ResourceStructureManager();
-                ResourceStructureAttribute rsa = new ResourceStructureAttribute();
-                if(model.Id == 0)
+                //check name
+                if (model.AttributeName != null)
                 {
-                    rsa = rsaManager.CreateResourceStructureAttribute(model.AttributeName, model.AttributeDescription);
+                    ResourceStructureAttribute tempRS = rsaManager.GetResourceStructureAttributesByName(StringHelper.CutSpaces(model.AttributeName));
+                    if (tempRS != null && tempRS.Id != model.Id)
+                        ModelState.AddModelError("NameExist", "Name already exist.");
+                }
+
+                //check domain items
+                List<DomainItemModel> tempList = new List<DomainItemModel>();
+                foreach (string k in keys)
+                {
+                    DomainItemModel d = new DomainItemModel();
+                    d.Key = k;
+                    d.Value = k;
+                    tempList.Add(d);
+                    if (string.IsNullOrEmpty(k))
+                        ModelState.AddModelError("DomainItem", "One domain item has no value.");
+                    
+                }
+                model.DomainItems = tempList;
+
+                if (ModelState.IsValid)
+                {
+                    ResourceStructureAttribute rsa = new ResourceStructureAttribute();
+                    using (var rsManager = new ResourceStructureManager())
+                    {
+                        if (model.Id == 0)
+                        {
+                            rsa = rsaManager.CreateResourceStructureAttribute(model.AttributeName, model.AttributeDescription);
+                        }
+                        else
+                        {
+                            rsa = rsaManager.GetResourceStructureAttributesById(model.Id);
+                            rsa.Name = model.AttributeName;
+                            rsa.Description = model.AttributeDescription;
+                            rsaManager.UpdateResourceStructureAttribute(rsa);
+                        }
+
+                        if (rsa != null && model.Id == 0)
+                        {
+                            //Start -> add security ----------------------------------------
+
+                            using (EntityPermissionManager pManager = new EntityPermissionManager())
+                            using (var entityTypeManager = new EntityManager())
+                            {
+                                UserManager userManager = new UserManager();
+                                var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                                userTask.Wait();
+                                var user = userTask.Result;
+
+                                Entity entityType = entityTypeManager.FindByName("ResourceStructureAttribute");
+
+                                pManager.Create(user, entityType, rsa.Id, 31);
+                            }
+
+                            //End -> add security ------------------------------------------
+                        }
+
+
+                        if (keys != null)
+                        {
+                            List<DomainItem> domainItems = CreateDomainItems(keys);
+                            using (var dcManager = new DataContainerManager())
+                            {
+
+                                if (model.Id == 0 || rsa.Constraints.Count() == 0)
+                                {
+                                    DomainConstraint dc = new DomainConstraint(ConstraintProviderSource.Internal, "", "en-US", "a simple domain validation constraint", false, null, null, null, domainItems);
+                                    dcManager.AddConstraint(dc, rsa);
+                                }
+                                else
+                                {
+                                    DomainConstraint temp = (DomainConstraint)rsa.Constraints.ElementAt(0);
+                                    temp.Materialize();
+                                    temp.Items = domainItems;
+                                    dcManager.AddConstraint(temp, rsa);
+                                }
+                            }
+                        }
+
+                        //Creation with usage
+                        if (model.rsID != 0)
+                        {
+                            ResourceStructure resourceStructure = rsManager.GetResourceStructureById(model.rsID);
+                            rsaManager.CreateResourceAttributeUsage(rsa, resourceStructure, true, false);
+                            //resourceStructure.ResourceStructureAttributes.Add(rsa);
+                            //rsManager.Update(resourceStructure);
+                            //return View("_editResourceStructure", new ResourceStructureModel(resourceStructure));
+                            return Json(new { success = true });
+                        }
+                        else
+                            return Json(new { success = true });
+                    }
                 }
                 else
-                {
-                    rsa = rsaManager.GetResourceStructureAttributesById(model.Id);
-                    rsa.Name = model.AttributeName;
-                    rsa.Description = model.AttributeDescription;
-                    rsaManager.UpdateResourceStructureAttribute(rsa);
-                }
-
-                if (rsa != null && model.Id == 0)
-                {
-                    //Start -> add security ----------------------------------------
-
-                    using (EntityPermissionManager pManager = new EntityPermissionManager())
-                    using (var entityTypeManager = new EntityManager())
-                    {
-                        UserManager userManager = new UserManager();
-                        var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                        userTask.Wait();
-                        var user = userTask.Result;
-
-                        Entity entityType = entityTypeManager.FindByName("ResourceStructureAttribute");
-
-                        pManager.Create(user, entityType, rsa.Id, 31);
-                    }
-
-                    //End -> add security ------------------------------------------
-                }
-
-                if (keys != null)
-                {
-                    List<DomainItem> domainItems = CreateDomainItems(keys);
-                    DataContainerManager dcManager = new DataContainerManager();
-
-                    if (model.Id == 0 || rsa.Constraints.Count() == 0)
-                    {
-                        DomainConstraint dc = new DomainConstraint(ConstraintProviderSource.Internal, "", "en-US", "a simple domain validation constraint", false, null, null, null, domainItems);
-                        dcManager.AddConstraint(dc, rsa);
-                    }
-                    else
-                    {
-                       DomainConstraint temp = (DomainConstraint)rsa.Constraints.ElementAt(0);
-                       temp.Materialize();
-                       temp.Items = domainItems;
-                       dcManager.AddConstraint(temp, rsa); 
-                    }
+                    return PartialView("_createResourceStructureAttribute", model);
 
                 }
-
-                //Creation with usage
-                if (model.rsID != 0)
-                {
-                    ResourceStructure resourceStructure = rsManager.GetResourceStructureById(model.rsID);
-                    rsaManager.CreateResourceAttributeUsage(rsa,resourceStructure, true, false);
-                    //resourceStructure.ResourceStructureAttributes.Add(rsa);
-                    //rsManager.Update(resourceStructure);
-                    //return View("_editResourceStructure", new ResourceStructureModel(resourceStructure));
-                    return Json(new { success = true });
-                }
-                else
-                    return Json(new { success = true });
-            }
-            else
-                return PartialView("_createResourceStructureAttribute", model);
         }
 
         
@@ -524,7 +545,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     //get id from loged in user
                     long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
                     //get entity type id
-                    long entityTypeId = entityTypeManager.FindByName("Notification").Id;
+                    long entityTypeId = entityTypeManager.FindByName("ResourceStructureAttribute").Id;
 
                     //get permission from logged in user
                     rsaModel.EditAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, a.Id, RightType.Write);
