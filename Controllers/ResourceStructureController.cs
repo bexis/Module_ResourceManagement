@@ -336,18 +336,21 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 }
 
                 //check domain items
-                List<DomainItemModel> tempList = new List<DomainItemModel>();
-                foreach (string k in keys)
+                if (keys != null)
                 {
-                    DomainItemModel d = new DomainItemModel();
-                    d.Key = k;
-                    d.Value = k;
-                    tempList.Add(d);
-                    if (string.IsNullOrEmpty(k))
-                        ModelState.AddModelError("DomainItem", "One domain item has no value.");
-                    
+                    List<DomainItemModel> tempList = new List<DomainItemModel>();
+                    foreach (string k in keys)
+                    {
+                        DomainItemModel d = new DomainItemModel();
+                        d.Key = k;
+                        d.Value = k;
+                        tempList.Add(d);
+                        if (string.IsNullOrEmpty(k))
+                            ModelState.AddModelError("DomainItem", "One domain item has no value.");
+
+                    }
+                    model.DomainItems = tempList;
                 }
-                model.DomainItems = tempList;
 
                 if (ModelState.IsValid)
                 {
