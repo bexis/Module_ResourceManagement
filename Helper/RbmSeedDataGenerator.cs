@@ -24,6 +24,7 @@ namespace BExIS.Modules.RBM.UI.Helper
             Dictionary<string, Type> rbmEntities = new Dictionary<string,Type>();
             rbmEntities.Add("SingleResource", typeof(SingleResource));
             rbmEntities.Add("ResourceStructure", typeof(ResourceStructure));
+            rbmEntities.Add("ResourceStructureAttribute", typeof(ResourceStructureAttribute));
             rbmEntities.Add("Activity", typeof(Activity));
             rbmEntities.Add("Event", typeof(RealEvent));
             rbmEntities.Add("Notification", typeof(Notification));
