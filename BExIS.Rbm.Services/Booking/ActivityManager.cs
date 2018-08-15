@@ -74,7 +74,7 @@ namespace BExIS.Rbm.Services.Booking
         }
 
         /// <summary>
-        /// If the <paramref name="Activity"/> is not associated to any <see cref="BookingEvent"/>, the method deletes it from the database.
+        /// If the <paramref name="Activity"/> is not associated to any <see cref="RealEvent"/>, the method deletes it from the database.
         /// </summary>
         public bool DeleteActivity(Activity activity)
         {
@@ -131,15 +131,15 @@ namespace BExIS.Rbm.Services.Booking
         /// <summary>
         /// Checks if activity is in use in a event.
         /// </summary>
-        public bool IsInEvent(long id)
-        {
-            EventManager eManager = new EventManager();
-            List<BookingEvent> eventList = eManager.GetEventsWhereActivity(id).ToList();
-            if (eventList.Count() > 0)
-                return true;
-            else
-                return false;
-        }
+        //public bool IsInEvent(long id)
+        //{
+        //    EventManager eManager = new EventManager();
+        //    List<RealEvent> eventList = eManager.GetEventsWhereActivity(id).ToList();
+        //    if (eventList.Count() > 0)
+        //        return true;
+        //    else
+        //        return false;
+        //}
 
         #endregion
 

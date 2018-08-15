@@ -32,9 +32,9 @@ namespace BExIS.Rbm.Entities.Booking
         #region Associations
 
         /// <summary>
-        /// The activities are used on <see cref="BookingEvent"/>s
+        /// The activities are used on <see cref="RealEvent"/>s
         /// </summary>
-        public virtual ICollection<BookingEvent> Events { get; set; }
+        public virtual ICollection<RealEvent> Events { get; set; }
 
         /// <summary>
         /// The activities are used on <see cref="Schedule"/>s
@@ -50,7 +50,7 @@ namespace BExIS.Rbm.Entities.Booking
         {
             Name = "";
             Disable = false;
-            Events = new List<BookingEvent>();
+            Events = new List<RealEvent>();
             Schedules = new List<Schedule>();
         }
 

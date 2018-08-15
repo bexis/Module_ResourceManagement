@@ -26,9 +26,9 @@
     <property name="Disable" type="Boolean" />
 
 
-    <set name="Events" table="BookingEvent_Activity" inverse="true" cascade="all-delete-orphan" lazy="true">
+    <set name="Events" table="RealEvent_Activity" inverse="true" cascade="all-delete-orphan" lazy="true">
       <key column="ActivityRef"/>
-      <many-to-many column="EventRef" class="BExIS.Rbm.Entities.Booking.BookingEvent, BExIS.Rbm.Entities"/>
+      <many-to-many column="EventRef" class="BExIS.Rbm.Entities.Booking.RealEvent, BExIS.Rbm.Entities"/>
     </set>
 
     <set name="Schedules" table="Schedule_Activity" inverse="true" cascade="all-delete-orphan" lazy="true">

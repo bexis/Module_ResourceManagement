@@ -28,6 +28,11 @@
        controller="ResourceStructure" action="ResourceStructure"
        extends="./menubarRoot/rbmAdminMenu" />
 
+    <Export tag="menubar" id="rbmMenu_Resouce" order="15"
+       title="Manage Resources Structures Attr" description="Cal" icon=""
+       controller="ResourceStructure" action="ResourceStructureAttribute"
+       extends="./menubarRoot/rbmAdminMenu" />
+
 
     <Export tag="menubar" id="rbmMenu_ResouceStructure" order="15"
         title="Manage Activities" description="Cal" icon=""

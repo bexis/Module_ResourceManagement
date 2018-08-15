@@ -53,7 +53,7 @@ namespace BExIS.Rbm.Services.Booking
 
         #region Methods
 
-        public Schedule CreateSchedule(DateTime startDate, DateTime endDate, BookingEvent thisEvent, R.SingleResource resource, Person forPerson, Person byPerson, List<Activity> activities,int quantity, int index)
+        public Schedule CreateSchedule(DateTime startDate, DateTime endDate, RealEvent thisEvent, R.SingleResource resource, Person forPerson, Person byPerson, List<Activity> activities,int quantity, int index)
         {
             Schedule schedule = new Schedule();
             schedule.StartDate = startDate;

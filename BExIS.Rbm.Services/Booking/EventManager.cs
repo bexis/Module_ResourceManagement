@@ -18,7 +18,7 @@ namespace BExIS.Rbm.Services.Booking
         public EventManager()
         {
             _guow = this.GetIsolatedUnitOfWork();
-            this.EventRepo = _guow.GetReadOnlyRepository<E.BookingEvent>();
+            this.EventRepo = _guow.GetReadOnlyRepository<E.RealEvent>();
             this.BookingTemplateRepo = _guow.GetReadOnlyRepository<E.BookingTemplate>();
         }
 
@@ -47,27 +47,27 @@ namespace BExIS.Rbm.Services.Booking
 
         #region Data Readers
 
-        public IReadOnlyRepository<E.BookingEvent> EventRepo { get; private set; }
+        public IReadOnlyRepository<E.RealEvent> EventRepo { get; private set; }
         public IReadOnlyRepository<E.BookingTemplate> BookingTemplateRepo { get; private set; }
 
         #endregion
 
         #region Methods
 
-        public E.BookingEvent CreateEvent(string name, string description, List<Activity> activities, DateTime minDate, DateTime maxDate)
+        public E.RealEvent CreateEvent(string name, string description, List<Activity> activities, DateTime minDate, DateTime maxDate)
         {
-            BookingEvent newEvent = new BookingEvent()
+            RealEvent newEvent = new RealEvent()
             {
                 Name = name,
                 Description = description,
-                Activities = activities,
+                //Activities = activities,
                 MinDate = minDate,
                 MaxDate = maxDate
             };
 
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
-                IRepository<E.BookingEvent> repo = uow.GetRepository<E.BookingEvent>();
+                IRepository<E.RealEvent> repo = uow.GetRepository<E.RealEvent>();
                 repo.Put(newEvent);
                 uow.Commit();
             }
@@ -75,7 +75,7 @@ namespace BExIS.Rbm.Services.Booking
             return newEvent;
         }
 
-        public bool DeleteEvent(E.BookingEvent deleteEvent)
+        public bool DeleteEvent(E.RealEvent deleteEvent)
         {
             Contract.Requires(deleteEvent != null);
             Contract.Requires(deleteEvent.Id >= 0);
@@ -87,7 +87,7 @@ namespace BExIS.Rbm.Services.Booking
             {
                 using (IUnitOfWork uow = this.GetUnitOfWork())
                 {
-                    IRepository<E.BookingEvent> repo = uow.GetRepository<E.BookingEvent>();
+                    IRepository<E.RealEvent> repo = uow.GetRepository<E.RealEvent>();
                     deleteEvent = repo.Reload(deleteEvent);
                     repo.Delete(deleteEvent);
                     uow.Commit();
@@ -97,12 +97,12 @@ namespace BExIS.Rbm.Services.Booking
             return true;
         }
 
-        public E.BookingEvent UpdateEvent(E.BookingEvent eEvent)
+        public E.RealEvent UpdateEvent(E.RealEvent eEvent)
         {
             Contract.Requires(eEvent != null);
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
-                IRepository<E.BookingEvent> repo = uow.GetRepository<E.BookingEvent>();
+                IRepository<E.RealEvent> repo = uow.GetRepository<E.RealEvent>();
                 repo.Merge(eEvent);
                 var merged = repo.Get(eEvent.Id);
                 repo.Put(merged);
@@ -112,25 +112,27 @@ namespace BExIS.Rbm.Services.Booking
             return eEvent;
         }
 
-        public IQueryable<E.BookingEvent> GetAllEvents()
+        public IQueryable<E.RealEvent> GetAllEvents()
         {
             return EventRepo.Query();
         }
 
-        public List<E.BookingEvent> GetAllEventByTimePeriod(DateTime startDate, DateTime endDate)
+        public List<E.RealEvent> GetAllEventByTimePeriod(DateTime startDate, DateTime endDate)
         {
             return EventRepo.Query(a => ((DateTime)a.MinDate >= startDate && (DateTime)a.MinDate <= endDate) || ((DateTime)a.MaxDate >= startDate && (DateTime)a.MaxDate <= endDate)).ToList(); 
         }
 
-        public BookingEvent GetEventById(long id)
+        public RealEvent GetEventById(long id)
         {
-            return EventRepo.Query(a => a.Id == id).FirstOrDefault();
+            RealEvent e = EventRepo.Query(a => a.Id == id).FirstOrDefault();
+            EventRepo.LoadIfNot(e.Schedules);
+            return e;
         }
 
-        public IQueryable<BookingEvent> GetEventsWhereActivity(long activityId)
-        {
-            return EventRepo.Query(a => a.Activities.Any(u=>u.Id == activityId));
-        }
+        //public IQueryable<RealEvent> GetEventsWhereActivity(long activityId)
+        //{
+        //    return EventRepo.Query(a => a.Activities.Any(u=>u.Id == activityId));
+        //}
 
         #endregion
     }

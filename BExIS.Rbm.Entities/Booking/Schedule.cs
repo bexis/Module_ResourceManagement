@@ -44,7 +44,7 @@ namespace BExIS.Rbm.Entities.Booking
         /// <summary>
         /// The <see cref="Event"/> where is this schedule related.
         /// </summary> 
-        public virtual BookingEvent Event { get; set; }
+        public virtual RealEvent Event { get; set; }
 
         /// <summary>
         /// The <see cref="Person"/> which created the schedule.

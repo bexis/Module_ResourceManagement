@@ -7,7 +7,7 @@ using R = BExIS.Rbm.Entities.Resource;
 
 namespace BExIS.Rbm.Entities.Booking
 {
-    public abstract class RealEvent : BaseEntity
+    public class RealEvent : BaseEntity
     {
         #region Attributes
 
@@ -35,12 +35,16 @@ namespace BExIS.Rbm.Entities.Booking
         /// <summary>
         /// List of <see cref="Schedule"/>s, the booked resources with resource and time frame, are related to this event.
         /// </summary>
-        public virtual List<Schedule> Schedules { get; set; }
+        public virtual ICollection<Schedule> Schedules { get; set; }
 
         #endregion
 
         #region Methods
       
+        public RealEvent()
+        {
+            Schedules = new List<Schedule>(); 
+        }
 
         #endregion
     }

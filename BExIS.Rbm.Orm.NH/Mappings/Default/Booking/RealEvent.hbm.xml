@@ -26,6 +26,11 @@
 
     <property name="MaxDate" type="DateTime" />
 
+    <set name="Schedules" inverse="true" cascade="all-delete-orphan" lazy="false">
+      <key column="EventRef"/>
+      <one-to-many class="BExIS.Rbm.Entities.Booking.Schedule, BExIS.Rbm.Entities.Booking" />
+    </set>
+
 
   </class>
 </hibernate-mapping>

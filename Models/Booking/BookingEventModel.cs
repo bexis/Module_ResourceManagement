@@ -82,7 +82,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             }
         }
 
-        public EventModel(BookingEvent e)
+        public EventModel(RealEvent e)
         {
             Id = e.Id;
             Name = e.Name;
@@ -94,24 +94,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             EditAccess = false;
             DeleteAccess = false;
 
-            //foreach(Schedule s in e.Schedules)
-            //{
-            //    ScheduleEventModel seM = new ScheduleEventModel(s);
-            //    seM.Index = s.Index;
-            //    seM.EditMode = false;
-            //    seM.EventId = e.Id;
-            //    seM.Activities = new List<ActivityEventModel>();
-            //    s.Activities.ToList().ForEach(r => seM.Activities.Add(new ActivityEventModel(r)));
-            //    Schedules.Add(seM);
-            //}
-
-            ScheduleManager schManager = new ScheduleManager();
-            List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
-
-            ActivityManager aManager = new ActivityManager();
-
-            Schedules = new List<ScheduleEventModel>();
-            foreach (Schedule s in schedules)
+            foreach (Schedule s in e.Schedules)
             {
                 ScheduleEventModel seM = new ScheduleEventModel(s);
                 seM.Index = s.Index;
@@ -120,7 +103,6 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                 seM.Activities = new List<ActivityEventModel>();
                 s.Activities.ToList().ForEach(r => seM.Activities.Add(new ActivityEventModel(r)));
                 Schedules.Add(seM);
-
             }
         }
     }
@@ -145,7 +127,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             //Resource = new R.Resource();
         }
 
-        public CalendarItemsModel(BookingEvent e)
+        public CalendarItemsModel(RealEvent e)
         {
             using (var schManager = new ScheduleManager())
             {
@@ -194,21 +176,21 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                 DeleteAccess = false;
             }
 
-            public ShowEventModel(BookingEvent eEvent)
+            public ShowEventModel(RealEvent eEvent)
             {
-                ScheduleManager schManager = new ScheduleManager();
-                List<Schedule> schedules = schManager.GetAllSchedulesByEvent(eEvent.Id);
+                //ScheduleManager schManager = new ScheduleManager();
+                //List<Schedule> schedules = schManager.GetAllSchedulesByEvent(eEvent.Id);
 
                 Schedules = new List<ScheduleEventModel>();
 
-                foreach (Schedule s in schedules)
+                foreach (Schedule s in eEvent.Schedules)
                 {
                     ScheduleEventModel rEventM = new ScheduleEventModel(s);
                     Schedules.Add(rEventM);
                 }
 
-                Activities = new List<ActivityModel>();
-                eEvent.Activities.ToList().ForEach(r => Activities.Add(new ActivityModel(r)));
+                //Activities = new List<ActivityModel>();
+                //eEvent.Activities.ToList().ForEach(r => Activities.Add(new ActivityModel(r)));
             }
         }
 

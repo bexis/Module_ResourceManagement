@@ -785,7 +785,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                             SendNotificationHelper.BookingAction bookingAction = new SendNotificationHelper.BookingAction();
 
                             //if event id = 0, create new event with note and description
-                            BookingEvent eEvent = new BookingEvent();
+                            RealEvent eEvent = new RealEvent();
                             if (model.Id == 0)
                             {
                                 eEvent = eventManager.CreateEvent(model.Name, model.Description, null, minDate, maxDate);
@@ -880,21 +880,21 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 List<Notification> temp = CheckNotificationForSchedule(schedule);
                                 notifications.AddRange(temp);
 
-                                //Add rights to the schedule for all user reserved for
-                                if (model.Id == 0)
-                                {
+                                //Add rights to the schedule and event for all user reserved for
+
                                     //get entities types
                                     var entityTypeSchedule = entityTypeManager.FindByName("Schedule");
                                     var entityTypeEvent = entityTypeManager.FindByName("Event");
 
-                                    //add rights to logged in user
-                                    var userIdLoggedIn = UserHelper.GetUserId(HttpContext.User.Identity.Name);
-
+                                    //add rights to logged in user if not exsit
                                     //rights on schedule 31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
-                                    permissionManager.Create(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id, 31);
+                                    var userIdLoggedIn = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+                                    if(permissionManager.GetRights(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id) == 0)
+                                        permissionManager.Create(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id, 31);
 
                                     //rights on event
-                                    permissionManager.Create(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id, 31);
+                                    if (permissionManager.GetRights(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id) == 0)
+                                        permissionManager.Create(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id, 31);
 
                                     foreach (PersonInSchedule user in schedule.ForPersons)
                                     {
@@ -902,12 +902,13 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                         if (us.Id != userIdLoggedIn)
                                         {
                                             //rights on schedule 15 is the sum from this rights:  Read = 1, Download = 2, Write = 4, Delete = 8
-                                            permissionManager.Create(us.Id, entityTypeSchedule.Id, newSchedule.Id, 15);
+                                            if (permissionManager.GetRights(us.Id, entityTypeSchedule.Id, newSchedule.Id) == 0)
+                                                permissionManager.Create(us.Id, entityTypeSchedule.Id, newSchedule.Id, 15);
                                             //rights on event, Read = 1, Write = 4
-                                            permissionManager.Create(us.Id, entityTypeEvent.Id, eEvent.Id, 5);
+                                            if (permissionManager.GetRights(us.Id, entityTypeEvent.Id, eEvent.Id) == 0)
+                                                permissionManager.Create(us.Id, entityTypeEvent.Id, eEvent.Id, 5);
                                         }
                                     }
-                                }
 
                                 if (notifications.Count > 0)
                                     SendNotification(notifications, model.Schedules);
@@ -970,38 +971,39 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult OpenEdit(string id)
         {
-            EntityPermissionManager permissionManager = new EntityPermissionManager();
-            SubjectManager subjectManager = new SubjectManager();
-
-            EventModel model = (EventModel)Session["Event"];
-            if (model != null)
-            {
-                model.EditMode = true;
-                for (int i = 0; i < model.Schedules.Count(); i++)
+            using (var permissionManager = new EntityPermissionManager())
+            using (var subjectManager = new SubjectManager())
+            { 
+                EventModel model = (EventModel)Session["Event"];
+                if (model != null)
                 {
-                    //Has user rights on schedule
-                    User user = subjectManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-                    //model.Schedules[i].EditAccess = permissionManager.HasEffectiveRight(HttpContext.User.Identity.Name, model.Schedules[i].,8, RightType.Write);
-                    //model.Schedules[i].DeleteAccess = permissionManager.HasEffectiveRight(HttpContext.User.Identity.Name, 8, model.Schedules[i].ScheduleId, RightType.Delete);
+                    model.EditMode = true;
+                    for (int i = 0; i < model.Schedules.Count(); i++)
+                    {
+                        //Has user rights on schedule
+                        User user = subjectManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
+                        //model.Schedules[i].EditAccess = permissionManager.HasEffectiveRight(HttpContext.User.Identity.Name, model.Schedules[i].,8, RightType.Write);
+                        //model.Schedules[i].DeleteAccess = permissionManager.HasEffectiveRight(HttpContext.User.Identity.Name, 8, model.Schedules[i].ScheduleId, RightType.Delete);
 
-                    model.Schedules[i].EditMode = true;
-                    model.Schedules[i].FileConfirmation = true;
-                    for (int j = 0; j < model.Schedules[i].Activities.Count(); j++)
-                    {
-                        model.Schedules[i].Activities[j].EditMode = true;
+                        model.Schedules[i].EditMode = true;
+                        model.Schedules[i].FileConfirmation = true;
+                        for (int j = 0; j < model.Schedules[i].Activities.Count(); j++)
+                        {
+                            model.Schedules[i].Activities[j].EditMode = true;
+                        }
+                        for (int j = 0; j < model.Schedules[i].ForPersons.Count(); j++)
+                        {
+                            model.Schedules[i].ForPersons[j].EditMode = true;
+                        }
                     }
-                    for (int j = 0; j < model.Schedules[i].ForPersons.Count(); j++)
-                    {
-                        model.Schedules[i].ForPersons[j].EditMode = true;
-                    }
+
+                    return View("EditEvent", model);
                 }
-
-                return View("EditEvent", model);
-            }
-            else
-            {
-                //need errors message here
-                return new EmptyResult();
+                else
+                {
+                    //need errors message here
+                    return new EmptyResult();
+                }
             }
         }
 
@@ -1020,9 +1022,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult EditScheduleActivities(long id)
         {
             EventManager eManager = new EventManager();
-            BookingEvent e = eManager.GetEventById(id);
+            RealEvent e = eManager.GetEventById(id);
             List<ActivityEventModel> model = new List<ActivityEventModel>();
-            e.Activities.ToList().ForEach(r => model.Add(new ActivityEventModel(r)));
+            //e.Activities.ToList().ForEach(r => model.Add(new ActivityEventModel(r)));
 
             return PartialView("_enterActivities", model);
         }
@@ -1865,7 +1867,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
             using (var entityTypeManager = new EntityManager())
             using (var eManager = new EventManager())
             {
-                BookingEvent e = eManager.GetEventById(id);
+                RealEvent e = eManager.GetEventById(id);
+                
                 EventModel model = new EventModel(e);
                 model.EditMode = false;
 
@@ -1892,7 +1895,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult ShowActivities(long Id)
         {
             EventManager eManager = new EventManager();
-            BookingEvent e = eManager.GetEventById(Id);
+            RealEvent e = eManager.GetEventById(Id);
             return PartialView("_showActivities", new ShowEventModel(e));
         }
 
@@ -1900,7 +1903,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult ShowSchedules(long Id)
         {
             EventManager eManager = new EventManager();
-            BookingEvent e = eManager.GetEventById(Id);
+            RealEvent e = eManager.GetEventById(Id);
             return PartialView("_showSchedules", new ShowEventModel(e));
         }
 
@@ -1912,7 +1915,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult Delete(long id)
         {
             EventManager eManager = new EventManager();
-            BookingEvent e = eManager.GetEventById(id);
+            RealEvent e = eManager.GetEventById(id);
 
             SendNotificationHelper.SendBookingNotification(SendNotificationHelper.BookingAction.deleted, new EventModel(e));
             eManager.DeleteEvent(e);

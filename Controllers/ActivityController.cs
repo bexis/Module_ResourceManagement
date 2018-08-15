@@ -160,7 +160,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 foreach (Activity a in data)
                 {
                     ActivityModel temp = new ActivityModel(a);
-                    temp.InUse = rManager.IsInEvent(a.Id);
+                    //temp.InUse = rManager.IsInEvent(a.Id);
 
                     //get permission from logged in user
                     temp.EditAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, a.Id, RightType.Read);

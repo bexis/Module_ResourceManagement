@@ -28,7 +28,7 @@
 
     <many-to-one name="Resource" class="BExIS.Rbm.Entities.Resource.SingleResource" not-null="true" column="ResourceRef"/>
 
-    <many-to-one name="Event" class="BExIS.Rbm.Entities.Booking.BookingEvent" not-null="true"  column="EventRef"/>
+    <many-to-one name="Event" class="BExIS.Rbm.Entities.Booking.RealEvent" not-null="true"  column="EventRef"/>
 
     <many-to-one name="ByPerson" class="BExIS.Rbm.Entities.Users.Person" not-null="true"  column="ByPerson" lazy="false"/>
 

@@ -75,9 +75,6 @@
     <Content Include="Mappings\Default\Booking\RealEvent.hbm.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Mappings\Default\Booking\Event.hbm.xml">
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="Mappings\Default\Booking\Schedule.hbm.xml">
       <SubType>Designer</SubType>
     </Content>
