@@ -358,7 +358,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                             //save file in session???????
                             FileValueModel fv = (FileValueModel)temp;
                             fv.NeedConfirmation = Convert.ToBoolean(value);
-                            var z = model.FileValues.FindIndex(p => p.AttributeName == valuetype);
+                            var z = model.ResourceStructureAttributeValues.FindIndex(p => p.AttributeName == valuetype);
                             model.ResourceStructureAttributeValues[z] = fv;
                         }
                         break;
