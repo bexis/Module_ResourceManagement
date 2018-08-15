@@ -53,7 +53,7 @@
 
         var index = $("td[name=scheduleIndex]:first").text();
 
-        $.post('@Url.Action("AddActivitiesToSchedule", "Event", new RouteValueDictionary { { "area", "RBM" } })', {scheduleIndex: index }, function (data) {
+        $.post('@Url.Action("AddActivitiesToSchedule", "Schedule", new RouteValueDictionary { { "area", "RBM" } })', {scheduleIndex: index }, function (data) {
             $("#activities_"+index).html(data)
             Window_Choose_OnClose();
         });
@@ -72,7 +72,7 @@
             selected = "false";
         }
 
-        $.get('@Url.Action("ChangeSelectedActivity", "Event")', { activityId: activityId, selected: selected, index: index }, function (data) {
+        $.get('@Url.Action("ChangeSelectedActivity", "Schedule")', { activityId: activityId, selected: selected, index: index }, function (data) {
         });
     }
 
