@@ -52,3 +52,10 @@ label.bx-disabled {
     opacity: 0.6;
     pointer-events: none; /* workaround for checkboxes being disabled, but still send to model */
 }
+
+.fc-agendaWeek-view .fc-title {
+    white-space: normal;
+}
+.fc-agendaDay-view .fc-title {
+    white-space: normal;
+}
