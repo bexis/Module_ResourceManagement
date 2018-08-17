@@ -13,39 +13,65 @@
 
 <script language="javascript" type="text/javascript" src="~/Areas/RBM/Scripts/RBM/rbm.js"></script>
 <div id="Content_Event">
+    <table id="enterSchedules" style="margin-bottom:20px">
+        <tr>
+            <th>1. Please specify details for your selected resources.</th>
+        </tr>
+    </table>
 
-          <table class="bx-table-form" style="width: 500px;">
-              <tr>
-                 <td>@Html.LabelFor(m => m.Name)</td>
-                 <td>
-                     @if(Model.EditMode || Model.Id == 0)
-                     {
-                        @Html.TextBoxFor(m => m.Name,  new { OnChange="onChangeControl(this)", @class = "bx-input", @tabindex = "2", @Name="Name_"})
-                        <small>@Html.ValidationMessage("Name")</small><br />
-                     }
-                     else
-                     {
-                          @Html.TextBoxFor(m => m.Name,  new { OnChange="onChangeControl(this)", @class = "bx-input", disabled="disabled", @tabindex = "2", @Name="Name_"})
-                     }
-                 </td>
-              </tr>
-               <tr>
-                 <td>@Html.LabelFor(m => m.Description)</td>
-                 <td>
-                     @if (Model.EditMode || Model.Id == 0)
-                     {
-                        @Html.TextAreaFor(m => m.Description,  new { OnChange="onChangeControl(this)", @class = "bx-input", @tabindex = "2", @Name="Description_"})
-                     }
-                     else
-                     {
-                       @Html.TextAreaFor(m => m.Description,  new { OnChange="onChangeControl(this)", @class = "bx-input", disabled="disabled", @tabindex = "2", @Name="Description_"})
-                     }
-                 </td>
-              </tr>
-          </table>
+
+    @Html.Partial("_schedules", Model.Schedules)
+
+    @if (Model.EditMode)
+    {
+        @Html.ActionLink("Add more Resources", "AddResource", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Add more resources to the event", style="float:right", @tabindex = "5" })
+    }
+
+    <table id="enterSchedules" style="margin-bottom:20px; margin-top:20px">
+        <tr>
+            <th>2. Please name your booking (e.g. 1st soil sampling campaign BExIS)  and describe your planned activities.</th>
+        </tr>
+    </table>
+
+    <table class="bx-table-form" style="width: 500px;">
+        <tr>
+            <td>
+                <b title="This field is required" style="color:red">*</b>
+                @Html.LabelFor(m => m.Name)
+            </td>
+            <td>
+                @if (Model.EditMode || Model.Id == 0)
+                {
+                    @Html.TextBoxFor(m => m.Name, new { OnChange = "onChangeControl(this)", @class = "bx-input", @tabindex = "2", @Name = "Name_" })<br />
+                    <small>@Html.ValidationMessage("Name")</small><br />
+                }
+                else
+                {
+                    @Html.TextBoxFor(m => m.Name, new { OnChange = "onChangeControl(this)", @class = "bx-input", disabled = "disabled", @tabindex = "2", @Name = "Name_" })
+                }
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <b title="This field is required" style="color:red">*</b>
+                @Html.LabelFor(m => m.Description)
+            </td>
+            <td>
+                @if (Model.EditMode || Model.Id == 0)
+                {
+                    @Html.TextAreaFor(m => m.Description, new { OnChange = "onChangeControl(this)", @class = "bx-input", @tabindex = "2", @Name = "Description_" })<br />
+                    <small>@Html.ValidationMessage("Description")</small><br />
+                }
+                else
+                {
+                    @Html.TextAreaFor(m => m.Description, new { OnChange = "onChangeControl(this)", @class = "bx-input", disabled = "disabled", @tabindex = "2", @Name = "Description_" })
+                }
+            </td>
+        </tr>
+    </table>
     <hr />
-    
-        @*<table style="background-color:#EFF7F6; border: 2px solid black; padding:5px;">
+
+    @*<table style="background-color:#EFF7F6; border: 2px solid black; padding:5px;">
             <tr>
                 <td>
                     <b>Resource Name</b>
@@ -56,24 +82,25 @@
             </tr>
         </table>*@
 
-        @Html.Partial("_schedules", Model.Schedules)
-    
-     <div class="bx-footer right">
+
+
+    <div class="bx-footer right">
+        @Html.ActionLink("Cancel", "Calendar", "Calendar", null, new { area = "rbm", @class = "t-button action", @title = "Cancel", @tabindex = "5" })
+
         @if (!Model.EditMode && Model.EditAccess)
         {
             <button id="edit" class="t-button action" title="" onclick="openEditMode(@Model.Id)">Edit</button>
         }
-        else if(Model.EditMode)
+        else if (Model.EditMode)
         {
-           @Html.ActionLink("Save", "SaveEvent", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Save event", @tabindex = "5" })
-           @Html.ActionLink("Add Resource", "AddResource", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Add more resources to the event", @tabindex = "5" })
+            @Html.ActionLink("Reserve", "SaveEvent", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Save event", @tabindex = "5" })
         }
         @if (Model.DeleteAccess)
         {
-            @Html.ActionLink("Delete", "Delete", "Schedule",  new { area = "RBM", id = Model.Id}, new{ @class = "t-button action", @title = "Delete", @tabindex = "5" })
+            @Html.ActionLink("Delete", "Delete", "Schedule", new { area = "RBM", id = Model.Id }, new { @class = "t-button action", @title = "Delete", @tabindex = "5" })
         }
 
-        @Html.ActionLink("Cancel", "Calendar", "Calendar", new { area = "RBM", @class = "t-button action", @title = "Cancel", @tabindex = "5" })
+
     </div>
 
 </div>

@@ -28,9 +28,12 @@
                     <tr>
                         <td><b>@Html.DisplayFor(m=>m[i].ResourceName)</b></td>
                         <td style="text-align:right">
-                            <small><b>Id:</b> @Html.DisplayFor(m=>m[i].ResourceId)
-                                   <b>Status:</b> @Html.DisplayFor(m=>m[i].Status)
-                                   <b>Quantity:</b> @Html.DisplayFor(m=>m[i].ResourceQuantity)
+                            <small>
+                                <!--<b>Id:</b> @Html.DisplayFor(m=>m[i].ResourceId)
+    <b>Status:</b> @Html.DisplayFor(m=>m[i].Status)
+
+                                <b>From:</b>@Html.DisplayFor(m => m[i].ScheduleDurationModel.StartDate) - @Html.DisplayFor(m => m[i].ScheduleDurationModel.EndDate)-->
+                                <b>Number:</b> @Html.DisplayFor(m => m[i].ResourceQuantity)
                             </small>
                         </td>
                     </tr>
@@ -52,20 +55,20 @@
                                         {
                                             <span class="bx bx-grid-function bx-trash" id="" onclick = "RemoveScheduleFromEvent(@Model[i].Index)" title="Remove schedule from event"></span><br />
                                         }
-                                        <span  id="availability_@Model[i].ResourceId" class="bx bx-grid-function bx-calendar-o" onclick = "OnClickCheckAvailability(@Model[i].Index,@Model[i].ResourceId)" title="Check availability for the defined time period and quantity"></span><br />
-                                        <span  id="@Model[i].ResourceId" class="bx bx-grid-function bx-clone" onclick = "OnClickCopy(@Model[i].Index, @Model[i].EventId)" title="Copy the whole resource schedule"></span><br />
-                                        <span  id="TT_@Model[i].ResourceId" class="bx bx-grid-function bx-filter" onclick = "OnClickShowSimilar(@Model[i].Index,@Model[i].ResourceId)" title="Show similar resources"></span><br />
-                                        <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function bx-reply-all" onclick="useValuesForAll(@Model[i].Index)" title="Use filled values for all other schedules"></span>
+                                        <span  id="availability_@Model[i].ResourceId" class="bx bx-grid-function fa-calendar-o" onclick = "OnClickCheckAvailability(@Model[i].Index,@Model[i].ResourceId)" title="Check availability for the defined time period and quantity"></span><br />
+                                        <span  id="@Model[i].ResourceId" class="bx bx-grid-function fa-copy" onclick = "OnClickCopy(@Model[i].Index, @Model[i].EventId)" title="Copy the whole resource schedule"></span><br />
+                                        <span  id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-filter" onclick = "OnClickShowSimilar(@Model[i].Index,@Model[i].ResourceId)" title="Show similar resources"></span><br />
+                                        <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-reply-all" onclick="useValuesForAll(@Model[i].Index)" title="Use filled values for all other schedules"></span>
                                     </div>
                             }
                         </td>
                     </tr>
                     <tr>
-                        <td style="width:200px"><b>Reserved For</b></td>
+                        <td style="width:200px"><b>Reserved for</b></td>
                         <td>
                             @if ((Model[i].EditMode && Model[i].EditAccess) || Model[i].EventId == 0)
                             {
-                               <span class="bx-grid-function bx-user-plus" onclick = "OnClickChooseForPerson(@Model[i].Index)" title="Select one or more person(s) for whom you want to reserve"></span>
+                               <span class="bx-grid-function fa-user-plus" onclick = "OnClickChooseForPerson(@Model[i].Index)" title="Select one or more person(s) for whom you want to reserve"></span>
                             }
 
                         </td>
@@ -83,7 +86,7 @@
                     </tr>*@
                     <tr>
                         <td>
-                            <b>Reserved By</b>
+                            <b>Reserved by</b>
                         </td>
                         <td>
                             @Html.DisplayFor(m=>m[i].ByPerson)
