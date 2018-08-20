@@ -4,50 +4,85 @@
 @model ResourceFilterModel
 
 <div class="overlay">
-    <small>Event View: </small>@Html.RadioButton("ContentView", "Events", true, new { title="Show events in the calendar"})
-    <small>Schedule View:</small> @Html.RadioButton("ContentView", "Schedules", new { title = "Show individual resouce schedules in the calendar" }) <br /><br />
-    <small>Calendar View: </small>@Html.RadioButton("DisplayView", "Calendar", true, new { title = "Show events in a tabular view" })
-    <small>List View:</small> @Html.RadioButton("DisplayView", "List", new { title = "Show individual resouce schedules in a tabular view" }) <br /><br />
-    <small>My bookings: @Html.CheckBox("MyBookings", false, new { @class = "js-switch", title="Show only my booking in the calendar" })</small>
-    <br /><br />
-<div class="overlayHeader">
-    <span>Filter</span>
-</div>
+    <div style="padding-bottom:5px">
 
-@(Html.Telerik().TreeView()
-        .Name("TreeView")
-        .ShowCheckBox(true)
-        .ClientEvents(events => events
-                //.OnSelect("onSelect")
-                .OnChecked("onChecked")
-        )
-
-         .BindTo<AttributeDomainItemsModel>(Model.TreeItems.Distinct(), (item, attribute) =>
-             {
-                 item.Text = attribute.AttrName;
-                 item.Value = attribute.AttrId.ToString();
-                 item.Checkable = false;
-                 item.Checked = false;
-                 item.Expanded = true;
-
-                 foreach(BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.DomainItemModel di in attribute.DomainItems)
-                 {
-                      TreeViewItem subitem = new TreeViewItem();
-                      item.Items.Add(subitem);
-
-                      subitem.Text = di.Key;
-                      subitem.Value = di.Key;
-                      subitem.LinkHtmlAttributes["id"] = attribute.AttrId;
-                      subitem.LinkHtmlAttributes["class"] = "domainItem";
-                      
-                      //subitem.Action("OnSelectTreeViewItem", "Schedule", new RouteValueDictionary { { "area", "RBM" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
-                 }
-             }
-        )
-        .ExpandAll(true)
-)
-
+        <div id="contentView" class="btn-group" data-toggle="buttons">
+            <label class="btn btn-default bx-button active">
+                <input type="radio" autocomplete="off" checked value="Events"> Booking
+            </label>
+            <label class="btn btn-default bx-button">
+                <input type="radio" autocomplete="off" value="Schedules"> Resource
+            </label>
+        </div>
+        <div id="contentView" class="btn-group" data-toggle="buttons">
+            <label class="btn btn-default  active" style="width:83px">
+                <input type="radio" autocomplete="off" checked value="Events"> Booking
+            </label>
+            <label class="btn btn-default ">
+                <input type="radio" autocomplete="off" value="Schedules"> Resource
+            </label>
+        </div>
     </div>
+ 
+    <div id="displayView" class="btn-group" data-toggle="buttons">
+        <label class="btn btn-default  active">
+            <input type="radio" autocomplete="off" checked value="Calendar"> Calendar
+        </label>
+        <label class="btn btn-default">
+            <input type="radio" autocomplete="off" value="List"> List
+        </label>
+    </div>
+
+
+
+
+
+    <!--  <small>Event View: </small>@Html.RadioButton("ContentView", "Events", true, new { title = "Show events in the calendar" })
+      <small>Schedule View:</small> @Html.RadioButton("ContentView", "Schedules", new { title = "Show individual resouce schedules in the calendar" }) <br /><br />
+      <small>Calendar View: </small>@Html.RadioButton("DisplayView", "Calendar", true, new { title = "Show events in a tabular view" })
+      <small>List View:</small> @Html.RadioButton("DisplayView", "List", new { title = "Show individual resouce schedules in a tabular view" }) <br /><br />-->
+    <div style="padding-top:15px"><small>Only my bookings: @Html.CheckBox("MyBookings", false, new { @class = "js-switch", title = "Show only my booking in the calendar" })</small></div>
+    <br /><br />
+    <div class="overlayHeader">
+        <span></span>
+    </div>
+
+
+
+    @(Html.Telerik().TreeView()
+                                        .Name("TreeView")
+                                        .ShowCheckBox(true)
+                                        .ClientEvents(events => events
+                                                //.OnSelect("onSelect")
+                                                .OnChecked("onChecked")
+                                        )
+
+                                         .BindTo<AttributeDomainItemsModel>(Model.TreeItems.Distinct(), (item, attribute) =>
+                                             {
+                                                 item.Text = attribute.AttrName;
+                                                 item.Value = attribute.AttrId.ToString();
+                                                 item.Checkable = false;
+                                                 item.Checked = false;
+                                                 item.Expanded = true;
+
+                                                 foreach (BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.DomainItemModel di in attribute.DomainItems)
+                                                 {
+                                                     TreeViewItem subitem = new TreeViewItem();
+                                                     item.Items.Add(subitem);
+
+                                                     subitem.Text = di.Key;
+                                                     subitem.Value = di.Key;
+                                                     subitem.LinkHtmlAttributes["id"] = attribute.AttrId;
+                                                     subitem.LinkHtmlAttributes["class"] = "domainItem";
+
+                                         //subitem.Action("OnSelectTreeViewItem", "Schedule", new RouteValueDictionary { { "area", "RBM" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
+                                     }
+                                             }
+                                        )
+                                        .ExpandAll(true)
+    )
+
+</div>
 
 <script type="text/javascript">
 
@@ -59,6 +94,20 @@
             var switchery = new Switchery(html, { size: 'small' });
         });
 
+
+        $('#displayView .btn').on('click', function (event) {
+            if ($('#displayView .active').find('input').val() != $(this).find('input').val()) {
+                showDisplay($(this).find('input').val(), $('#contentView .active').find('input').val());
+            }
+        });
+
+        $('#contentView .btn').on('click', function (event) {
+            if ($('#contentView .active').find('input').val() != $(this).find('input').val()) {
+                showContent($('#displayView .active').find('input').val(), $(this).find('input').val());
+            }
+            
+        });
+
         //$.validator.unobtrusive.parse("#contentEdit");
     });
 
@@ -66,11 +115,11 @@
         return $('#TreeView').data('tTreeView');
     }
 
-    $("input[name='DisplayView']").change(function () {
+    function showDisplay(displayView, contentView) {
 
-        var displayView = $("input[name='DisplayView']:checked").val();
-        var contentView = $("input[name='ContentView']:checked").val();
-
+       // var displayView = $("input[name='DisplayView']:checked").val();
+    // var contentView = $("input[name='ContentView']:checked").val();
+        console.log(displayView, contentView);
         if (displayView == "List")
         {
             $("#calendar").toggle();
@@ -133,14 +182,14 @@
                 $('#scheduleList').toggle();
             }
         }
-    });
+    }
 
 
 
-    $("input[name='ContentView']").change(function () {
+    function showContent(displayView, contentView) {
 
-        var displayView = $("input[name='DisplayView']:checked").val();
-        var contentView = $("input[name='ContentView']:checked").val();
+      //  var displayView = $("input[name='DisplayView']:checked").val();
+      //  var contentView = $("input[name='ContentView']:checked").val();
 
         if (displayView == "Calendar") {
 
@@ -201,7 +250,8 @@
                 }
             }
         }
-    });
+    }
+    
 
     $("input[name='MyBookings']").change(function () {
 

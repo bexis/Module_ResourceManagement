@@ -4,46 +4,67 @@
 @model List<ResourceCart>
 
 @Html.ValidationSummary(true)
-<div id="ResourceCart" style="overflow:scroll; height:600px;">
-<table>
-    @foreach(ResourceCart rc in Model)
-    {
-        <tr>
-            <td colspan="3" style="background-color:#EFF7F6;">
-                 <b>@rc.Name</b><br />
-            </td>
-        </tr>
-        <tr>
-            <td style="vertical-align:middle; background-color:#d2e8e3;">
-                <div>
-                    <small>Startdate: @rc.PreselectedStartDate</small><br />
-                    <small>Enddate: @rc.PreselectedEndDate</small><br />
-                    <small>Quantity: @rc.PreselectdQuantity</small><br />
-                </div>
-            </td>
-            <td style="vertical-align:middle; background-color:#d2e8e3;">
-                <div id="remove" class="bx bx-grid-function bx-trash" onclick="removeRourceFromCart(@rc.Index)" title="Remove resource from cart"></div>
+<div id="ResourceCart" >
+    <div style="overflow-y:scroll; max-height:600px;">
+        <table>
+            @foreach (ResourceCart rc in Model)
+            {
+                <tr>
+                    <td colspan="3" style="background-color:#EFF7F6;">
+                        <b>@rc.Name</b><br />
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align:middle; background-color:#d2e8e3;">
+                        <div>
+                            @if (rc.PreselectedEndStartDate == true)
+                            {
+                                <small> @rc.PreselectedStartDate.ToString("dd.MM.yyyy")</small>
+                                <small>- @rc.PreselectedEndDate.ToString("dd.MM.yyyy")</small>
+                            }
+                            else
+                            {
+                                <small>(Please specify date and number in the next step.)</small>
+                            }
 
-            </td>
-        </tr>
-    }
-</table>
-</div>
+                            @if (rc.PreselectdQuantity != 0)
+                            {
+                                <small>(No. @rc.PreselectdQuantity)</small><br />
+                            }
 
+                        </div>
+                    </td>
+                    <td style="vertical-align:middle; background-color:#d2e8e3;">
+                        <div id="remove" class="bx bx-grid-function bx-trash" onclick="removeRourceFromCart(@rc.Index)" title="Remove resource from cart"></div>
 
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
 
+    @if (Model.Count > 0)
+    {  @Html.ActionLink("Remove all", "Calendar", "Calendar", new { area = "RBM", @class = "t-button action", @title = "Remove all", style = "float: left;  margin-top: 10px;", @tabindex = "5" })
+        <small>@Html.ValidationMessage("CartEmpty")</small>
+        @Html.ActionLink("Continue booking", "CreateEvent", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Create event with all selected resources", style = "float: right;  margin-top: 10px;", @tabindex = "5" })
+        }
+        else
+        {
+        <span>Please select one or more resources. <br /> <br /> In the next step you can still change the number or dates. In addition you will be ask to provide more details.</span>
+        }
+    </div>
 
 <script type="text/javascript">
 
     $(document).ready(function () {
-        resetAllTelerikIconTitles();
-        addTooltips();
-    });
-
-    function removeRourceFromCart(index) {
-        $.get('@Url.Action("RemoveResourceFromCart", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', { index: index }, function (data) {
-            $('#ResourceCart').html(data);
+            resetAllTelerikIconTitles();
+            addTooltips();
         });
+
+        function removeRourceFromCart(index) {
+        $.get('@Url.Action("RemoveResourceFromCart", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', { index: index }, function (data) {
+            $('#ResourceCart').replaceWith(data);
+            });
     }
 
     @*function changeQuantityInCart(e) {

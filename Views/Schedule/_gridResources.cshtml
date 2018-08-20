@@ -11,6 +11,7 @@
 <div>
 @(Html.Telerik().Grid(Model)
         .Name("Grid_Resource")
+        .NoRecordsTemplate("No results.")
         .HtmlAttributes(new { style = "height:100% !important;" })
         .DataKeys(keys =>
         {
@@ -20,37 +21,37 @@
         {
            
         columns.Bound(r => r.Name);
-        columns.Bound(r => r.ResourceQuantity);
+        columns.Bound(r => r.ResourceQuantity).Width("10%").Filterable(false).Title("No.");
         columns.Template(
                 @<text>
-                                <span class="bx bx-next bx-button function small" onclick="addResourceToCart('' + @item.Id + '')"/>
-                                <span class="bx bx-grid-function bx-show" onclick="OnClickShowDetails('' + @item.Id + '')"></span>
+                                <span title="Select resource"class="bx bx-next bx-button function small" onclick="addResourceToCart('' + @item.Id + '')"/>
+                                <button type="button" title="Show more details" class="bx-function bx-info fa fa-info" onclick="OnClickShowDetails('' + @item.Id + '')"/>
                 </text>
-                            )
+                            ).Title(" ")
+                             .ClientTemplate(" <span title = \"Select resource\" class=\"bx bx-next bx-button function small\" onclick=\"addResourceToCart(\'\' + <#= Id #> + \'\')\"/>"
+                                + "<button type = \"button\" title=\"Show more details\" class=\"bx-function bx-info fa fa-info\" onclick=\"OnClickShowDetails(\'\' + <#= Id #> + \'\')\"/>"
+            )
+
+
+
         .Width(70)
         .Title(" ");
-                        //columns.Bound(r => r.AvailableQuantity).Width(30);
-                        //columns.Bound(r => r.Description).Width(80);
+            //columns.Bound(r => r.AvailableQuantity).Width(30);
+            //columns.Bound(r => r.Description).Width(80);
 
 
-                    })
+        })
                                 .ClientEvents(clientEvents => clientEvents
                                   .OnDataBound("onDataBound")
                                 )
                                         .DataBinding(dataBinding => dataBinding
                                             .Ajax()
-                                            .Select("Resource_Select", "Resource")
+
                                             .OperationMode(GridOperationMode.Client)
                                         )
                                 .Filterable()
                                 .Sortable()
-                                .Pageable(paging =>
-                                        paging
-                                            .Style(pagerStyles)
-                                            .PageSize(15)
-                                            .Position(GridPagerPosition.Top)
 
-                                            )
                                 )
                                 <br />
 

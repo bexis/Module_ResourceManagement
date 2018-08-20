@@ -316,6 +316,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         cartItem.PreselectdQuantity = filter.Quantity;
                         cartItem.PreselectedStartDate = filter.StartDate;
                         cartItem.PreselectedEndDate = filter.EndDate;
+                        cartItem.PreselectedEndStartDate = true;
+                    }
+                    else
+                    {
+                        cartItem.PreselectedEndStartDate = false;
                     }
 
                     model.Add(cartItem);
@@ -442,6 +447,19 @@ namespace BExIS.Modules.RBM.UI.Controllers
             //    if (!filter.IsPredefined)
             //        Session["Filter"] = null;
             //}
+            ResourceFilterModel model = new ResourceFilterModel();
+            if (Session["Filter"] != null)
+            {
+                ResourceFilterHelper.Filter filter = (ResourceFilterHelper.Filter)Session["Filter"];
+                model.StartDate = filter.StartDate;
+                model.EndDate = filter.EndDate;
+                model.IsPreSelected = true;
+            }
+            else
+            {
+                model.IsPreSelected = false;
+            }
+
 
             return View("SelectResources");
         }
@@ -605,9 +623,17 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 //check name
                 if (model.Name == "" || model.Name == null)
                 {
-                    ModelState.AddModelError("Name", "Name is required.");
+                    ModelState.AddModelError("Name", "A name for your reservation is required.");
                     isError = true;
                 }
+
+                //check description
+                if (model.Description == "" || model.Description == null)
+                {
+                    ModelState.AddModelError("Description", "A description for your reservation is required.");
+                    isError = true;
+                }
+
 
                 foreach (ScheduleEventModel s in tempScheduleList)
                 {
@@ -644,7 +670,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     //check contact person
                     if(s.Contact.UserId == 0)
                     {
-                        ModelState.AddModelError("ContactMissing_" + s.Index, "Contact person for is missing.");
+                        ModelState.AddModelError("ContactMissing_" + s.Index, "Contact person is missing.");
                         isError = true;
                         sError = true;
                     }
@@ -675,7 +701,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         {
                             isError = true;
                             sError = true;
-                            ModelState.AddModelError("Quantity_" + s.Index, "The Quantity must be greater than 0");
+                            ModelState.AddModelError("Quantity_" + s.Index, "The Number must be greater than 0.");
                         }
                     }
 

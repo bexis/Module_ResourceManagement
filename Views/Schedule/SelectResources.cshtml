@@ -11,23 +11,18 @@
 <table id="enterSchedules">
     <tr>
         <th>Filter</th>
-        <th>Resources</th>
-        <th><div class="bx bx-shopping-cart"></div> Resource Cart</th>
+        <th>Available Resources</th>
+        <th><div class="bx bx-shopping-cart"></div>Selected Resources</th>
     </tr>
     <tr>
-        <td id="filter" style="width: 15%;"><div id="Content_Filter" class="overlay"></div></td>
-        <td id="resources" style="width: 40%;"><div id="Content_Resources"></div></td>
-        <td id="schedules"><div id="Content_Schedules" onchange="onSchedulesChange()"></div></td>
+        <td id="filter" style="width: 5%;"><div id="Content_Filter" class="overlay"></div></td>
+        <td id="resources" style="width: 50%;"><div id="Content_Resources"></div></td>
+        <td id="schedules">
+            <div id="Content_Schedules" onchange="onSchedulesChange()"></div>
+        </td>
     </tr>
 </table>
-    
- <div class="bx-footer right">
-
- @Html.ActionLink("Booking", "CreateEvent", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Create event with all selected resources", @tabindex = "5" })
- @Html.ActionLink("Cancel", "Calendar", "Calendar", new { area = "RBM", @class = "t-button action", @title = "Cancel", @tabindex = "5" })<br />
- <small>@Html.ValidationMessage("CartEmpty")</small>
- </div>
-
+   
 
 <style type="text/css">
 

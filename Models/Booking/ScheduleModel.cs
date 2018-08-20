@@ -48,7 +48,9 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
     public class ScheduleDurationModel
     {
         public int Index { get; set; }
+        [Display(Name = "From")]
         public DateTime StartDate { get; set; }
+        [Display(Name = "To")]
         public DateTime EndDate { get; set; }
         public int DurationValue { get; set; }
         public SystemDefinedUnit TimeUnit { get; set; }
@@ -81,6 +83,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         //Status must be included
         public DateTime PreselectedStartDate { get; set; }
         public DateTime PreselectedEndDate { get; set; }
+        public bool PreselectedEndStartDate { get; set; }
         public int PreselectdQuantity { get; set; } 
         public int Index { get; set; }
 
@@ -90,7 +93,8 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         {
             PreselectedStartDate = DateTime.Now;
             PreselectedEndDate = DateTime.Now;
-        }
+            PreselectedEndStartDate = false;
+    }
 
     }
 
@@ -242,6 +246,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         public PersonInSchedule Contact { get; set; }
 
         //def. Quantity for a schedule
+        [Display(Name = "Number")]
         public int ScheduleQuantity { get; set; }
         // Quantity of the resource
         public int ResourceQuantity { get; set; }

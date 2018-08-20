@@ -1,80 +1,81 @@
 ﻿@using Telerik.Web.Mvc.UI;
 @using BExIS.Web.Shell.Areas.RBM.Models.Booking;
 
+
+
 @model ResourceFilterModel
-
-
 @*<b>Filter Resources</b><br /><br />*@
 
-    <table style="width:400px; border: none !important;"class="overlay">
-        <tr>
-            <td style="border: none !important;">
-                @if(Model.IsPreSelected)
-                {
-                <span>Startdate:@Html.Telerik().DatePickerFor(m => m.StartDate).HtmlAttributes(new { title="Start date of the time period in which you search resources" })</span>
-                }
-                else
-                {
-                  <span>Startdate: @Html.Telerik().DatePicker().Name("StartDate").HtmlAttributes(new { title = "Start date of the time period in which you search resources" })</span>
-                }
-            </td>
-            <td  style="border: none !important;">
-                @if(Model.IsPreSelected)
-                {
-                    <span>Enddate: @Html.Telerik().DatePickerFor(m=>m.EndDate).HtmlAttributes(new { title = "End date of the time period in which you search resources" })</span>
-                }
-                else
-                {
-                   <span> Enddate: @Html.Telerik().DatePicker().Name("EndDate").HtmlAttributes(new { title = "End date of the time period in which you search resources" })</span>
-                }
-                
-            </td>
-        </tr>
-        <tr>
-            <td  style="border: none !important;">
-                Quantity
-                @Html.TextBox("Quantity", Model.Quantity, new { title= "Filter on quantity " })
-            </td>
-            <td  style="border: none !important;">
-                <button onclick="applyFilter()" class="bx-button small function" title="Apply filter">OK</button>
-                <button onclick="removeFilter()" class="bx-button small function" title="Clear filter">Clear</button>
-            </td>
-            </tr>
-    </table>
-    
+<table style=" border: none !important;" class="overlay">
+    <tr>
+        <td style="border: none !important;">
+            @if (Model.IsPreSelected)
+            {
+                <span>From:@Html.Telerik().DatePickerFor(m => m.StartDate).HtmlAttributes(new { title = "Start date of the time period in which you search resources", style = "width:120px" })</span>
+            }
+            else
+            {
+                <span>From: @Html.Telerik().DatePicker().Name("StartDate").HtmlAttributes(new { title = "Start date of the time period in which you search resources", style = "width:120px" })</span>
+            }
+
+            @if (Model.IsPreSelected)
+            {
+                <span>To: @Html.Telerik().DatePickerFor(m => m.EndDate).HtmlAttributes(new { title = "End date of the time period in which you search resources", style = "width:120px" })</span>
+            }
+            else
+            {
+                <span>To: @Html.Telerik().DatePicker().Name("EndDate").HtmlAttributes(new { title = "End date of the time period in which you search resources", style = "width:120px" })</span>
+            }
+
+        </td>
+    </tr>
+    <tr>
+        <td style="border: none !important;">
+            <span> Number:  @Html.TextBox("Quantity", Model.Quantity, new { title = "Filter on quantity ", style = "width:34px; border-width:2px" })</span>
+        </td>
+    </tr>
+    <tr>
+        <td style="border: none !important;">
+
+            <button onclick="applyFilter()" class="bx-button small function" title="Apply filter">OK</button>
+            <button onclick="removeFilter()" class="bx-button small function" title="Clear filter">Clear</button>
+        </td>
+    </tr>
+</table>
+
 
 <br />
 @(Html.Telerik().TreeView()
-        .Name("TreeView")
-        .ShowCheckBox(true)
-        .ClientEvents(events => events
-                //.OnSelect("onSelect")
-                .OnChecked("onChangeFilter")
-        )
+            .Name("TreeView")
+            .ShowCheckBox(true)
+            .ClientEvents(events => events
+                    //.OnSelect("onSelect")
+                    .OnChecked("onChangeFilter")
+            )
 
-         .BindTo<AttributeDomainItemsModel>(Model.TreeItems.Distinct(), (item, attribute) =>
-             {
-                 item.Text = attribute.AttrName;
-                 item.Value = attribute.AttrId.ToString();
-                 item.Checkable = false;
-                 item.Checked = false;
-                 item.Expanded = true;
-
-                 foreach(BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.DomainItemModel di in attribute.DomainItems)
+             .BindTo<AttributeDomainItemsModel>(Model.TreeItems.Distinct(), (item, attribute) =>
                  {
-                      TreeViewItem subitem = new TreeViewItem();
-                      item.Items.Add(subitem);
+                     item.Text = attribute.AttrName;
+                     item.Value = attribute.AttrId.ToString();
+                     item.Checkable = false;
+                     item.Checked = false;
+                     item.Expanded = true;
 
-                      subitem.Text = di.Key;
-                      subitem.Value = di.Key;
-                      subitem.LinkHtmlAttributes["id"] = attribute.AttrId;
-                      subitem.LinkHtmlAttributes["class"] = "domainItem";
-                      
-                      //subitem.Action("OnSelectTreeViewItem", "Schedule", new RouteValueDictionary { { "area", "RBM" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
+                     foreach (BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.DomainItemModel di in attribute.DomainItems)
+                     {
+                         TreeViewItem subitem = new TreeViewItem();
+                         item.Items.Add(subitem);
+
+                         subitem.Text = di.Key;
+                         subitem.Value = di.Key;
+                         subitem.LinkHtmlAttributes["id"] = attribute.AttrId;
+                         subitem.LinkHtmlAttributes["class"] = "domainItem";
+
+             //subitem.Action("OnSelectTreeViewItem", "Schedule", new RouteValueDictionary { { "area", "RBM" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
+         }
                  }
-             }
-        )
-        .ExpandAll(true)
+            )
+            .ExpandAll(true)
 )
 
 
@@ -94,9 +95,16 @@
         var startdate = $("#StartDate").val();
         var enddate = $("#EndDate").val();
 
+        if (!startdate || !enddate) {
+            alert("End or start date is missing. Add the date to apply the filter.");
+            return;
+        }
+     
+
         if (new Date(enddate) < new Date(startdate))
         {
             alert("End date is before start date. Change the date to apply the filter.");
+            return;
         }
         else
         {
@@ -193,7 +201,7 @@
                 });
             }
         }
-    
+
 
 </script>
 
