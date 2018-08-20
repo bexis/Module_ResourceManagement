@@ -109,6 +109,12 @@
             alert("End date is before start date. Change the date to apply the filter.");
             return;
         }
+
+        if (!Number.isInteger(Number($("#Quantity").val()))) {
+            alert("Number must be an integer.");
+            return;
+        }
+
         else
         {
             var quantity = $("#Quantity").val();
