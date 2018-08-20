@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BExIS.Rbm.Entities.Booking
 {
-    public class BookingTemplate : RealEvent
+    public class BookingTemplate : BookingEvent
     {
         #region Attributes
 
