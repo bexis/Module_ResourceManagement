@@ -62,7 +62,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Booking\Notification.cs" />
-    <Compile Include="Booking\RealEvent.cs">
+    <Compile Include="Booking\BookingEvent.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Booking\Schedule.cs" />

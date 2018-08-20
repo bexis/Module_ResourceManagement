@@ -74,7 +74,7 @@ namespace BExIS.Rbm.Services.Booking
         }
 
         /// <summary>
-        /// If the <paramref name="Activity"/> is not associated to any <see cref="RealEvent"/>, the method deletes it from the database.
+        /// If the <paramref name="Activity"/> is not associated to any <see cref="BookingEvent"/>, the method deletes it from the database.
         /// </summary>
         public bool DeleteActivity(Activity activity)
         {

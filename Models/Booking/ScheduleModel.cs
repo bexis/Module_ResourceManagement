@@ -164,8 +164,8 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
         public ScheduleListModel(Schedule s)
         {
-            EventName = s.Event.Name;
-            EventDescription = s.Event.Description;
+            EventName = s.BookingEvent.Name;
+            EventDescription = s.BookingEvent.Description;
             ResourceName = s.Resource.Name;
             ContactPerson = s.ForPerson.Contact.Name;
             StartDate = s.StartDate;

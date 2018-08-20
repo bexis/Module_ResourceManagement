@@ -42,9 +42,9 @@ namespace BExIS.Rbm.Entities.Booking
         public virtual R.SingleResource Resource { get; set; }
 
         /// <summary>
-        /// The <see cref="Event"/> where is this schedule related.
+        /// The <see cref="BookingEvent"/> where is this schedule related.
         /// </summary> 
-        public virtual RealEvent Event { get; set; }
+        public virtual BookingEvent BookingEvent { get; set; }
 
         /// <summary>
         /// The <see cref="Person"/> which created the schedule.

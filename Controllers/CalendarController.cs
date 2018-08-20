@@ -40,7 +40,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             DateTime startDate = DateTime.Parse(st.ToString());
             DateTime endDate = DateTime.Parse(ed.ToString());
 
-            List<RealEvent> eventList = new List<RealEvent>();
+            List<BookingEvent> eventList = new List<BookingEvent>();
             if (Session["FilterSchedules"] == null)
             {
                 EventManager eManager = new EventManager();
@@ -53,14 +53,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 scheduleList = Session["FilterSchedules"] as List<Schedule>;
                 foreach (Schedule s in scheduleList)
                 {
-                    if (!eventList.Select(a => a.Id).ToList().Contains(s.Event.Id))
-                        eventList.Add(eManager.GetEventById(s.Event.Id));
+                    if (!eventList.Select(a => a.Id).ToList().Contains(s.BookingEvent.Id))
+                        eventList.Add(eManager.GetEventById(s.BookingEvent.Id));
                 }
 
             }
 
             List<object> eventObjectList = new List<object>();
-            foreach (RealEvent e in eventList)
+            foreach (BookingEvent e in eventList)
             {
                 eventObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(e)) });
             }
@@ -83,7 +83,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<object> scheduleObjectList = new List<object>();
             foreach (Schedule s in scheduleList)
             {
-                scheduleObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource, s.StartDate, s.EndDate, s.Event.Id)) });
+                scheduleObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource, s.StartDate, s.EndDate, s.BookingEvent.Id)) });
             }
 
             Session["FilterSchedules"] = null;
@@ -93,7 +93,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public JsonResult GetEventsByUser()
         {
-            List<RealEvent> eventList = new List<RealEvent>();
+            List<BookingEvent> eventList = new List<BookingEvent>();
             SubjectManager subManager = new SubjectManager();
 
             User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
@@ -103,8 +103,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 EventManager eManager = new EventManager();
                 ScheduleManager schManager = new ScheduleManager();
 
-                List<RealEvent> temp = eManager.GetAllEvents().ToList();
-                foreach (RealEvent e in temp)
+                List<BookingEvent> temp = eManager.GetAllEvents().ToList();
+                foreach (BookingEvent e in temp)
                 {
                     List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
                     var s = schedules.Where(a => a.ByPerson.Person.Id == user.Id).ToList();
@@ -114,7 +114,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             }
 
             List<object> eventObjectList = new List<object>();
-            foreach (RealEvent e in eventList)
+            foreach (BookingEvent e in eventList)
             {
                 eventObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(e)) });
             }
@@ -145,7 +145,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<object> scheduleObjectList = new List<object>();
             foreach (Schedule s in scheduleList)
             {
-                scheduleObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource, s.StartDate, s.EndDate, s.Event.Id)) });
+                scheduleObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource, s.StartDate, s.EndDate, s.BookingEvent.Id)) });
             }
 
             Session["FilterSchedules"] = null;
@@ -162,7 +162,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<object> scheduleList = new List<object>();
             foreach (Schedule s in allSchedules)
             {
-                scheduleList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource, s.StartDate, s.EndDate, s.Event.Id)) });
+                scheduleList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource, s.StartDate, s.EndDate, s.BookingEvent.Id)) });
             }
 
             return Json(scheduleList.ToArray(), JsonRequestBehavior.AllowGet);
@@ -294,9 +294,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
             ScheduleManager schManager = new ScheduleManager();
             SubjectManager subManager = new SubjectManager();
 
-            List<EventModel> model = new List<EventModel>();
+            List<BookingEventModel> model = new List<BookingEventModel>();
 
-            List<RealEvent> allEvents = new List<RealEvent>();
+            List<BookingEvent> allEvents = new List<BookingEvent>();
 
             if (Session["FilterSchedules"] == null)
                 allEvents = eManager.GetAllEvents().ToList();
@@ -306,7 +306,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 scheduleList = Session["FilterSchedules"] as List<Schedule>;
                 foreach (Schedule s in scheduleList)
                 {
-                    allEvents.Add(eManager.GetEventById(s.Event.Id));
+                    allEvents.Add(eManager.GetEventById(s.BookingEvent.Id));
                 }
             }
 
@@ -314,16 +314,16 @@ namespace BExIS.Modules.RBM.UI.Controllers
             {
                 User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
 
-                foreach (RealEvent e in allEvents)
+                foreach (BookingEvent e in allEvents)
                 {
                     List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
                     var s = schedules.Where(a => a.ByPerson.Person.Id == user.Id).ToList();
                     if (s.Count > 0)
-                        model.Add(new EventModel(e));
+                        model.Add(new BookingEventModel(e));
                 }
             }
             else
-                allEvents.ForEach(r => model.Add(new EventModel(r)));
+                allEvents.ForEach(r => model.Add(new BookingEventModel(r)));
 
             return PartialView("_listEvents", model);
         }

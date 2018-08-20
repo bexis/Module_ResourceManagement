@@ -7,7 +7,7 @@ using R = BExIS.Rbm.Entities.Resource;
 
 namespace BExIS.Rbm.Entities.Booking
 {
-    public class RealEvent : BaseEntity
+    public class BookingEvent : BaseEntity
     {
         #region Attributes
 
@@ -41,7 +41,7 @@ namespace BExIS.Rbm.Entities.Booking
 
         #region Methods
       
-        public RealEvent()
+        public BookingEvent()
         {
             Schedules = new List<Schedule>(); 
         }

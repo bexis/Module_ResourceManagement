@@ -77,9 +77,18 @@ namespace BExIS.Rbm.Services.ResourceStructure
        {
            Contract.Requires(resoureStruc != null);
            Contract.Requires(resoureStruc.Id >= 0);
-           ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
 
-           bool deleted = rsaManager.DeleteUsagesByRSId(resoureStruc.Id);
+            bool deleted = false;
+
+            if (resoureStruc.ResourceAttributeUsages != null)
+            {
+                using (var rsaManager = new ResourceStructureAttributeManager())
+                {
+                    deleted = rsaManager.DeleteUsagesByRSId(resoureStruc.Id);
+                }
+            }
+            else
+                deleted = true;
 
            if (deleted)
            {

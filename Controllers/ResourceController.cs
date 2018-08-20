@@ -256,7 +256,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 foreach (TextValueModel tvm in model.TextValues)
                 {
                     ResourceAttributeUsage usage = valueManager.GetResourceAttributeUsageById(tvm.ResourceAttributeUsageId);
-                    if (usage.IsValueOptional == false && tvm.Value == null)
+                    if (usage.IsValueOptional == false && (tvm.Value == null || tvm.Value == ""))
                     {
                         ModelState.AddModelError("Errors", "Set a value to " + usage.ResourceStructureAttribute.Name + " is required.");
                     }

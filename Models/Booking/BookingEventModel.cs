@@ -21,7 +21,7 @@ using BExIS.Dlm.Entities.Party;
 
 namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 {
-    public class EventModel
+    public class BookingEventModel
     {
         public long Id { get; set; }
 
@@ -43,13 +43,13 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         //store deleted schedule temporär
         public List<long> DeletedSchedules { get; set; }
 
-        public EventModel()
+        public BookingEventModel()
         {
             Schedules = new List<ScheduleEventModel>();
             DeletedSchedules = new List<long>();
         }
 
-        public EventModel(List<ResourceCart> cart)
+        public BookingEventModel(List<ResourceCart> cart)
         {
             using (var rManager = new SingleResourceManager())
             {
@@ -82,7 +82,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             }
         }
 
-        public EventModel(RealEvent e)
+        public BookingEventModel(BookingEvent e)
         {
             Id = e.Id;
             Name = e.Name;
@@ -127,7 +127,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             //Resource = new R.Resource();
         }
 
-        public CalendarItemsModel(RealEvent e)
+        public CalendarItemsModel(BookingEvent e)
         {
             using (var schManager = new ScheduleManager())
             {
@@ -176,7 +176,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                 DeleteAccess = false;
             }
 
-            public ShowEventModel(RealEvent eEvent)
+            public ShowEventModel(BookingEvent eEvent)
             {
                 //ScheduleManager schManager = new ScheduleManager();
                 //List<Schedule> schedules = schManager.GetAllSchedulesByEvent(eEvent.Id);

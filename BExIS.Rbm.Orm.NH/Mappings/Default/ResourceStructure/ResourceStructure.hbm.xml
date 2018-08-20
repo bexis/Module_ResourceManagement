@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.ResourceStructure">
 
-  <class xmlns="urn:nhibernate-mapping-2.2" name="ResourceStructure" table="ResourceStructures" dynamic-update="true">
+  <class xmlns="urn:nhibernate-mapping-2.2" name="ResourceStructure" table="RBM_ResourceStructures" dynamic-update="true">
 
     <!-- Mapping BaseEntity properties -->
 

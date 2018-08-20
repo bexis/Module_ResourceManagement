@@ -28,7 +28,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         //define if user has delete access to the attribute
         public bool DeleteAccess { get; set; }
 
-        List<EventModel> Events { get; set; }
+        List<BookingEventModel> Events { get; set; }
 
         public ActivityModel()
         {
