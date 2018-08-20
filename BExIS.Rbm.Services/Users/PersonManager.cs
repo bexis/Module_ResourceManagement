@@ -64,7 +64,7 @@ namespace BExIS.Rbm.Services.Users
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
                 IRepository<Person> repo = uow.GetRepository<Person>();
-                person = repo.Reload(person);
+                person = repo.Reload(person.Self);
                 repo.Delete(person);
                 uow.Commit();
             }
