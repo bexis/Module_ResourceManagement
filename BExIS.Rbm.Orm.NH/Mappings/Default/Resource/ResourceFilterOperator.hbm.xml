@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.Resource">
-  <class xmlns="urn:nhibernate-mapping-2.2" name="ResourceFilterOperator" table="ResourceFilterOperator">
+  <class xmlns="urn:nhibernate-mapping-2.2" name="ResourceFilterOperator" table="RBM_ResourceFilterOperator">
 
     <!-- Mapping BaseEntity properties -->
 

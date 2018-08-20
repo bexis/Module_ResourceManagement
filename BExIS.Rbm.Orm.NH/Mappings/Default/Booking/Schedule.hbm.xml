@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.Booking">
-  <class xmlns="urn:nhibernate-mapping-2.2" name="Schedule" table="Schedules">
+  <class xmlns="urn:nhibernate-mapping-2.2" name="Schedule" table="RBM_Schedules">
 
     <!-- Mapping BaseEntity properties -->
     <id name="Id" type="Int64">
@@ -28,7 +28,7 @@
 
     <many-to-one name="Resource" class="BExIS.Rbm.Entities.Resource.SingleResource" not-null="true" column="ResourceRef"/>
 
-    <many-to-one name="Event" class="BExIS.Rbm.Entities.Booking.RealEvent" not-null="true"  column="EventRef"/>
+    <many-to-one name="BookingEvent" class="BExIS.Rbm.Entities.Booking.BookingEvent" not-null="true"  column="BookingEventRef"/>
 
     <many-to-one name="ByPerson" class="BExIS.Rbm.Entities.Users.Person" not-null="true"  column="ByPerson" lazy="false"/>
 

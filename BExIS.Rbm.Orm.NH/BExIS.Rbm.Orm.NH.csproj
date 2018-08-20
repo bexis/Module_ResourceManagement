@@ -44,19 +44,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Mappings\DB2Dialect\BookingManagementTime\PeriodicTimeInstant.hbm.xml" />
-    <Content Include="Mappings\DB2Dialect\BookingManagementTime\PeriodicTimeInterval.hbm.xml" />
-    <Content Include="Mappings\DB2Dialect\BookingManagementTime\TimeDuration.hbm.xml" />
-    <Content Include="Mappings\DB2Dialect\BookingManagementTime\TimeInstant.hbm.xml">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Mappings\DB2Dialect\BookingManagementTime\TimeInterval.hbm.xml">
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="Mappings\Default\BookingManagementTime\PeriodicTimeInstant.hbm.xml" />
     <Content Include="Mappings\Default\BookingManagementTime\PeriodicTimeInterval.hbm.xml" />
     <Content Include="Mappings\Default\BookingManagementTime\TimeDuration.hbm.xml" />
@@ -72,7 +62,7 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Mappings\Default\Booking\NotificationDependencies.hbm.xml" />
-    <Content Include="Mappings\Default\Booking\RealEvent.hbm.xml">
+    <Content Include="Mappings\Default\Booking\BookingEvent.hbm.xml">
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Mappings\Default\Booking\Schedule.hbm.xml">
@@ -125,7 +115,9 @@
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Mappings\DB2Dialect\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>rmdir /S /Q  "$(SolutionDir)Console\Workspace\Modules\RBM\Db\Mappings"

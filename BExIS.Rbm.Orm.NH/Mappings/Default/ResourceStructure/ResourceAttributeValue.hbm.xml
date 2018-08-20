@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.ResourceStructure">
 
-  <class xmlns="urn:nhibernate-mapping-2.2" name="ResourceAttributeValue" table="ResourceAttributeValues">
+  <class xmlns="urn:nhibernate-mapping-2.2" name="ResourceAttributeValue" table="RBM_ResourceAttributeValues">
 
     <!-- Mapping BaseEntity properties -->
 

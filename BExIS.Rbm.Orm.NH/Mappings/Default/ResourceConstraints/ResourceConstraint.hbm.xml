@@ -1,5 +1,5 @@
 ﻿<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.ResourceConstraint">
-  <class xmlns="urn:nhibernate-mapping-2.2" name="ResourceConstraint" table="ResourceConstraints" dynamic-update="true">
+  <class xmlns="urn:nhibernate-mapping-2.2" name="ResourceConstraint" table="RBM_ResourceConstraints" dynamic-update="true">
 
     <!-- Mapping BaseEntity properties -->
 

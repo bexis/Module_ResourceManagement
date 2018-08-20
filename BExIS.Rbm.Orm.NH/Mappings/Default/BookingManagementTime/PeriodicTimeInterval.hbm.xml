@@ -1,5 +1,5 @@
 ﻿<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rbm.Entities" namespace="BExIS.Rbm.Entities.BookingManagementTime">
-  <class xmlns="urn:nhibernate-mapping-2.2" name="PeriodicTimeInterval" table="PeriodicTimeInterval" dynamic-update="true">
+  <class xmlns="urn:nhibernate-mapping-2.2" name="PeriodicTimeInterval" table="RBM_PeriodicTimeInterval" dynamic-update="true">
 
     <!-- Mapping BaseEntity properties -->
 
