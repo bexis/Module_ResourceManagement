@@ -329,7 +329,8 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                         FileValueModel fvm = new FileValueModel(fileValue);
                         Files.Add(fvm);
                         //if (!usage.IsValueOptional)
-                        ResourceHasFiles = true;
+                        if (fvm.Data != null)
+                            ResourceHasFiles = true;
                     }
                 }
             }
