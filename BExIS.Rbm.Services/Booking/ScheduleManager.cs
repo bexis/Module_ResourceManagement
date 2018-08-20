@@ -53,12 +53,12 @@ namespace BExIS.Rbm.Services.Booking
 
         #region Methods
 
-        public Schedule CreateSchedule(DateTime startDate, DateTime endDate, RealEvent thisEvent, R.SingleResource resource, Person forPerson, Person byPerson, List<Activity> activities,int quantity, int index)
+        public Schedule CreateSchedule(DateTime startDate, DateTime endDate, BookingEvent thisEvent, R.SingleResource resource, Person forPerson, Person byPerson, List<Activity> activities,int quantity, int index)
         {
             Schedule schedule = new Schedule();
             schedule.StartDate = startDate;
             schedule.EndDate = endDate;
-            schedule.Event = thisEvent;
+            schedule.BookingEvent = thisEvent;
             schedule.Resource = resource;
             schedule.Activities = activities;
             schedule.Index = index;
@@ -135,13 +135,13 @@ namespace BExIS.Rbm.Services.Booking
 
         public List<Schedule> GetAllSchedulesByEvent(long eventId)
         {
-            return ScheduleRepo.Query(a=>a.Event.Id == eventId).ToList();
+            return ScheduleRepo.Query(a=>a.BookingEvent.Id == eventId).ToList();
         }
 
         public bool RemoveAllSchedulesByEvent(long eventId)
         {
             PersonManager pManager = new PersonManager();
-            List<Schedule> list = ScheduleRepo.Query(a => a.Event.Id == eventId).ToList();
+            List<Schedule> list = ScheduleRepo.Query(a => a.BookingEvent.Id == eventId).ToList();
             foreach (Schedule s in list)
             {
                 using (IUnitOfWork uow = this.GetUnitOfWork())
@@ -174,7 +174,7 @@ namespace BExIS.Rbm.Services.Booking
 
         public List<Schedule> GetSchedulesBetweenStartAndEndDate(DateTime startDate, DateTime endDate, List<long> eventIds)
         {
-            return ScheduleRepo.Query(a => (eventIds.Contains(a.Event.Id)) && (((DateTime)a.StartDate >= startDate && (DateTime)a.StartDate <= endDate) || ((DateTime)a.EndDate >= startDate && (DateTime)a.EndDate <= endDate))).ToList();
+            return ScheduleRepo.Query(a => (eventIds.Contains(a.BookingEvent.Id)) && (((DateTime)a.StartDate >= startDate && (DateTime)a.StartDate <= endDate) || ((DateTime)a.EndDate >= startDate && (DateTime)a.EndDate <= endDate))).ToList();
         }
 
         #endregion
