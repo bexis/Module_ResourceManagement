@@ -5,15 +5,6 @@
 
 <div class="overlay">
     <div style="padding-bottom:5px">
-
-        <div id="contentView" class="btn-group" data-toggle="buttons">
-            <label class="btn btn-default bx-button active">
-                <input type="radio" autocomplete="off" checked value="Events"> Booking
-            </label>
-            <label class="btn btn-default bx-button">
-                <input type="radio" autocomplete="off" value="Schedules"> Resource
-            </label>
-        </div>
         <div id="contentView" class="btn-group" data-toggle="buttons">
             <label class="btn btn-default  active" style="width:83px">
                 <input type="radio" autocomplete="off" checked value="Events"> Booking
@@ -23,7 +14,7 @@
             </label>
         </div>
     </div>
- 
+
     <div id="displayView" class="btn-group" data-toggle="buttons">
         <label class="btn btn-default  active">
             <input type="radio" autocomplete="off" checked value="Calendar"> Calendar
@@ -48,38 +39,40 @@
     </div>
 
 
-
+    <div class="overlayHeader">
+        <span>Filter</span>
+    </div>
     @(Html.Telerik().TreeView()
-                                        .Name("TreeView")
-                                        .ShowCheckBox(true)
-                                        .ClientEvents(events => events
-                                                //.OnSelect("onSelect")
-                                                .OnChecked("onChecked")
-                                        )
+                                                .Name("TreeView")
+                                                .ShowCheckBox(true)
+                                                .ClientEvents(events => events
+                                                        //.OnSelect("onSelect")
+                                                        .OnChecked("onChecked")
+                                                )
 
-                                         .BindTo<AttributeDomainItemsModel>(Model.TreeItems.Distinct(), (item, attribute) =>
-                                             {
-                                                 item.Text = attribute.AttrName;
-                                                 item.Value = attribute.AttrId.ToString();
-                                                 item.Checkable = false;
-                                                 item.Checked = false;
-                                                 item.Expanded = true;
+                                                 .BindTo<AttributeDomainItemsModel>(Model.TreeItems.Distinct(), (item, attribute) =>
+                                                     {
+                                                         item.Text = attribute.AttrName;
+                                                         item.Value = attribute.AttrId.ToString();
+                                                         item.Checkable = false;
+                                                         item.Checked = false;
+                                                         item.Expanded = true;
 
-                                                 foreach (BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.DomainItemModel di in attribute.DomainItems)
-                                                 {
-                                                     TreeViewItem subitem = new TreeViewItem();
-                                                     item.Items.Add(subitem);
+                                                         foreach (BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.DomainItemModel di in attribute.DomainItems)
+                                                         {
+                                                             TreeViewItem subitem = new TreeViewItem();
+                                                             item.Items.Add(subitem);
 
-                                                     subitem.Text = di.Key;
-                                                     subitem.Value = di.Key;
-                                                     subitem.LinkHtmlAttributes["id"] = attribute.AttrId;
-                                                     subitem.LinkHtmlAttributes["class"] = "domainItem";
+                                                             subitem.Text = di.Key;
+                                                             subitem.Value = di.Key;
+                                                             subitem.LinkHtmlAttributes["id"] = attribute.AttrId;
+                                                             subitem.LinkHtmlAttributes["class"] = "domainItem";
 
-                                         //subitem.Action("OnSelectTreeViewItem", "Schedule", new RouteValueDictionary { { "area", "RBM" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
-                                     }
+                                                 //subitem.Action("OnSelectTreeViewItem", "Schedule", new RouteValueDictionary { { "area", "RBM" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
                                              }
-                                        )
-                                        .ExpandAll(true)
+                                                     }
+                                                )
+                                                .ExpandAll(true)
     )
 
 </div>
