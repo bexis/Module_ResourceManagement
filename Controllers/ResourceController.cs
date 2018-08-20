@@ -163,9 +163,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                         foreach (FileValueModel fv in model.FileValues)
                         {
-                            if (fv.Id == 0)
+                            if (fv.Data != null && fv.Id == 0)
+                            {
                                 valueManager.CreateResourceAttributeValue(fv.Name, fv.Extention, fv.Minmetype, fv.Data, fv.NeedConfirmation, rManager.GetResourceById(resource.Id), valueManager.GetResourceAttributeUsageById(fv.ResourceAttributeUsageId));
-                            else
+                            }
+                            else if (fv.Data != null && fv.Id != 0)
                             {
                                 FileValue fValue = valueManager.GetFileValueById(fv.Id);
                                 fValue.Name = fv.Name;
@@ -174,6 +176,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 fValue.Data = fv.Data;
                                 fv.NeedConfirmation = fv.NeedConfirmation;
                                 valueManager.UpdateResourceAttributeValue(fValue);
+                            }
+                            else if (fv.Data == null && fv.Id != 0)
+                            {
+                                FileValue fValue = valueManager.GetFileValueById(fv.Id);
+                                valueManager.DeleteResourceAttributeValue(fValue);
                             }
                         }
                     }
