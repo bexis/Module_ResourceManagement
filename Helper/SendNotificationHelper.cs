@@ -41,7 +41,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Helpers
         /// <param name="bookingAction">For which action the notification will be send. (create, edit or delete event)</param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static void SendBookingNotification(BookingAction bookingAction, EventModel model)
+        public static void SendBookingNotification(BookingAction bookingAction, BookingEventModel model)
         {
             //string a = @"\BExIS.Modules.RBM.UI";
             //Configuration configFile = WebConfigurationManager.OpenWebConfiguration(a);
