@@ -44,8 +44,15 @@
               @Html.Partial("_showResourceStructureAttributes", Model)
 
          <div class="bx-footer right">
-            <button name="create" type="submit" class="bx-button action" title="Save Resource Structure">Save</button>
-            @Html.ActionLink("Cancel", "ResourceStructure", "ResourceStructure", new { area = "RBM", @class = "t-button action", @title = "Cancel", @tabindex = "5" })
+             <button name="create" type="submit" class="bx-button action" title="Save Resource Structure">Save</button>
+             @if (Model.FirstCreated)
+             {
+                 @Html.ActionLink("Cancel", "Delete", "ResourceStructure", new { area = "RBM", id = Model.Id }, new { @class = "t-button action", @title = "Cancel", @tabindex = "5" })
+             }
+             else
+             {
+                 @Html.ActionLink("Cancel", "ResourceStructure", "ResourceStructure", new { area = "RBM", @class = "t-button action", @title = "Cancel", @tabindex = "5" })
+             }
          </div>
              @Html.ValidationSummary("Errors")
 
@@ -85,7 +92,8 @@
                 var window = $('#Window_Add').data('tWindow');
                 window.center().open();
             });
-    }
+        }
+
 
     function Window_Creation_OnClose() {
 
