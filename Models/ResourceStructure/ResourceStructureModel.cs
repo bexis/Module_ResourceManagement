@@ -38,6 +38,8 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure
 
         public ResourceStructureModel Parent { get; set; }
 
+        public bool FirstCreated { get; set; }
+
         public ResourceStructureModel()
         {
             Id = 0;
@@ -46,6 +48,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure
             AllResourceStructures = new List<ResourceStructureModel>();
             ResourceStructureAttributeUsages = new List<ResourceStructureAttributeUsageModel>();
             SelectedItem = new ResourceStructureAttributeModel();
+            FirstCreated = false;
             //Parent = new ResourceStructureModel();
         }
 
