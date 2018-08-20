@@ -68,10 +68,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     pManager.Create(user, entityType, rS.Id, 31);
                 }
 
-               //End -> add security ------------------------------------------
+                //End -> add security ------------------------------------------
 
 
-                  return View("_editResourceStructure", new ResourceStructureModel(rS));
+                ResourceStructureModel rSmodel = new ResourceStructureModel(rS);
+                rSmodel.FirstCreated = true;
+                  return View("_editResourceStructure", rSmodel);
             }
             
             else
@@ -188,7 +190,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 }
             }
 
-            return RedirectToAction("ResourceStructure");
+            return RedirectToAction("ResourceStructure", "ResourceStructure");
         }
 
         [GridAction]
