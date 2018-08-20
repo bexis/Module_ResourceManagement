@@ -26,7 +26,7 @@ namespace BExIS.Modules.RBM.UI.Helper
             rbmEntities.Add("ResourceStructure", typeof(ResourceStructure));
             rbmEntities.Add("ResourceStructureAttribute", typeof(ResourceStructureAttribute));
             rbmEntities.Add("Activity", typeof(Activity));
-            rbmEntities.Add("Event", typeof(RealEvent));
+            rbmEntities.Add("Event", typeof(BookingEvent));
             rbmEntities.Add("Notification", typeof(Notification));
             rbmEntities.Add("Schedule", typeof(Schedule));
 
