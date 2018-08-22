@@ -33,7 +33,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult Create(CreateResourceGroupModel model)
         {
            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Create Group Manager", this.Session.GetTenant());
-           SingleResourceManager rManager = new SingleResourceManager();
+           ResourceManager rManager = new ResourceManager();
            ResourceGroupModel rsModel = new ResourceGroupModel(rManager.CreateResourceGroup(model.Name, model.ClassifierMode, null));
 
             return View("EditResourceGroup", rsModel);
@@ -42,7 +42,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult Edit(long id)
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Edit Group Manager", this.Session.GetTenant());
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
             ResourceGroup rc = rManager.GetResourceGroupById(id);
 
             return View("EditResourceGroup", new ResourceGroupModel(rc));
@@ -51,7 +51,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         [HttpPost]
         public ActionResult Edit(ResourceGroupModel model)
         {
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
             ResourceGroup rc = rManager.GetResourceGroupById(model.Id);
             if (rc != null)
             {
@@ -69,7 +69,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult Delete(long id)
         {
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
             ResourceGroup rc = rManager.GetResourceGroupById(id);
             rManager.DeleteResourceGroup(rc);
 
@@ -80,7 +80,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             ResourceGroupModel model = new ResourceGroupModel();
             model.Id = id;
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
             IQueryable<SingleResource> resoures = rManager.GetAllResources();
             List<ResourceModel> resourceMList = new List<ResourceModel>();
             foreach (SingleResource r in resoures)
@@ -94,7 +94,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult AddResourceToGroup(long setId, long resourceId)
         {
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
             ResourceGroup rc = rManager.GetResourceGroupById(setId);
             SingleResource r = rManager.GetResourceById(resourceId);
             rc.SingleResources.Add(r);
@@ -107,7 +107,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult AddResourcesToGroup(long setId, string resourceIds)
         {
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
             ResourceGroup rc = rManager.GetResourceGroupById(setId);
 
             if (rc != null)
@@ -136,7 +136,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult RemoveResourceFromGroup(long setId, long resourceId)
         {
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
             ResourceGroup rc = rManager.GetResourceGroupById(setId);
             SingleResource r = rManager.GetResourceById(resourceId);
             rc.SingleResources.Remove(r);
@@ -150,8 +150,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
         [GridAction]
         public ActionResult ResourceGroup_Select()
         {
-            SingleResourceManager rManager = new SingleResourceManager();
-            IQueryable<ResourceGroup> data = rManager.GetAllResourceClassifiers();
+            ResourceManager rManager = new ResourceManager();
+            IQueryable<ResourceGroup> data = rManager.GetAllResourceGroups();
             List<ResourceGroupManagerModel> model = new List<ResourceGroupManagerModel>();
 
             ResourceGroupManagerModel temp = new ResourceGroupManagerModel();
@@ -163,7 +163,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         [GridAction]
         public ActionResult Resource_Select()
         {
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
 
             //Resource rsss = resourceManager.GetResourceById(1);
             IQueryable<SingleResource> data = rManager.GetAllResources();

@@ -36,7 +36,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult CreateNotification()
         {
-            using (SingleResourceManager rManager = new SingleResourceManager())
+            using (ResourceManager rManager = new ResourceManager())
             {
                 List<SingleResource> resources = rManager.GetAllResources().ToList();
                 List<ResourceModel> rModelList = new List<ResourceModel>();
@@ -181,7 +181,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         private List<Schedule> GetAffectedSchedules(Dictionary<long, List<string>> dictionary, DateTime startDate, DateTime endDate)
         {
             ScheduleManager sManager = new ScheduleManager();
-            SingleResourceManager srManager = new SingleResourceManager();
+            ResourceManager srManager = new ResourceManager();
 
             List<ResourceAttributeValueModel> resourceAttributeValueModels = new List<ResourceAttributeValueModel>();
 
@@ -257,7 +257,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             NotificationManager nManager = new NotificationManager();
             Notification notification = nManager.GetNotificationById(id);
 
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
             List<SingleResource> resources = rManager.GetAllResources().ToList();
             List<ResourceModel> rModelList = new List<ResourceModel>();
             resources.ToList().ForEach(r => rModelList.Add(new ResourceModel(r)));

@@ -43,18 +43,18 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<BookingEvent> eventList = new List<BookingEvent>();
             if (Session["FilterSchedules"] == null)
             {
-                EventManager eManager = new EventManager();
+                BookingEventManager eManager = new BookingEventManager();
                 eventList = eManager.GetAllEventByTimePeriod(startDate, endDate);
             }
             else
             {
-                EventManager eManager = new EventManager();
+                BookingEventManager eManager = new BookingEventManager();
                 List<Schedule> scheduleList = new List<Schedule>();
                 scheduleList = Session["FilterSchedules"] as List<Schedule>;
                 foreach (Schedule s in scheduleList)
                 {
                     if (!eventList.Select(a => a.Id).ToList().Contains(s.BookingEvent.Id))
-                        eventList.Add(eManager.GetEventById(s.BookingEvent.Id));
+                        eventList.Add(eManager.GetBookingEventById(s.BookingEvent.Id));
                 }
 
             }
@@ -100,10 +100,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             if (Session["FilterSchedules"] == null)
             {
-                EventManager eManager = new EventManager();
+                BookingEventManager eManager = new BookingEventManager();
                 ScheduleManager schManager = new ScheduleManager();
 
-                List<BookingEvent> temp = eManager.GetAllEvents().ToList();
+                List<BookingEvent> temp = eManager.GetAllBookingEvents().ToList();
                 foreach (BookingEvent e in temp)
                 {
                     List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
@@ -171,7 +171,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult TreeFilterSchedules()
         {
             ResourceFilterModel model = new ResourceFilterModel();
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
             List<SingleResource> singleResources = rManager.GetAllResources().ToList();
 
             List<ResourceModel> resources = new List<ResourceModel>();
@@ -290,7 +290,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult GetEventsAsList(string myBookings)
         {
-            EventManager eManager = new EventManager();
+            BookingEventManager eManager = new BookingEventManager();
             ScheduleManager schManager = new ScheduleManager();
             SubjectManager subManager = new SubjectManager();
 
@@ -299,14 +299,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<BookingEvent> allEvents = new List<BookingEvent>();
 
             if (Session["FilterSchedules"] == null)
-                allEvents = eManager.GetAllEvents().ToList();
+                allEvents = eManager.GetAllBookingEvents().ToList();
             else
             {
                 List<Schedule> scheduleList = new List<Schedule>();
                 scheduleList = Session["FilterSchedules"] as List<Schedule>;
                 foreach (Schedule s in scheduleList)
                 {
-                    allEvents.Add(eManager.GetEventById(s.BookingEvent.Id));
+                    allEvents.Add(eManager.GetBookingEventById(s.BookingEvent.Id));
                 }
             }
 

@@ -71,7 +71,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<ResourceAttributeValueModel> treeDomainList = new List<ResourceAttributeValueModel>();
             List<SelectResourceForEventModel> resultFromTreeFilter = new List<SelectResourceForEventModel>();
 
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
 
             ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
             List<SingleResource> resources = rManager.GetAllResources().ToList();
@@ -160,7 +160,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             }
             else
             {
-                SingleResourceManager rManager = new SingleResourceManager();
+                ResourceManager rManager = new ResourceManager();
                 List<SingleResource> resources = rManager.GetAllResources().ToList();
                 resources.ForEach(r => resourcesEventList.Add(new SelectResourceForEventModel(r)));
             }
@@ -195,7 +195,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 model.EndDate = filter.EndDate;
                 model.IsPreSelected = true;
             }
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
             List<SingleResource> singleResources = rManager.GetAllResources().ToList();
 
             List<ResourceModel> resources = new List<ResourceModel>();
@@ -224,7 +224,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<SelectResourceForEventModel> allResourceList = new List<SelectResourceForEventModel>();
             List<SelectResourceForEventModel> results = new List<SelectResourceForEventModel>();
 
-            SingleResourceManager srManager = new SingleResourceManager();
+            ResourceManager srManager = new ResourceManager();
             List<SingleResource> singelResources = new List<SingleResource>();
             singelResources = srManager.GetAllResources().ToList();
             singelResources.ForEach(r => allResourceList.Add(new SelectResourceForEventModel(r)));
@@ -283,7 +283,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 //get all selected resource ids
                 //var rIds = resources.Split(',').Select(Int64.Parse).ToList();
 
-                using (var srManager = new SingleResourceManager())
+                using (var srManager = new ResourceManager())
                 using (var pManager = new PersonManager())
                 {
                     UserManager userManager = new UserManager();
@@ -467,7 +467,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult CreateEvent()
         {
             using (var partyManager = new PartyManager())
-            using (var rManager = new SingleResourceManager())
+            using (var rManager = new ResourceManager())
             {
                 List<ResourceCart> cart = (List<ResourceCart>)Session["ResourceCart"];
                 if (cart == null)
@@ -610,7 +610,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             int countSchedulesCurrent = model.Schedules.Count();
             int countSchedulesBefor = 0;
-            using (var singleResourceManager = new SingleResourceManager())
+            using (var singleResourceManager = new ResourceManager())
             {
 
                 //Validate schedules ----------------------------------------------------------
@@ -798,7 +798,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                     using (var scheduleManager = new ScheduleManager())
                     using (var personManager = new PersonManager())
-                    using (var eventManager = new EventManager())
+                    using (var eventManager = new BookingEventManager())
                     using (var permissionManager = new EntityPermissionManager())
                     using (var entityTypeManager = new EntityManager())
                     {
@@ -814,18 +814,18 @@ namespace BExIS.Modules.RBM.UI.Controllers
                             BookingEvent eEvent = new BookingEvent();
                             if (model.Id == 0)
                             {
-                                eEvent = eventManager.CreateEvent(model.Name, model.Description, null, minDate, maxDate);
+                                eEvent = eventManager.CreateBookingEvent(model.Name, model.Description, null, minDate, maxDate);
                                 bookingAction = SendNotificationHelper.BookingAction.created;
                             }
                             else
                             {
-                                eEvent = eventManager.GetEventById(model.Id);
+                                eEvent = eventManager.GetBookingEventById(model.Id);
                                 countSchedulesBefor = scheduleManager.GetAllSchedulesByEvent(model.Id).Count();
                                 eEvent.Name = model.Name;
                                 eEvent.Description = model.Description;
                                 eEvent.MinDate = minDate;
                                 eEvent.MaxDate = maxDate;
-                                eventManager.UpdateEvent(eEvent);
+                                eventManager.UpdateBookingEvent(eEvent);
                                 bookingAction = SendNotificationHelper.BookingAction.edited;
                             }
 
@@ -1047,8 +1047,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult EditScheduleActivities(long id)
         {
-            EventManager eManager = new EventManager();
-            BookingEvent e = eManager.GetEventById(id);
+            BookingEventManager eManager = new BookingEventManager();
+            BookingEvent e = eManager.GetBookingEventById(id);
             List<ActivityEventModel> model = new List<ActivityEventModel>();
             //e.Activities.ToList().ForEach(r => model.Add(new ActivityEventModel(r)));
 
@@ -1514,7 +1514,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         private int GetQuantityLeftOnTime(long resourceId, DateTime startDate, DateTime endDate)
         {
-            SingleResourceManager rManger = new SingleResourceManager();
+            ResourceManager rManger = new ResourceManager();
             ScheduleManager schManager = new ScheduleManager();
 
             int quantityLeft = 0;
@@ -1541,7 +1541,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             DateTime.TryParse(endDate, out inputEnd);
 
             bool available = false;
-            SingleResourceManager rManger = new SingleResourceManager();
+            ResourceManager rManger = new ResourceManager();
             ScheduleManager schManager = new ScheduleManager();
 
             SingleResource resource = rManger.GetResourceById(id);
@@ -1611,7 +1611,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<SingleResource> similarResources = new List<SingleResource>();
             List<string> DomainItems = new List<string>();
 
-            SingleResourceManager srManager = new SingleResourceManager();
+            ResourceManager srManager = new ResourceManager();
             ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
             SingleResource sr = srManager.GetResourceById(resourceId);
 
@@ -1661,7 +1661,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult UseSimilarResources(List<AlternateEventResource> model)
         {
             BookingEventModel sEventM = (BookingEventModel)Session["Event"];
-            SingleResourceManager srManager = new SingleResourceManager();
+            ResourceManager srManager = new ResourceManager();
 
             foreach (AlternateEventResource r in model)
             {
@@ -1691,7 +1691,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             try
             {
                 AlternateEventResource a = model.AlternateResources.Where(d => d.ResourceId == long.Parse(chooseAlternateResource)).FirstOrDefault();
-                SingleResourceManager srManager = new SingleResourceManager();
+                ResourceManager srManager = new ResourceManager();
                 SingleResource sr = srManager.GetResourceById(long.Parse(chooseAlternateResource));
 
                 ScheduleEventModel tempSchedule = new ScheduleEventModel(sr);
@@ -1737,7 +1737,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         private List<Notification> CheckNotificationForSchedule(ScheduleEventModel schedule)
         {
             NotificationManager nManager = new NotificationManager();
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
             ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
 
             List<Notification> notificationList = nManager.GetNotificationsByTimePeriod(schedule.ScheduleDurationModel.StartDate, schedule.ScheduleDurationModel.EndDate);
@@ -1891,9 +1891,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             using (var permissionManager = new EntityPermissionManager())
             using (var entityTypeManager = new EntityManager())
-            using (var eManager = new EventManager())
+            using (var eManager = new BookingEventManager())
             {
-                BookingEvent e = eManager.GetEventById(id);
+                BookingEvent e = eManager.GetBookingEventById(id);
                 
                 BookingEventModel model = new BookingEventModel(e);
                 model.EditMode = false;
@@ -1920,16 +1920,16 @@ namespace BExIS.Modules.RBM.UI.Controllers
         //in show event view
         public ActionResult ShowActivities(long Id)
         {
-            EventManager eManager = new EventManager();
-            BookingEvent e = eManager.GetEventById(Id);
+            BookingEventManager eManager = new BookingEventManager();
+            BookingEvent e = eManager.GetBookingEventById(Id);
             return PartialView("_showActivities", new ShowEventModel(e));
         }
 
         //in show event view
         public ActionResult ShowSchedules(long Id)
         {
-            EventManager eManager = new EventManager();
-            BookingEvent e = eManager.GetEventById(Id);
+            BookingEventManager eManager = new BookingEventManager();
+            BookingEvent e = eManager.GetBookingEventById(Id);
             return PartialView("_showSchedules", new ShowEventModel(e));
         }
 
@@ -1940,11 +1940,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult Delete(long id)
         {
-            EventManager eManager = new EventManager();
-            BookingEvent e = eManager.GetEventById(id);
+            BookingEventManager eManager = new BookingEventManager();
+            BookingEvent e = eManager.GetBookingEventById(id);
 
             SendNotificationHelper.SendBookingNotification(SendNotificationHelper.BookingAction.deleted, new BookingEventModel(e));
-            eManager.DeleteEvent(e);
+            eManager.DeleteBookingEvent(e);
             
             return RedirectToAction("Calendar", "Calendar");
         }

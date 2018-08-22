@@ -59,7 +59,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         //Save Resource after create or edit
         public ActionResult Save()
         {
-            using (var rManager = new SingleResourceManager())
+            using (var rManager = new ResourceManager())
             using (var rsManager = new ResourceStructureManager())
             using (var valueManager = new ResourceStructureAttributeManager())
             {
@@ -227,7 +227,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         private void ValidateResource(EditResourceModel model)
         {
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
             ResourceStructureManager rsManager = new ResourceStructureManager();
             ResourceStructureAttributeManager valueManager = new ResourceStructureAttributeManager();
 
@@ -521,6 +521,30 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         }
 
+
+        public ActionResult DeleteFile(long id)
+        {
+
+                EditResourceModel model = (EditResourceModel)Session["Resource"];
+                ResourceStructureAttributeValueModel m = model.ResourceStructureAttributeValues.Where(a => a.Id == id).FirstOrDefault();
+
+                using (var valueManager = new ResourceStructureAttributeManager())
+                {
+                    FileValue fValue = valueManager.GetFileValueById(id);
+                    valueManager.DeleteResourceAttributeValue(fValue);
+                }
+
+                model.ResourceStructureAttributeValues.Remove(m);
+
+                Session["Resource"] = model;
+
+            return RedirectToAction("Edit", new { id = model.Id });
+
+
+
+
+        }
+
         #endregion
 
         #region Edit Resource
@@ -531,7 +555,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Edit Resource", this.Session.GetTenant());
 
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
             SingleResource resource = rManager.GetResourceById(id);
 
             ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
@@ -573,7 +597,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult Delete(long id)
         {
-            using (var rManager = new SingleResourceManager())
+            using (var rManager = new ResourceManager())
             using (var valueManager = new ResourceStructureAttributeManager())
             using (var permissionManager = new EntityPermissionManager())
             using (var entityTypeManager = new EntityManager())
@@ -603,7 +627,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult ShowDetails(string id)
         {
-            SingleResourceManager rManager = new SingleResourceManager();
+            ResourceManager rManager = new ResourceManager();
             SingleResource r = rManager.GetResourceById(long.Parse(id));
 
             List<ResourceStructureAttributeValueModel> valuesModel = new List<ResourceStructureAttributeValueModel>();
@@ -735,7 +759,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         [GridAction]
         public ActionResult Resource_Select()
         {
-            using (var rManager = new SingleResourceManager())
+            using (var rManager = new ResourceManager())
             using (var permissionManager = new EntityPermissionManager())
                 using (var entityTypeManager = new EntityManager())
             {
@@ -864,7 +888,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             }
 
             ResourceConstraintManager rcManager = new ResourceConstraintManager();
-            SingleResourceManager srManager = new SingleResourceManager();
+            ResourceManager srManager = new ResourceManager();
 
             if (rcm is DependencyConstraintModel)
             {
@@ -1439,7 +1463,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             switch (selectedObject)
             {
                 case "Single Resource":
-                    SingleResourceManager rManager = new SingleResourceManager();
+                    ResourceManager rManager = new ResourceManager();
                     List<SingleResource> resources = rManager.GetAllResources().ToList();
                     List<ResourceManagerModel> listSingleResources = new List<ResourceManagerModel>();
 
@@ -1453,8 +1477,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     //resources.ToList().ForEach(r => listSingleResources.Add(new ResourceManagerModel(r)));
                     return PartialView("_chooseSingleResource", listSingleResources);
                 case "Resource Group":
-                    SingleResourceManager rgManager = new SingleResourceManager();
-                    List<ResourceGroup> resourceGroups = rgManager.GetAllResourceClassifiers().ToList();
+                    ResourceManager rgManager = new ResourceManager();
+                    List<ResourceGroup> resourceGroups = rgManager.GetAllResourceGroups().ToList();
                     List<ResourceGroupManagerModel> listResourceGroups = new List<ResourceGroupManagerModel>();
                     resourceGroups.ToList().ForEach(r => listResourceGroups.Add(new ResourceGroupManagerModel(r)));
                     return PartialView("_chooseResourceGroup", listResourceGroups);
