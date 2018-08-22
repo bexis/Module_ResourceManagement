@@ -28,13 +28,19 @@
       .ClientEvents(events =>
           events
           .OnSuccess("SelectFile_OnSuccess")
+          .OnRemove("SelectFile_OnRemove")
        )
        .Async(async => async
           .Save("SaveFileTemp", "Resource", new { area = "RBM", id = Model.ResourceAttributeUsageId })
           .AutoUpload(true))
 
      )
-        <div id="fileNameDiv">@if (Model.Name != ""){@Model.Name}</div>
+        <div id="fileNameDiv">
+            @if (Model.Name != null)
+            {
+                @Model.Name @Html.ActionLink(" ", "DeleteFile", "Resource", new { area = "RBM", id = @Model.Id }, new { @class = "bx-trash bx-function" })
+            }
+            </div>
         </td>
     @*}
     else
@@ -55,6 +61,11 @@
 
     function SelectFile_OnSuccess(e) {
         $('#fileNameDiv').text(e.files[0].name);
+    }
+
+    function SelectFile_OnRemove(e) {
+
+        //$('#fileNameDiv').empty();
     }
 
 </script>

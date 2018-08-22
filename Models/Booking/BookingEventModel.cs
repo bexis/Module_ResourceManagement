@@ -51,7 +51,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
         public BookingEventModel(List<ResourceCart> cart)
         {
-            using (var rManager = new SingleResourceManager())
+            using (var rManager = new ResourceManager())
             {
                 Schedules = new List<ScheduleEventModel>();
                 DeletedSchedules = new List<long>();

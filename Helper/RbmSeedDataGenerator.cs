@@ -17,34 +17,59 @@ namespace BExIS.Modules.RBM.UI.Helper
             //throw new NotImplementedException();
         }
 
+        public struct EntityStruct
+        {
+            public string Name;
+            public Type Type;
+            public Type StoreType;
+
+            public EntityStruct(string name, Type type, Type storeType)
+            {
+                Name = name;
+                Type = type;
+                StoreType = storeType;
+            }
+        }
+
         public void GenerateSeedData()
         {
+
             #region ENTITIES
+
+            List<EntityStruct> entities = new List<EntityStruct>();
+            entities.Add(new EntityStruct("SingleResource", typeof(SingleResource), typeof(BExIS.Rbm.Services.Resource.SingleResourceStore)));
+            entities.Add(new EntityStruct("ResourceStructure", typeof(ResourceStructure), typeof(BExIS.Rbm.Services.ResourceStructure.ResourceStructureStore)));
+            entities.Add(new EntityStruct("ResourceStructureAttribute", typeof(ResourceStructureAttribute), typeof(BExIS.Rbm.Services.ResourceStructure.ResourceStructureAttributeStore)));
+            entities.Add(new EntityStruct("Activity", typeof(Activity), typeof(BExIS.Rbm.Services.Booking.ActivityStore)));
+            entities.Add(new EntityStruct("BookingEvent", typeof(BookingEvent), typeof(BExIS.Rbm.Services.Booking.BookingEventStore)));
+            entities.Add(new EntityStruct("Notification", typeof(Notification), typeof(BExIS.Rbm.Services.Booking.NotificationStore)));
+            entities.Add(new EntityStruct("Schedule", typeof(Schedule), typeof(BExIS.Rbm.Services.Booking.ScheduleStore)));
+
+
 
             Dictionary<string, Type> rbmEntities = new Dictionary<string,Type>();
             rbmEntities.Add("SingleResource", typeof(SingleResource));
             rbmEntities.Add("ResourceStructure", typeof(ResourceStructure));
             rbmEntities.Add("ResourceStructureAttribute", typeof(ResourceStructureAttribute));
             rbmEntities.Add("Activity", typeof(Activity));
-            rbmEntities.Add("Event", typeof(BookingEvent));
+            rbmEntities.Add("BookingEvent", typeof(BookingEvent));
             rbmEntities.Add("Notification", typeof(Notification));
             rbmEntities.Add("Schedule", typeof(Schedule));
 
             using (var entityManager = new EntityManager())
             {
-                foreach (var et in rbmEntities)
+                foreach (var et in entities)
                 {
-                    Entity entity = entityManager.Entities.Where(e => e.Name.ToUpperInvariant() == et.Key.ToUpperInvariant()).FirstOrDefault();
+                    Entity entity = entityManager.Entities.Where(e => e.Name.ToUpperInvariant() == et.Name.ToUpperInvariant()).FirstOrDefault();
 
                     if (entity == null)
                     {
                         entity = new Entity();
-                        entity.Name = et.Key;
-                        entity.EntityType = et.Value;
-                        //entity.EntityStoreType = typeof(Xml.Helpers.DatasetStore);
+                        entity.Name = et.Name;
+                        entity.EntityType = et.Type;
+                        entity.EntityStoreType = et.StoreType;
                         //entity.UseMetadata = true;
                         entity.Securable = true;
-
                         entityManager.Create(entity);
                     }
                 }
