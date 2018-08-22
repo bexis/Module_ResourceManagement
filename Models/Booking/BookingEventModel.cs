@@ -66,6 +66,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                     s.ScheduleQuantity = rc.PreselectdQuantity;
                     s.ResourceQuantity = resource.Quantity;
                     s.ByPerson = rc.ByPersonName;
+                    
 
                     //add as default resvered by user as reserved for user
                     UserManager userManager = new UserManager();
@@ -74,6 +75,9 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                     var user = userTask.Result;
 
                     PersonInSchedule byPerson = new PersonInSchedule(0, user, false);
+                    byPerson.IsContactPerson = true;
+                    s.Contact = byPerson;
+                    s.ContactName = rc.ByPersonName;
                     s.ForPersons.Add(byPerson);
 
                     s.Index = rc.Index;
