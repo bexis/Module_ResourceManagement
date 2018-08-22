@@ -228,6 +228,7 @@
 
     function Toogle(index) {
         $("#scheduleDetails_" + index).slideToggle("slow");
+        $('#' + index).toggleClass("fa-angle-double-down fa-angle-double-right");
     }
 
 @*    function saveEvent() {

@@ -591,11 +591,16 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         break;
                     case "Quantity":
                         seModel = model.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
-                        seModel.ScheduleQuantity = int.Parse(value);
-                        //get index of modify schedule and update it in the session list
-                        i = model.Schedules.FindIndex(p => p.Index == int.Parse(index));
-                        model.Schedules[i] = seModel;
-                        Session["Event"] = model;
+
+                        int quantity;
+                        if (Int32.TryParse(value, out quantity))
+                        {
+                            seModel.ScheduleQuantity = quantity;
+                            // get index of modify schedule and update it in the session list
+                             i = model.Schedules.FindIndex(p => p.Index == int.Parse(index));
+                            model.Schedules[i] = seModel;
+                            Session["Event"] = model;
+                        }
                         break;
 
                 }
@@ -690,6 +695,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     if (s.ResourceQuantity != 0)
                     {
                         int availableQuantity = GetAvailableQuantity(s.ResourceId, s.ResourceQuantity, s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate, s.ScheduleQuantity, s.ScheduleId);
+
+                     
+
 
                         if ((availableQuantity - s.ScheduleQuantity) < 0)
                         {
