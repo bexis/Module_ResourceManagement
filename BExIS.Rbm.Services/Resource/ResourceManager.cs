@@ -1,5 +1,6 @@
 ﻿using BExIS.Rbm.Entities.BookingManagementTime;
 using BExIS.Rbm.Entities.Resource;
+using BExIS.Security.Services.Objects;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -11,12 +12,12 @@ using RS = BExIS.Rbm.Entities.ResourceStructure;
 
 namespace BExIS.Rbm.Services.Resource
 {
-    public class SingleResourceManager : IDisposable
+    public class ResourceManager : IDisposable
     {
         private readonly IUnitOfWork _guow;
         private bool _isDisposed;
 
-        public SingleResourceManager()
+        public ResourceManager()
         {
             _guow = this.GetIsolatedUnitOfWork();
             this.SingleResourceRepo = _guow.GetReadOnlyRepository<R.SingleResource>();
@@ -24,7 +25,7 @@ namespace BExIS.Rbm.Services.Resource
             this.ResourceGroupRepo = _guow.GetReadOnlyRepository<R.ResourceGroup>();
         }
 
-        ~SingleResourceManager()
+        ~ResourceManager()
         {
             Dispose(true);
         }
@@ -251,10 +252,11 @@ namespace BExIS.Rbm.Services.Resource
             return ResourceGroupRepo.Query(u => u.Id == id).FirstOrDefault();
         }
 
-        public IQueryable<R.ResourceGroup> GetAllResourceClassifiers()
+        public IQueryable<R.ResourceGroup> GetAllResourceGroups()
         {
             return ResourceGroupRepo.Query();
         }
+
 
         #endregion
 

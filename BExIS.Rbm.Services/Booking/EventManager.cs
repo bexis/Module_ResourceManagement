@@ -10,19 +10,19 @@ using R = BExIS.Rbm.Entities.Resource;
 
 namespace BExIS.Rbm.Services.Booking
 {
-    public class EventManager : IDisposable
+    public class BookingEventManager : IDisposable
     {
         private readonly IUnitOfWork _guow;
         private bool _isDisposed;
 
-        public EventManager()
+        public BookingEventManager()
         {
             _guow = this.GetIsolatedUnitOfWork();
             this.EventRepo = _guow.GetReadOnlyRepository<E.BookingEvent>();
             this.BookingTemplateRepo = _guow.GetReadOnlyRepository<E.BookingTemplate>();
         }
 
-        ~EventManager()
+        ~BookingEventManager()
         {
             Dispose(true);
         }
@@ -54,7 +54,7 @@ namespace BExIS.Rbm.Services.Booking
 
         #region Methods
 
-        public E.BookingEvent CreateEvent(string name, string description, List<Activity> activities, DateTime minDate, DateTime maxDate)
+        public E.BookingEvent CreateBookingEvent(string name, string description, List<Activity> activities, DateTime minDate, DateTime maxDate)
         {
             BookingEvent newEvent = new BookingEvent()
             {
@@ -75,7 +75,7 @@ namespace BExIS.Rbm.Services.Booking
             return newEvent;
         }
 
-        public bool DeleteEvent(E.BookingEvent deleteEvent)
+        public bool DeleteBookingEvent(E.BookingEvent deleteEvent)
         {
             Contract.Requires(deleteEvent != null);
             Contract.Requires(deleteEvent.Id >= 0);
@@ -97,7 +97,7 @@ namespace BExIS.Rbm.Services.Booking
             return true;
         }
 
-        public E.BookingEvent UpdateEvent(E.BookingEvent eEvent)
+        public E.BookingEvent UpdateBookingEvent(E.BookingEvent eEvent)
         {
             Contract.Requires(eEvent != null);
             using (IUnitOfWork uow = this.GetUnitOfWork())
@@ -112,7 +112,7 @@ namespace BExIS.Rbm.Services.Booking
             return eEvent;
         }
 
-        public IQueryable<E.BookingEvent> GetAllEvents()
+        public IQueryable<E.BookingEvent> GetAllBookingEvents()
         {
             return EventRepo.Query();
         }
@@ -122,7 +122,7 @@ namespace BExIS.Rbm.Services.Booking
             return EventRepo.Query(a => ((DateTime)a.MinDate >= startDate && (DateTime)a.MinDate <= endDate) || ((DateTime)a.MaxDate >= startDate && (DateTime)a.MaxDate <= endDate)).ToList(); 
         }
 
-        public BookingEvent GetEventById(long id)
+        public BookingEvent GetBookingEventById(long id)
         {
             BookingEvent e = EventRepo.Query(a => a.Id == id).FirstOrDefault();
             EventRepo.LoadIfNot(e.Schedules);
