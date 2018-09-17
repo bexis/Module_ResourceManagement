@@ -1,12 +1,18 @@
 ﻿using BExIS.Rbm.Entities.Booking;
 using BExIS.Rbm.Entities.Resource;
 using BExIS.Rbm.Entities.ResourceStructure;
+using BExIS.Rbm.Services.Resource;
+using BExIS.Rbm.Entities.BookingManagementTime;
 using BExIS.Security.Entities.Objects;
 using BExIS.Security.Services.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
+using BExIS.Rbm.Services.ResourceStructure;
+using BExIS.Dlm.Services.DataStructure;
+using BExIS.Dlm.Entities.DataStructure;
 
 namespace BExIS.Modules.RBM.UI.Helper
 {
@@ -15,6 +21,19 @@ namespace BExIS.Modules.RBM.UI.Helper
         public void Dispose()
         {
             //throw new NotImplementedException();
+        }
+
+        public class newResourceStructure
+        {
+            public string name { set; get; }
+            public string description { set; get; }
+            public int quantity { set; get; }
+            public string color { set; get; }
+            public bool withActivity { set; get; }
+            public ResourceStructure resourceStructure { set; get; }
+            public int duration { set; get; }
+            public string type { set; get; }
+            public string explo { set; get; }
         }
 
         public struct EntityStruct
@@ -74,6 +93,101 @@ namespace BExIS.Modules.RBM.UI.Helper
                     }
                 }
             }
+
+            try
+            {
+
+                ResourceStructureAttribute rsa = new ResourceStructureAttribute();
+                using (var rsaManager = new ResourceStructureAttributeManager())
+                   rsa = rsaManager.CreateResourceStructureAttribute("Exploratory", "Biodiversity Exploratories funded by DFG Priority Programme 1374. They serve as open research platform for all biodiversity and ecosystem research groups of Germany.");
+
+                var dcManager = new DataContainerManager();
+
+                string[] keys = { "Hainich-Dün", "Schorfheide-Chorin", "Schwäbische Alb" };
+                List<DomainItem> domainItems = CreateDomainItems(keys);
+                DomainConstraint dc = new DomainConstraint(ConstraintProviderSource.Internal, "", "en-US", "a simple domain validation constraint", false, null, null, null, domainItems);
+                dcManager.AddConstraint(dc, rsa);
+
+
+                ResourceStructureAttribute rsa2 = new ResourceStructureAttribute();
+                using (var rsaManager2 = new ResourceStructureAttributeManager())
+                    rsa2 = rsaManager2.CreateResourceStructureAttribute("Type", "Type of resource.");
+
+                var dcManager2 = new DataContainerManager();
+
+                string[]  keys2 = { "Area", "Object", "Sleeping place"};
+                List<DomainItem>  domainItems2 = CreateDomainItems(keys2);
+                DomainConstraint dc2 = new DomainConstraint(ConstraintProviderSource.Internal, "", "en-US", "a simple domain validation constraint", false, null, null, null, domainItems2);
+                dcManager2.AddConstraint(dc2, rsa2);
+
+                ResourceStructureManager rsManager = new ResourceStructureManager(); ;
+                ResourceStructure rs = rsManager.Create("Explo resources", "Resources related to exploratories.", null, null);
+
+                using (var rsaManager = new ResourceStructureAttributeManager())
+                rsaManager.CreateResourceAttributeUsage(rsa, rs, true, false);
+                using (var rsaManager = new ResourceStructureAttributeManager())
+                rsaManager.CreateResourceAttributeUsage(rsa2, rs, true, false);
+
+                ResourceManager rManager = new ResourceManager(); ;
+                List<newResourceStructure> rs_new = new List<newResourceStructure>();
+
+                rs_new.Add(new newResourceStructure() {name = "Grassland - all VIPs (SCH)", color = "#ff0000", description = "Visit of all grassland VIPs in Schorfheide-Chorin", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin"});               
+                rs_new.Add(new newResourceStructure() { name = "Grassland - all MIPs (SCH)", color = "#ff0000", description = "Visit of all grassland VIPs in Schorfheide-Chorin", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });        
+                rs_new.Add(new newResourceStructure() { name = "Grassland - all EPs (SCH)", color = "#ff0000", description = "Visit of all grassland VIPs in Schorfheide-Chorin", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs , type = "Area", explo = "Schorfheide-Chorin" });
+                rs_new.Add(new newResourceStructure() { name = "Forest - all VIPs (SCH)", color = "#ec5959", description = "Visit of all forest VIPs in Schorfheide-Chorin", duration = 14, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
+                rs_new.Add(new newResourceStructure() { name = "Forest - all MIPs (SCH)", color = "#ec5959", description = "Visit of all forest VIPs in Schorfheide-Chorin", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
+                rs_new.Add(new newResourceStructure() { name = "Forest - all EPs (SCH)", color = "#ec5959", description = "Visit of all forest VIPs in Schorfheide-Chorin", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
+                rs_new.Add(new newResourceStructure() { name = "no plot visit (SCH)", color = "#e28f8f", description = "No plot visit in Schorfheide-Chorin", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
+                rs_new.Add(new newResourceStructure() { name = "Sleeping place (SCH)", color = "#9c3939", description = "Sleeping places in Schorfheide-Chorin", duration = 1, quantity = 7, withActivity = false, resourceStructure = rs, type = "Sleeping place", explo = "Schorfheide-Chorin" });
+                rs_new.Add(new newResourceStructure() { name = "Drying cabinet (SCH)", color = "#940b0b", description = "Drying cabinet in Schorfheide-Chorin", duration = 1, quantity = 5, withActivity = false, resourceStructure = rs, type = "Object", explo = "Schorfheide-Chorin" });
+                rs_new.Add(new newResourceStructure() { name = "Fridge (SCH)", color = "#940b0b", description = "Fridge in Schorfheide-Chorin", duration = 1, quantity = 2, withActivity = false, resourceStructure = rs, type = "Object", explo = "Schorfheide-Chorin" });
+                rs_new.Add(new newResourceStructure() { name = "Metal detector (Magna Trak 100)	 (SCH)", color = "#940b0b", description = "Metal detector (Magna Trak 100) in Schorfheide-Chorin", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Object", explo = "Schorfheide-Chorin" });
+
+                rs_new.Add(new newResourceStructure() { name = "Grassland - all VIPs (ALB)", color = "#6495ed", description = "Visit of all grassland VIPs in Schwäbische Alb", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
+                rs_new.Add(new newResourceStructure() { name = "Grassland - all MIPs (ALB)", color = "#6495ed", description = "Visit of all grassland VIPs in Schwäbische Alb", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
+                rs_new.Add(new newResourceStructure() { name = "Grassland - all EPs (ALB)", color = "#6495ed", description = "Visit of all grassland VIPs in Schwäbische Alb", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
+                rs_new.Add(new newResourceStructure() { name = "Forest - all VIPs (ALB)", color = "#3a75e0", description = "Visit of all forest VIPs in Schwäbische Alb", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
+                rs_new.Add(new newResourceStructure() { name = "Forest - all MIPs (ALB)", color = "#3a75e0", description = "Visit of all forest VIPs in Schwäbische Alb", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
+                rs_new.Add(new newResourceStructure() { name = "Forest - all EPs (ALB)", color = "#3a75e0", description = "Visit of all forest VIPs in Schwäbische Alb", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
+                rs_new.Add(new newResourceStructure() { name = "Grassland - all GPs excluding former military training area (ALB)", color = "#6495ed", description = "Visit of all GPs excluding former military training area in Schwäbische Alb", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
+                rs_new.Add(new newResourceStructure() { name = "Forest - all GPs including former military training area (ALB)", color = "#3a75e0", description = "Visit of all GPs including former military training area in Schwäbische Alb", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
+                rs_new.Add(new newResourceStructure() { name = "no plot visit (ALB)", color = "#0057f5", description = "No plot visit in Schwäbische Alb", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
+                rs_new.Add(new newResourceStructure() { name = "Sleeping place (ALB)", color = "#27509a", description = "Sleeping places in Schwäbische Alb", duration = 1, quantity = 8, withActivity = false, resourceStructure = rs, type = "Sleeping place", explo = "Schwäbische Alb" });
+                rs_new.Add(new newResourceStructure() { name = "Drying cabinet (ALB)", color = "#7e95bf", description = "Drying cabinet in Schwäbische Alb", duration = 1, quantity = 5, withActivity = false, resourceStructure = rs, type = "Object", explo = "Schwäbische Alb" });
+                rs_new.Add(new newResourceStructure() { name = "Metal detector (Magna Trak 100)	 (ALB)", color = "#7e95bfa", description = "Metal detector (Magna Trak 100) in Schwäbische Alb", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Object", explo = "Schwäbische Alb" });
+
+                rs_new.Add(new newResourceStructure() { name = "Grassland - all VIPs (HAI)", color = "#9acd32", description = "Visit of all grassland VIPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Grassland - all MIPs (HAI)", color = "#9acd32", description = "Visit of all grassland VIPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Grassland - all EPs (HAI)", color = "#9acd32", description = "Visit of all grassland VIPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Forest - all VIPs (HAI)", color = "#8cca0d", description = "Visit of all forest VIPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Forest - all MIPs (HAI)", color = "#8cca0d", description = "Visit of all forest VIPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Forest - all EPs (HAI)", color = "#8cca0d", description = "Visit of all forest VIPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Grassland - all GPs (HAI)", color = "#9acd32", description = "Visit of all grassland GPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Forest - all GPs (HAI)", color = "#8cca0d", description = "Visit of all forest GPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "no plot visit (HAI)", color = "#a9fb00", description = "No plot visit in Hainich-Dün", duration = 1, quantity = 0, withActivity = false, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Sleeping place (HAI)", color = "#78ab0f", description = "Sleeping place in Hainich-Dün", duration = 1, quantity = 8, withActivity = false, resourceStructure = rs, type = "Sleeping place", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Drying cabinet (HAI)", color = "#6a8a27", description = "Drying cabinete in Hainich-Dün", duration = 4, quantity = 8, withActivity = false, resourceStructure = rs, type = "Object", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Fridge (HAI)", color = "#6a8a27", description = "Fridge in Hainich-Dün", duration = 4, quantity = 2, withActivity = false, resourceStructure = rs, type = "Object", explo = "Hainich-Dün" });
+
+                foreach (newResourceStructure rs_item in rs_new)
+                {
+                    var duration = new TimeDuration();
+                    duration.Value = rs_item.duration;
+                    var resource = rManager.CreateResource(rs_item.name, rs_item.description, rs_item.quantity, rs_item.color, rs_item.withActivity, rs_item.resourceStructure, duration);
+                    var valueManager = new ResourceStructureAttributeManager();
+                    ResourceAttributeUsage usage = valueManager.GetResourceAttributeUsageById(1);
+                    valueManager.CreateResourceAttributeValue(rs_item.explo, rManager.GetResourceById(resource.Id), usage);
+                    ResourceAttributeUsage usage2 = valueManager.GetResourceAttributeUsageById(2);
+                    valueManager.CreateResourceAttributeValue(rs_item.type, rManager.GetResourceById(resource.Id), usage);
+
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("{0} Exception caught.", e);
+            }
+
+           
             #endregion
 
             #region SECURITY
@@ -87,7 +201,23 @@ namespace BExIS.Modules.RBM.UI.Helper
             }
 
 
+          
             #endregion
+        }
+
+        private List<DomainItem> CreateDomainItems(string[] keys)
+        {
+            List<DomainItem> domainItems = new List<DomainItem>();
+            for (int i = 0; i < keys.Length; i++)
+            {
+                DomainItem domainItem = new DomainItem();
+                domainItem.Key = keys[i];
+                //for this implemention values are not needed now
+                //domainItem.Value = value[i];
+                domainItems.Add(domainItem);
+            }
+
+            return domainItems;
         }
     }
 }
