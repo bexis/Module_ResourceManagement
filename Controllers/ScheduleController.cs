@@ -918,7 +918,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                                     //get entities types
                                     var entityTypeSchedule = entityTypeManager.FindByName("Schedule");
-                                    var entityTypeEvent = entityTypeManager.FindByName("Event");
+                                    var entityTypeEvent = entityTypeManager.FindByName("BookingEvent");
 
                                     //add rights to logged in user if not exsit
                                     //rights on schedule 31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
