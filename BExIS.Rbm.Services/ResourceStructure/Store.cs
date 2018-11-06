@@ -28,6 +28,11 @@ namespace BExIS.Rbm.Services.ResourceStructure
             }
 
         }
+
+        public string GetTitleById(long id)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
     public class ResourceStructureAttributeStore : IEntityStore
@@ -49,6 +54,11 @@ namespace BExIS.Rbm.Services.ResourceStructure
                 }
             }
 
+        }
+
+        public string GetTitleById(long id)
+        {
+            throw new System.NotImplementedException();
         }
     }
 

@@ -28,6 +28,11 @@ namespace BExIS.Rbm.Services.Booking
             }
 
         }
+
+        public string GetTitleById(long id)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
     public class BookingEventStore : IEntityStore
@@ -49,6 +54,11 @@ namespace BExIS.Rbm.Services.Booking
                 }
             }
 
+        }
+
+        public string GetTitleById(long id)
+        {
+            throw new System.NotImplementedException();
         }
     }
 
@@ -72,6 +82,11 @@ namespace BExIS.Rbm.Services.Booking
             }
 
         }
+
+        public string GetTitleById(long id)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
     public class ScheduleStore : IEntityStore
@@ -93,6 +108,11 @@ namespace BExIS.Rbm.Services.Booking
                 }
             }
 
+        }
+
+        public string GetTitleById(long id)
+        {
+            throw new System.NotImplementedException();
         }
     }
 
