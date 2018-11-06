@@ -187,21 +187,71 @@ namespace BExIS.Modules.RBM.UI.Helper
                 Console.WriteLine("{0} Exception caught.", e);
             }
 
-           
+
             #endregion
 
             #region SECURITY
 
-            using (var featureManager = new FeatureManager())
+            OperationManager operationManager = new OperationManager();
+            FeatureManager featureManager = new FeatureManager();
+
+            try
             {
                 List<Feature> features = featureManager.FeatureRepository.Get().ToList();
 
                 Feature ResourceBooking = features.FirstOrDefault(f => f.Name.Equals("Resource Booking"));
-                if (ResourceBooking == null) ResourceBooking = featureManager.Create("Resource Booking", "Resource Booking");
+                if (ResourceBooking == null)
+                    ResourceBooking = featureManager.Create("Resource Booking", "Resource Booking");
+
+
+
+                Feature ResourceAdmin = features.FirstOrDefault(f => f.Name.Equals("Resource Administration"));
+                if (ResourceAdmin == null)
+                    ResourceAdmin = featureManager.Create("Resource Administration", "Resource Administration");
+
+                Feature ResourceManagement = features.FirstOrDefault(f => f.Name.Equals("Resource Management"));
+                if (ResourceManagement == null)
+                    ResourceManagement = featureManager.Create("Resource Management", "Resource Management", ResourceAdmin);
+
+                Feature ResourceStructureManagement = features.FirstOrDefault(f => f.Name.Equals("Resource Structure Management"));
+                if (ResourceStructureManagement == null)
+                    ResourceStructureManagement = featureManager.Create("Resource Structure Management", "Resource Structure Management", ResourceAdmin);
+
+                Feature ResourceStructureAttributeManagement = features.FirstOrDefault(f => f.Name.Equals("Resource Structure Attribute Management"));
+                if (ResourceStructureAttributeManagement == null)
+                    ResourceStructureAttributeManagement = featureManager.Create("Resource Structure Attribute Management", "Resource Structure Attribute Management", ResourceAdmin);
+
+                Feature NotificationManagement = features.FirstOrDefault(f => f.Name.Equals("Notification Management"));
+                if (NotificationManagement == null)
+                    NotificationManagement = featureManager.Create("Notification Management", "Notification Management", ResourceAdmin);
+
+                Feature ActivityManagement = features.FirstOrDefault(f => f.Name.Equals("Activity Management"));
+                if (ActivityManagement == null)
+                    ActivityManagement = featureManager.Create("Activity Management", "Activity Management", ResourceAdmin);
+
+
+                operationManager.Create("RBM", "Schedule", "*", ResourceBooking);
+                operationManager.Create("RBM", "Calendar", "*", ResourceBooking);
+
+
+                operationManager.Create("RBM", "Resource", "*", ResourceManagement);
+                operationManager.Create("RBM", "ResourceStructure", "*", ResourceStructureManagement);
+                operationManager.Create("RBM", "ResourceStructure", "*", ResourceStructureAttributeManagement);
+                operationManager.Create("RBM", "Notification", "*", NotificationManagement);
+                operationManager.Create("RBM", "Activity", "*", ActivityManagement);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
 
+            finally
+            {
+                operationManager.Dispose();
+                featureManager.Dispose();
 
-          
+            }
+
             #endregion
         }
 
