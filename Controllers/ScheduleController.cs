@@ -38,6 +38,9 @@ using BExIS.Dlm.Entities.Party;
 using BExIS.Dlm.Services.Party;
 using BExIS.Modules.RBM.UI.Helper;
 using BExIS.Security.Services.Objects;
+using System.Configuration;
+using System.Web.Configuration;
+using Vaiona.Utils.Cfg;
 
 namespace BExIS.Modules.RBM.UI.Controllers
 {
@@ -1122,11 +1125,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
             using (var partyManager = new PartyManager())
             using (var partyTypeManager = new PartyTypeManager())
             {
-
                 UserManager userManager = new UserManager();
 
-                //get party type person
-                var partyType = partyTypeManager.PartyTypes.Where(p => p.Title == "Person").FirstOrDefault();
+                //get party type where you store the first and-lastname of the persons
+                var accountPartyTypesStr = Helper.Settings.get("AccountPartyTypes");
+                var partyType = partyTypeManager.PartyTypes.Where(p => p.Title == accountPartyTypesStr.ToString()).FirstOrDefault();
+
                 //get all parties with person party type
                 List<Party> partyPersons = partyManager.PartyRepository.Query(p => p.PartyType == partyType).ToList();
 

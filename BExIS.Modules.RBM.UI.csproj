@@ -48,6 +48,7 @@
       <HintPath>..\..\..\..\packages\Antlr.3.4.1.9004\lib\Antlr3.Runtime.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Web.Helpers">
       <HintPath>..\..\..\..\packages\Microsoft.AspNet.WebHelpers.3.2.3\lib\net45\Microsoft.Web.Helpers.dll</HintPath>
@@ -189,6 +190,7 @@
     <Compile Include="Helper\RbmSeedDataGenerator.cs" />
     <Compile Include="Helper\ResourceFilterHelper.cs" />
     <Compile Include="Helper\SendNotificationHelper.cs" />
+    <Compile Include="Helper\Settings.cs" />
     <Compile Include="Helper\StringHelper.cs" />
     <Compile Include="Helper\TimeHelper.cs" />
     <Compile Include="Helper\UserHelper.cs" />

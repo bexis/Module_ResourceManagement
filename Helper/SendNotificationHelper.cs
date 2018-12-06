@@ -3,10 +3,12 @@ using BExIS.Web.Shell.Areas.RBM.Models.Booking;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Net.Mail;
 using System.Web;
 using System.Web.Configuration;
+using Vaiona.Utils.Cfg;
 
 namespace BExIS.Web.Shell.Areas.RBM.Helpers
 {
@@ -43,33 +45,14 @@ namespace BExIS.Web.Shell.Areas.RBM.Helpers
         /// <remarks></remarks>
         public static void SendBookingNotification(BookingAction bookingAction, BookingEventModel model)
         {
-            //string a = @"\BExIS.Modules.RBM.UI";
-            //Configuration configFile = WebConfigurationManager.OpenWebConfiguration(a);
-            //var map = new ExeConfigurationFileMap { ExeConfigFilename = "../RBM/web.config" };
-            //var configFile = ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
+            //get receiver and sender from the settings file
+            var receiver = Modules.RBM.UI.Helper.Settings.get("BookingMailReceiver").ToString().Split(',').ToList();
+            var receiverCC = Modules.RBM.UI.Helper.Settings.get("BookingMailReceiverCC").ToString().Split(',').ToList();
+            var receiverBCC = Modules.RBM.UI.Helper.Settings.get("BookingMailReceiverBCC").ToString().Split(',').ToList();
 
-            //get receiver and sender from the web.config file
-            //List<string> receiver  = configFile.AppSettings.Settings["BookingMailReceiver"].Value.Split(',').ToList();
-            //List<string> receiverCC = configFile.AppSettings.Settings["BookingMailReceiverCC"].Value.Split(',').ToList();
-            //List<string> receiverBCC = configFile.AppSettings.Settings["BookingMailReceiverBCC"].Value.Split(',').ToList();
-            //string sender = ConfigurationManager.AppSettings["BookingMailReceiver"];
+            var sender = Modules.RBM.UI.Helper.Settings.get("BookingMailSender").ToString();
 
-            List<string> receiver = new List<string>();
-            receiver.Add("eleonora.petzold@uni-jena.de");
-
-            List<string> receiverCC = new List<string>();
-            receiverCC.Add("eleonora.petzold@uni-jena.de");
-
-            List<string> receiverBCC = new List<string>();
-            receiverBCC.Add("eleonora.petzold@uni-jena.de");
-
-            List<string> replyToList = new List<string>();
-            replyToList.Add("eleonora.petzold@uni-jena.de");
-
-            string subject = "Biodiversity Exploratories: Fieldbook" + bookingAction.ToString() + " reservation";
-
-            //get mail subject from web config
-            //string subject = configFile.AppSettings.Settings["BookingMailSubject"].Value;
+            var subject = Modules.RBM.UI.Helper.Settings.get("BookingMailSubject").ToString();
 
             string message = "";
             message += "The following event has been " + bookingAction + "\n";
@@ -98,7 +81,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Helpers
             }
 
             var emailService = new EmailService();
-            emailService.Send(subject, message, receiver, receiverCC, receiverBCC, replyToList);
+            emailService.Send(subject, message, receiver, receiverCC, receiverBCC);
         }
 
     }
