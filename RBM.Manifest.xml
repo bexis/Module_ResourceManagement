@@ -13,44 +13,44 @@
   <Exports>
     <!--add proper menu items-->
 
-    <Export tag="menubar" id="rbmAdminMenu" order="15"
+    <!--<Export tag="menubar" id="rbmAdminMenu" order="15"
            title="Resource Admin" description="RBM desc" icon=""
            controller="Resource" action="Resource"
-           extends="./menubarRoot" />
+           extends="./menubarRoot" />-->
 
-    <Export tag="menubar" id="rbmMenu_Resouce" order="15"
+    <Export tag="settings" id="resources" order="15"
         title="Manage Resources" description="Cal" icon=""
         controller="Resource" action="Resource"
-        extends="./menubarRoot/rbmAdminMenu" />
+        extends="./settingsRoot" />
 
-    <Export tag="menubar" id="rbmMenu_Resouce" order="15"
+    <Export tag="settings" id="resourceStructure" order="15"
        title="Manage Resources Structures" description="Cal" icon=""
        controller="ResourceStructure" action="ResourceStructure"
-       extends="./menubarRoot/rbmAdminMenu" />
+       extends="./settingsRoot" />
 
-    <Export tag="menubar" id="rbmMenu_Resouce" order="15"
+    <Export tag="settings" id="resourcesStructuresAtt" order="15"
        title="Manage Resources Structures Attr" description="Cal" icon=""
        controller="ResourceStructure" action="ResourceStructureAttribute"
-       extends="./menubarRoot/rbmAdminMenu" />
+       extends="./settingsRoot" />
 
 
-    <Export tag="menubar" id="rbmMenu_ResouceStructure" order="15"
+    <Export tag="settings" id="activities" order="15"
         title="Manage Activities" description="Cal" icon=""
         controller="Activity" action="Activity"
-        extends="./menubarRoot/rbmAdminMenu" />
+        extends="./settingsRoot" />
 
-    <Export tag="menubar" id="rbmMenu_ResouceStructure" order="15"
+    <Export tag="settings" id="notifications" order="15"
         title="Manage Notification" description="Cal" icon=""
         controller="Notification" action="Notification"
-        extends="./menubarRoot/rbmAdminMenu" />
+        extends="./settingsRoot" />
 
-    <Export tag="menubar" id="rbmMenu_ResouceStructure" order="15"
+    <!--<Export tag="menubar" id="rbmMenu_ResouceStructure" order="15"
       title="Manage Resource Groups" description="Cal" icon=""
       controller="ResourceGroup" action="ResourceGroup"
-      extends="./menubarRoot/rbmAdminMenu" />
+      extends="./menubarRoot/rbmAdminMenu" />-->
 
     <Export tag="menubar" id="rbmMenu" order="16"
-            title="Resource Calendar" description="RBM desc" icon=""
+            title="Book Resources" description="RBM desc" icon=""
             controller="Calendar" action="Calendar"
             extends="./menubarRoot" />
 
