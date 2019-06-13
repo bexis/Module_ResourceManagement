@@ -5,7 +5,6 @@ Resource booking management module: This is a calendar based tool to manage any 
 2. [How to use](#how_to)
     1. [Create resources](#resource_creation)
     2. [Booking resources](#booking_resources)
-3. [Installtion](#install)
 
 
 ## Features<a name="features"></a>
