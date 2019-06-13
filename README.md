@@ -10,6 +10,10 @@ Resource booking management module: This is a calendar based tool to manage any 
 
 ## Features<a name="features"></a>
 - resource with free definable properties
-- resources have time and Quantity restrictions
+- resources have time and quantity restrictions
 - free definable constrains on resources
 - resources can inherit from each other
+- resources can be tied to activities
+- option to add notification to resources
+- calendar view for bookings
+- option to create events with multiple resources
