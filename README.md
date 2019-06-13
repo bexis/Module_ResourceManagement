@@ -3,6 +3,13 @@ Resource booking management module: This is a calendar based tool to manage any 
 
 1. [Features](#Features)
 2. [How to use / Workflow](#how_to)
-    1. [Event creation](#event_creation)
-    2. [Event registration](#event_reg)
+    1. [Create resources and their dependencies](#resource_creation)
+    2. [Booking resources](#booking_resources)
 3. [Installtion](#install)
+
+
+## Features<a name="features"></a>
+- resource with free definable properties
+- resources have time and Quantity restrictions
+- free definable constrains on resources
+- resources can inherit from each other
