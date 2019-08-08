@@ -97,22 +97,22 @@ namespace BExIS.Modules.RBM.UI.Helper
                     //get all schedule where resource is booked
                     List<Schedule> allSchedules = schManager.GetAllSchedulesByResource(r.Id);
                     List<Schedule> inTimeSchedules = new List<Schedule>();
-                    int schedulesQunatity = 0;
+                    int schedulesQuantity = 0;
                     foreach (Schedule s in allSchedules)
                     {
                         //get all schedule in the given time period
                         if ((DateTime.Compare(filter.StartDate, s.StartDate) >= 0 && DateTime.Compare(filter.StartDate, s.EndDate) <= 0) || (DateTime.Compare(filter.EndDate, s.StartDate) >= 0 && DateTime.Compare(filter.EndDate, s.EndDate) <= 0))
                         {
                             //Count all quantities in in time schedules
-                            schedulesQunatity = schedulesQunatity + s.Quantity;
+                            schedulesQuantity = schedulesQuantity + s.Quantity;
                         }
                     }
                     if (resourceQuantity != 0)
                     {
-                        //if diff of resourceQuantity and schedulesQunatity minus requested quantity is posive add to resultlist
-                        if (((resourceQuantity - schedulesQunatity) - filter.Quantity) >= 0)
+                        //if diff of resourceQuantity and schedulesQuantity minus requested quantity is posive add to resultlist
+                        if (((resourceQuantity - schedulesQuantity) - filter.Quantity) >= 0)
                         {
-                            r.AvailableQuantity = resourceQuantity - schedulesQunatity;
+                            r.AvailableQuantity = resourceQuantity - schedulesQuantity;
                             endResultList.Add(r);
                         }
                     }

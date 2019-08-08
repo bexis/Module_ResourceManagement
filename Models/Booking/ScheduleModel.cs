@@ -153,7 +153,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
         public DateTime EndDate { get; set; }
 
-        public int Qunatity { get; set; }
+        public int Quantity { get; set; }
 
         public string Activities { get; set; }
 
@@ -170,7 +170,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             ContactPerson = s.ForPerson.Contact.Name;
             StartDate = s.StartDate;
             EndDate = s.EndDate;
-            Qunatity = s.Quantity;
+            Quantity = s.Quantity;
             
             if (s.ForPerson is PersonGroup)
             {
