@@ -34,6 +34,21 @@ namespace BExIS.Rbm.Services.Resource
         {
             throw new System.NotImplementedException();
         }
+
+        public bool HasVersions()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int CountVersions(long id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<EntityStoreItem> GetVersionsById(long id)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class ResourceGroupStore : IEntityStore
@@ -61,6 +76,21 @@ namespace BExIS.Rbm.Services.Resource
         public string GetTitleById(long id)
         {
             throw new System.NotImplementedException();
+        }
+
+        public bool HasVersions()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int CountVersions(long id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<EntityStoreItem> GetVersionsById(long id)
+        {
+            throw new NotImplementedException();
         }
     }
 }
