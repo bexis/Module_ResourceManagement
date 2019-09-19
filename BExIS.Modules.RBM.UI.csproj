@@ -673,6 +673,7 @@
     <Content Include="Views\Schedule\_showUsers.cshtml" />
     <Content Include="Views\Schedule\_similarResources.cshtml" />
     <Content Include="Views\Calendar\_treeFilterSchedules.cshtml" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\Settings.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -702,7 +703,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="fonts\" />
-    <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Components\AAA\BExIS.Security.Entities\BExIS.Security.Entities.csproj">
