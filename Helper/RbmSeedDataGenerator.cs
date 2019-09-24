@@ -130,18 +130,18 @@ namespace BExIS.Modules.RBM.UI.Helper
                 rsaManager.CreateResourceAttributeUsage(rsa2, rs, true, false);
 
                 ActivityManager aManager = new ActivityManager();
-                aManager.CreateActivity("Adding of material (litter, dead wood, chemicals ....)", "", true);
-                aManager.CreateActivity("Adding of organisms (seeds and others)", "", true);
-                aManager.CreateActivity("Conference", "", true);
-                aManager.CreateActivity("Dismantling of experiments", "", true);
-                aManager.CreateActivity("Installation of equipment remaining for some time", "", true);
-                aManager.CreateActivity("Measuring and marking of subplots/experiments/study organisms", "", true);
-                aManager.CreateActivity("Observation/capture of organisms without removal", "", true);
-                aManager.CreateActivity("Plot maintenance", "", true);
-                aManager.CreateActivity("Removal of org. material without killing", "", true);
-                aManager.CreateActivity("Removal of organisms", "", true);
-                aManager.CreateActivity("Removal of soil samples", "", true);
-                aManager.CreateActivity("Visit without activity", "", true);
+                aManager.CreateActivity("Adding of material (litter, dead wood, chemicals ....)", "", false);
+                aManager.CreateActivity("Adding of organisms (seeds and others)", "", false);
+                aManager.CreateActivity("Conference", "", false);
+                aManager.CreateActivity("Dismantling of experiments", "", false);
+                aManager.CreateActivity("Installation of equipment remaining for some time", "", false);
+                aManager.CreateActivity("Measuring and marking of subplots/experiments/study organisms", "", false);
+                aManager.CreateActivity("Observation/capture of organisms without removal", "", false);
+                aManager.CreateActivity("Plot maintenance", "", false);
+                aManager.CreateActivity("Removal of org. material without killing", "", false);
+                aManager.CreateActivity("Removal of organisms", "", false);
+                aManager.CreateActivity("Removal of soil samples", "", false);
+                aManager.CreateActivity("Visit without activity", "", false);
 
                 ResourceManager rManager = new ResourceManager(); ;
                 List<newResourceStructure> rs_new = new List<newResourceStructure>();
