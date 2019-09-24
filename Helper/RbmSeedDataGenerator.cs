@@ -13,6 +13,7 @@ using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
 using BExIS.Rbm.Services.ResourceStructure;
 using BExIS.Dlm.Services.DataStructure;
 using BExIS.Dlm.Entities.DataStructure;
+using BExIS.Rbm.Services.Booking;
 
 namespace BExIS.Modules.RBM.UI.Helper
 {
@@ -127,6 +128,20 @@ namespace BExIS.Modules.RBM.UI.Helper
                 rsaManager.CreateResourceAttributeUsage(rsa, rs, true, false);
                 using (var rsaManager = new ResourceStructureAttributeManager())
                 rsaManager.CreateResourceAttributeUsage(rsa2, rs, true, false);
+
+                ActivityManager aManager = new ActivityManager();
+                aManager.CreateActivity("Adding of material (litter, dead wood, chemicals ....)", "", true);
+                aManager.CreateActivity("Adding of organisms (seeds and others)", "", true);
+                aManager.CreateActivity("Conference", "", true);
+                aManager.CreateActivity("Dismantling of experiments", "", true);
+                aManager.CreateActivity("Installation of equipment remaining for some time", "", true);
+                aManager.CreateActivity("Measuring and marking of subplots/experiments/study organisms", "", true);
+                aManager.CreateActivity("Observation/capture of organisms without removal", "", true);
+                aManager.CreateActivity("Plot maintenance", "", true);
+                aManager.CreateActivity("Removal of org. material without killing", "", true);
+                aManager.CreateActivity("Removal of organisms", "", true);
+                aManager.CreateActivity("Removal of soil samples", "", true);
+                aManager.CreateActivity("Visit without activity", "", true);
 
                 ResourceManager rManager = new ResourceManager(); ;
                 List<newResourceStructure> rs_new = new List<newResourceStructure>();
