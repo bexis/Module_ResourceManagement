@@ -33,6 +33,21 @@ namespace BExIS.Rbm.Services.Booking
         {
             throw new System.NotImplementedException();
         }
+
+        public bool HasVersions()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int CountVersions(long id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<EntityStoreItem> GetVersionsById(long id)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class BookingEventStore : IEntityStore
@@ -59,6 +74,21 @@ namespace BExIS.Rbm.Services.Booking
         public string GetTitleById(long id)
         {
             throw new System.NotImplementedException();
+        }
+
+        public bool HasVersions()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int CountVersions(long id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<EntityStoreItem> GetVersionsById(long id)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -87,6 +117,21 @@ namespace BExIS.Rbm.Services.Booking
         {
             throw new System.NotImplementedException();
         }
+
+        public bool HasVersions()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int CountVersions(long id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<EntityStoreItem> GetVersionsById(long id)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class ScheduleStore : IEntityStore
@@ -113,6 +158,21 @@ namespace BExIS.Rbm.Services.Booking
         public string GetTitleById(long id)
         {
             throw new System.NotImplementedException();
+        }
+
+        public bool HasVersions()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int CountVersions(long id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<EntityStoreItem> GetVersionsById(long id)
+        {
+            throw new NotImplementedException();
         }
     }
 
