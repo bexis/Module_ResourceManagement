@@ -368,7 +368,7 @@
 
                 var parentSelect = $(this).parent().parent();
                 var itemSelect = parentSelect.find(':input[name="itemValue"]');
-                var attrId = parentSelect.find('span[class$="domainItem"]').attr('id');
+                var attrId = parentSelect.find("span.domainItem").attr('id');
 
                 var item = attrId + "_" + itemSelect.attr('value');
 
