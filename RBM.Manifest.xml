@@ -49,15 +49,28 @@
       controller="ResourceGroup" action="ResourceGroup"
       extends="./menubarRoot/rbmAdminMenu" />-->
 
-    <Export tag="menubar" id="rbmMenu" order="16"
-            title="Book Resources" description="RBM desc" icon=""
+    <Export tag="menubar" id="rbmMenu" order="5"
+            title="Fieldwork" description="Fieldwork" icon=""
             controller="Calendar" action="Calendar"
             extends="./menubarRoot" />
+    
+    <Export tag="menubar" id="rbmMenu_Cal" order="5"
+          title="News" description="News" icon=""
+          controller="Notification" action="Blackboard"
+          extends="./menubarRoot/rbmMenu" />
 
-    <Export tag="menubar" id="rbmMenu_Cal" order="17"
+    <Export tag="menubar" id="rbmMenu_Cal" order="5"
           title="Calendar" description="Cal" icon=""
           controller="Calendar" action="Calendar"
           extends="./menubarRoot/rbmMenu" />
+
+
+    <Export tag="menubar" id="rbmMenu_Cal" order="5"
+          title="Exploratory Information" description="Explo info" icon=""
+          controller="Calendar" action="ExploInfo"
+          extends="./menubarRoot/rbmMenu" />
+
+   
     
 	<!-- Settings Example-->
     <!--<Export tag="settings" id="manageMetadata" order="1"
