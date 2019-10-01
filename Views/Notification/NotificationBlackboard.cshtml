@@ -3,15 +3,62 @@
 
 @model List<NotificationBlackboardModel>
 
+@{
+    Dictionary<string, List<object>> DomainNotification = new Dictionary<string, List<object>>();
+    foreach (NotificationBlackboardModel item in Model)
+    {
+        foreach (var domain in item.NotificationDependency)
+        {
+            if (!DomainNotification.ContainsKey(domain.DomainItem))
+            {
+                DomainNotification.Add(domain.DomainItem, new List<object>());
+            }
+
+
+            List<object> value = new List<object>();
+            DomainNotification.TryGetValue(domain.DomainItem, out value);
+            value.Add(item);
+            DomainNotification[domain.DomainItem] = value;
+
+        }
+    }
+
+    var test = DomainNotification;
+}
 <h3>Notification Blackboard</h3>
 <hr />
-@foreach(NotificationBlackboardModel item in Model)
-{
-    <fieldset>
-        <legend>@item.Subject</legend>
-        <br />
-        <div><b> From @item.StartDate To @item.EndDate</b></div>
-        <div><p>@item.Message</p></div>
-        <div><i>Insertdate: @item.InsertDate </i></div>
-    </fieldset>
-}
+<div style="display:flex; flex-wrap:wrap">
+    @foreach (KeyValuePair<string, List<object>> domianItem in DomainNotification)
+    {
+        List<object> value = new List<object>();
+
+        DomainNotification.TryGetValue(domianItem.Key, out value);
+
+    <div style="margin-right: 5px;">
+        <fieldset style="min-width: 500px;" title="@domianItem.Key">
+            <legend style="width: auto;border-bottom: none; color: var(--information-bg-color);">@domianItem.Key</legend>
+
+            @foreach (NotificationBlackboardModel item in value)
+            {
+
+            <fieldset title="@domianItem.Key">
+                <legend style="width: auto;border-bottom: none; color: var(--information-bg-color);">@item.Subject</legend>
+
+
+                @if (item.StartDate == item.EndDate)
+                {
+                    <div><b> @item.StartDate.ToString("dd.MM.yyyy") </b></div>
+                }
+                else
+                {
+                    <div><b> @item.StartDate.ToString("dd.MM.yyyy") - @item.EndDate.ToString("dd.MM.yyyy")</b></div>
+                }
+
+                <div><p style="width:500px">@item.Message</p></div>
+                <div style="float:right"><i>Date: @item.InsertDate.ToString("dd.MM.yyyy HH:mm") </i></div>
+            </fieldset>
+            }
+        </fieldset>
+        </div>
+    }
+    </div>

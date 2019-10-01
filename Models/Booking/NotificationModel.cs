@@ -179,18 +179,19 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
     public class NotificationBlackboardModel
     {
+        public ICollection<NotificationDependency> NotificationDependency { get; private set; }
         public string Subject { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public DateTime InsertDate { get; set; }
         public string Message { get; set; }
-        public List<DomainItemModel> DomainItems { get; set; }
+        public List<string> DomainItems { get; set; }
 
 
 
         public NotificationBlackboardModel(Notification notification)
         {
-            DomainItems = new List<DomainItemModel>();
+            NotificationDependency = notification.NotificationDependency;
             Subject = notification.Subject;
             StartDate = notification.StartDate;
             EndDate = notification.EndDate;
