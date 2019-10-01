@@ -30,6 +30,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return View("Calendar");
         }
 
+        //temp delte soon
+        public ActionResult ExploInfo()
+        {
+            return View("Temp_ExploInfo");
+        }
+
 
 
         #region Schedule Calendar
