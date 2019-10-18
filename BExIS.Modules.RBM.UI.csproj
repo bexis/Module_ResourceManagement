@@ -694,7 +694,6 @@
     <Content Include="Scripts\fullcalendar\readme.md" />
     <Content Include="Scripts\fullcalendar\tests\lib\themeswitcher\README.md" />
     <Content Include="Scripts\fullcalendar\tests\slot_event_overlap.json" />
-    <Content Include="Views\Calendar\Temp_ExploInfo.cshtml" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
