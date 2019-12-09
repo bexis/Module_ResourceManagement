@@ -35,7 +35,7 @@
         DomainNotification.TryGetValue(domianItem.Key, out value);
 
     <div style="margin-right: 5px;">
-        <fieldset style="min-width: 500px;" title="@domianItem.Key">
+        <fieldset style="min-width: 350px;" title="@domianItem.Key">
             <legend style="width: auto;border-bottom: none; color: var(--information-bg-color);">@domianItem.Key</legend>
 
             @foreach (NotificationBlackboardModel item in value)
@@ -54,7 +54,7 @@
                     <div><b> @item.StartDate.ToString("dd.MM.yyyy") - @item.EndDate.ToString("dd.MM.yyyy")</b></div>
                 }
 
-                <div><p style="width:500px">@item.Message</p></div>
+                <div><p style="width:350px">@item.Message</p></div>
                 <div style="float:right"><i>Date: @item.InsertDate.ToString("dd.MM.yyyy HH:mm") </i></div>
             </fieldset>
             }

@@ -3,7 +3,11 @@
 
 @model ResourceFilterModel
 
+@Html.ActionLink("Book Resource", "Create", "Schedule", new { area = "RBM" }, new { @class = "bx-button function", title = "Book one more more resources" , style = "width: 90%;  margin-bottom: 20px;"})
 <div class="overlay">
+    <div class="overlayHeader">
+        <span>Group by</span>
+    </div>
     <div style="padding-bottom:5px">
         <div id="contentView" class="btn-group" data-toggle="buttons">
             <label class="btn btn-default  active" style="width:83px">
@@ -15,14 +19,7 @@
         </div>
     </div>
 
-    <div id="displayView" class="btn-group" data-toggle="buttons">
-        <label class="btn btn-default  active">
-            <input name="DisplayView" type="radio" autocomplete="off" checked value="Calendar"> Calendar
-        </label>
-        <label class="btn btn-default">
-            <input name="DisplayView" type="radio" autocomplete="off" value="List"> List
-        </label>
-    </div>
+
 
 
 
@@ -32,52 +29,49 @@
       <small>Schedule View:</small> @Html.RadioButton("ContentView", "Schedules", new { title = "Show individual resouce schedules in the calendar" }) <br /><br />
       <small>Calendar View: </small>@Html.RadioButton("DisplayView", "Calendar", true, new { title = "Show events in a tabular view" })
       <small>List View:</small> @Html.RadioButton("DisplayView", "List", new { title = "Show individual resouce schedules in a tabular view" }) <br /><br />-->
-    <div style="padding-top:15px"><small>Only my bookings: @Html.CheckBox("MyBookings", false, new { @class = "js-switch", title = "Show only my booking in the calendar" })</small></div>
-    <br /><br />
-    <div class="overlayHeader">
-        <span></span>
-    </div>
-
-
+    <br />
     <div class="overlayHeader">
         <span>Filter</span>
     </div>
+    <div style="padding-top:5px"><small>Only my bookings: @Html.CheckBox("MyBookings", false, new { @class = "js-switch", title = "Show only my booking in the calendar" })</small></div>
+    <br /><br />
+
     @(Html.Telerik().TreeView()
-                                                .Name("TreeView")
-                                                .ShowCheckBox(true)
-                                                .ClientEvents(events => events
-                                                        //.OnSelect("onSelect")
-                                                        .OnChecked("onChecked")
-                                                )
+                                                                                                        .Name("TreeView")
+                                                                                                        .ShowCheckBox(true)
+                                                                                                        .ClientEvents(events => events
+                                                                                                                //.OnSelect("onSelect")
+                                                                                                                .OnChecked("onChecked")
+                                                                                                        )
 
-                                                 .BindTo<AttributeDomainItemsModel>(Model.TreeItems.Distinct(), (item, attribute) =>
-                                                     {
-                                                         item.Text = attribute.AttrName;
-                                                         item.Value = attribute.AttrId.ToString();
-                                                         item.Checkable = false;
-                                                         item.Checked = false;
-                                                         item.Expanded = true;
+                                                                                                         .BindTo<AttributeDomainItemsModel>(Model.TreeItems.Distinct(), (item, attribute) =>
+                                                                                                             {
+                                                                                                                 item.Text = attribute.AttrName;
+                                                                                                                 item.Value = attribute.AttrId.ToString();
+                                                                                                                 item.Checkable = false;
+                                                                                                                 item.Checked = false;
+                                                                                                                 item.Expanded = true;
 
-                                                         foreach (BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.DomainItemModel di in attribute.DomainItems)
-                                                         {
-                                                             TreeViewItem subitem = new TreeViewItem();
-                                                             item.Items.Add(subitem);
+                                                                                                                 foreach (BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.DomainItemModel di in attribute.DomainItems)
+                                                                                                                 {
+                                                                                                                     TreeViewItem subitem = new TreeViewItem();
+                                                                                                                     item.Items.Add(subitem);
 
-                                                             subitem.Text = di.Key;
-                                                             subitem.Value = di.Key;
-                                                             subitem.LinkHtmlAttributes["id"] = attribute.AttrId;
-                                                             subitem.LinkHtmlAttributes["class"] = "domainItem";
+                                                                                                                     subitem.Text = di.Key;
+                                                                                                                     subitem.Value = di.Key;
+                                                                                                                     subitem.LinkHtmlAttributes["id"] = attribute.AttrId;
+                                                                                                                     subitem.LinkHtmlAttributes["class"] = "domainItem";
 
-                                                 //subitem.Action("OnSelectTreeViewItem", "Schedule", new RouteValueDictionary { { "area", "RBM" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
-                                             }
-                                                     }
-                                                )
-                                                .ExpandAll(true)
+                                                                                                         //subitem.Action("OnSelectTreeViewItem", "Schedule", new RouteValueDictionary { { "area", "RBM" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
+                                                                                                     }
+                                                                                                             }
+                                                                                                        )
+                                                                                                        .ExpandAll(true)
     )
 
 </div>
 
-<script type="text/javascript">
+    <script type="text/javascript">
 
     $(document).ready(function () {
 
@@ -98,7 +92,7 @@
             if ($('#contentView .active').find('input').val() != $(this).find('input').val()) {
                 showContent($('#displayView .active').find('input').val(), $(this).find('input').val());
             }
-            
+
         });
 
         //$.validator.unobtrusive.parse("#contentEdit");
@@ -244,7 +238,7 @@
             }
         }
     }
-    
+
 
     $("input[name='MyBookings']").change(function () {
 
@@ -272,7 +266,7 @@
                 if (contentView == "Events") {
 
                     $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', {myBookings: true}, function (data) {
-                        
+
                         $('#eventList').html(data);
 
                         if ($("#eventList").is(":hidden")) {
@@ -365,13 +359,15 @@
         if ($('#TreeView>ul>li>ul>li>div :checked').length > 0) {
 
             $('#TreeView>ul>li>ul>li>div :checked').each(function () {
-
+                console.log(this);
                 var parentSelect = $(this).parent().parent();
+                console.log(parentSelect);
                 var itemSelect = parentSelect.find(':input[name="itemValue"]');
+                console.log(itemSelect);
                 var attrId = parentSelect.find("span.domainItem").attr('id');
-
+                console.log(parentSelect.find("span.domainItem"));
                 var item = attrId + "_" + itemSelect.attr('value');
-
+                console.log(item);
                 checkedItems.push(item);
             });
 
@@ -453,4 +449,4 @@
         }
     }
 
-</script>
+    </script>

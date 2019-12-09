@@ -14,11 +14,11 @@
         .Name("Grid_Resource")
         .Columns(columns =>
         {
-            columns.Bound(r => r.Id).Width(90);
+    
             columns.Bound(r => r.Name);
             columns.Bound(r => r.Description);
-            //columns.Bound(r => r.Schedules.Select(a=>a.ScheduleDurationModel.StartDate).ToList().Min());
-            //columns.Bound(r => r.Schedules.Select(a => a.ScheduleDurationModel.EndDate).ToList().Min());
+          //  columns.Bound(r => r.Schedules.Select(a=>a.ScheduleDurationModel.StartDate).ToList().Min());
+          //  columns.Bound(r => r.Schedules.Select(a => a.ScheduleDurationModel.EndDate).ToList().Min());
         })
         .Pageable(paging =>
          paging

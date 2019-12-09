@@ -14,11 +14,30 @@
 }
 
 <div class="editor-field">
-    @Html.ActionLink("Book Resource", "Create", "Schedule", new { area = "RBM" }, new { @class = "bx-button function", title = "Book one more more resources" })
-</div><br />
-<div id='calendar'></div>
-<div id="eventList"></div>
-<div id="scheduleList"></div>
+    <div id="displayView" class="btn-group" data-toggle="buttons">
+        <label class="btn btn-default  active">
+            <input name="DisplayView" type="radio" autocomplete="off" checked value="Calendar"> Calendar
+        </label>
+        <label class="btn btn-default">
+            <input name="DisplayView" type="radio" autocomplete="off" value="List"> List
+        </label>
+    </div>
+
+
+
+</div>
+
+
+<div style="
+    /* border-style: solid; */
+    /* border-color: lightgray; */
+    border-width: 2px;
+    margin-top: 20px;
+">
+    <div id='calendar'></div>
+    <div id="eventList"></div>
+    <div id="scheduleList"></div>
+</div>
 
 @section LeftPane
 {
@@ -46,20 +65,20 @@
 
 
 @(Html.Telerik().Window()
-            .Name("Window_Show")
-            .Title("Show Event")
-            .Draggable(true)
-            .Modal(true)
-            .Visible(false)
-            .Scrollable(true)
-            .Width(900)
-            .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
-            .Content(@<text>
-                <div id="Content_Creation2"></div>
-            </text>)
-                            .ClientEvents(clientEvents => clientEvents
-                                .OnClose("Window_Creation_OnClose")
-                            ))
+                .Name("Window_Show")
+                .Title("Show Event")
+                .Draggable(true)
+                .Modal(true)
+                .Visible(false)
+                .Scrollable(true)
+                .Width(900)
+                .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+                .Content(@<text>
+                    <div id="Content_Creation2"></div>
+                </text>)
+                                        .ClientEvents(clientEvents => clientEvents
+                                            .OnClose("Window_Creation_OnClose")
+                                        ))
 
 
 <script type="text/javascript">
@@ -71,6 +90,7 @@
         eventsource: {
             events: function (start, end, timezone, callback) {
                 var o = { st: start, ed:end };
+                console.log(start, end);
                 $.ajax({
                     url: '@Url.Content("~/RBM/Calendar/GetAllEvents")',
                     dataType: 'json',
@@ -191,7 +211,7 @@
     $(window).load(function () {
 
         var selectedRadio = $("input[name='CalendarView']:checked").val();
-        var view = 'month,agendaWeek,agendaDay';
+        var view = 'month,basicWeek,basicDay';
         //alert($("input[name='CalendarView']:checked").val());
         //if (selectedRadio == "allDay")
         //{ view = 'month,basicWeek,basicDay'; }
@@ -209,7 +229,7 @@
                 //right: 'month,basicWeek,basicDay'
                // right: 'month,agendaWeek,agendaDay'
             },
-
+            defaultView: 'basicWeek',
             eventLimit: true, // for all non-agenda views
             views: {
                 agenda: {
