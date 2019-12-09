@@ -54,7 +54,7 @@
             controller="Calendar" action="Calendar"
             extends="./menubarRoot" />
     
-    <Export tag="menubar" id="rbmMenu_Cal" order="5"
+    <Export tag="menubar" id="rbmMenu_Notif" order="5"
           title="News" description="News" icon=""
           controller="Notification" action="Blackboard"
           extends="./menubarRoot/rbmMenu" />
@@ -63,14 +63,6 @@
           title="Calendar" description="Cal" icon=""
           controller="Calendar" action="Calendar"
           extends="./menubarRoot/rbmMenu" />
-
-
-    <Export tag="menubar" id="rbmMenu_Cal" order="5"
-          title="Exploratory Information" description="Explo info" icon=""
-          controller="Calendar" action="ExploInfo"
-          extends="./menubarRoot/rbmMenu" />
-
-   
     
 	<!-- Settings Example-->
     <!--<Export tag="settings" id="manageMetadata" order="1"
