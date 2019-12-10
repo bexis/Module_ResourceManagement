@@ -208,7 +208,7 @@ namespace BExIS.Rbm.Entities.ResourceConstraint
             }
             else
             {
-                //Constraint quantity multiply in schedule qunatity from the source resource result in the quantiry that you need from the dependent resource
+                //Constraint quantity multiply in schedule quantity from the source resource result in the quantiry that you need from the dependent resource
                 int neededQuantity = Quantity * cData.QuantityInSchedule;
 
                 if (dependentResources.Count() > 0)
