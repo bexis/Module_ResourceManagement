@@ -23,6 +23,9 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 {
     public class BookingEventModel
     {
+        public DateTime startDate;
+        public DateTime endDate;
+
         public long Id { get; set; }
 
         [StringLength(50, ErrorMessage = "The name must be {2} - {1} characters long.", MinimumLength = 3)]

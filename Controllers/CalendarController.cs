@@ -225,8 +225,26 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     //index 0 = attrbute id, index1 domainvalue
                     List<string> i = item.Split('_').ToList();
                     ResourceFilterHelper.FilterTreeItem filterItem = new ResourceFilterHelper.FilterTreeItem();
-                    filterItem.Id = Convert.ToInt64(i[0]);
-                    filterItem.Value = i[1].ToString();
+                    try
+                    {
+                        filterItem.Id = Convert.ToInt64(i[0]);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        throw;
+                    }
+
+                    try
+                    {
+                        filterItem.Value = i[1].ToString();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        throw;
+                    }
+                    
                     filterList.Add(filterItem);
                 }
 
@@ -322,6 +340,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
             }
             else
                 allEvents.ForEach(r => model.Add(new BookingEventModel(r)));
+
+            foreach (BookingEventModel m in model)
+            {
+                m.startDate = m.Schedules.Select(a => a.ScheduleDurationModel.StartDate).ToList().Min();
+                m.endDate = m.Schedules.Select(a => a.ScheduleDurationModel.EndDate).ToList().Min();
+            }
 
             return PartialView("_listEvents", model);
         }

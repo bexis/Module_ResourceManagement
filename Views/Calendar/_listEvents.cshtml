@@ -4,32 +4,39 @@
 @model List<BookingEventModel>
 
 @{
-    GridPagerStyles pagerStyles = GridPagerStyles.PageSizeDropDown;
-    pagerStyles |= GridPagerStyles.NextPreviousAndNumeric;
-    pagerStyles |= GridPagerStyles.Numeric;
+                /**/
+
+                GridPagerStyles pagerStyles = GridPagerStyles.PageSizeDropDown;
+                pagerStyles |= GridPagerStyles.NextPreviousAndNumeric;
+                pagerStyles |= GridPagerStyles.Numeric;
 }
 
-<div id="events">
-@(Html.Telerik().Grid(Model)
-        .Name("Grid_Resource")
-        .Columns(columns =>
-        {
-    
-            columns.Bound(r => r.Name);
-            columns.Bound(r => r.Description);
-          //  columns.Bound(r => r.Schedules.Select(a=>a.ScheduleDurationModel.StartDate).ToList().Min());
-          //  columns.Bound(r => r.Schedules.Select(a => a.ScheduleDurationModel.EndDate).ToList().Min());
-        })
-        .Pageable(paging =>
-         paging
-                    .Style(pagerStyles)
-                    .PageSize(10)
-                    .Position(GridPagerPosition.Both)
-                    )
-        .Filterable()
-)
-</div>
+<table id="booking_table" class="display" style="width:100%">
+    <thead>
+        <tr>
 
+            <th title="Name">Name</th>
+            <th title="Description">Description</th>
+            <th title="Start date">Start date</th>
+            <th title="End date">End date</th>
+        
+        </tr>
+    </thead>
+    <tbody>
+
+
+        @foreach (var m in Model)
+        {
+            <tr>
+                <td><a href="../../RBM/Schedule/Show/@m.Id">@m.Name</a></td>
+                <td>@m.Description</td>
+                <td>@m.startDate.ToString("dd.MM.yyyy")</td>
+                <td>@m.endDate.ToString("dd.MM.yyyy")</td>
+            </tr>
+        }
+    </tbody>
+
+</table>
 
 <script type="text/javascript">
 
@@ -37,6 +44,66 @@
 
         resetAllTelerikIconTitles();
         addTooltips();
-    })
+jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml ) {
+    var esc = function ( t ) {
+        return t
+            .replace( /&/g, '&amp;' )
+            .replace( /</g, '&lt;' )
+            .replace( />/g, '&gt;' )
+            .replace( /"/g, '&quot;' );
+    };
+ 
+    return function ( d, type, row ) {
+        // Order, search and type get the original data
+        if ( type !== 'display' ) {
+            return d;
+        }
+ 
+        if ( typeof d !== 'number' && typeof d !== 'string' ) {
+            return d;
+        }
+ 
+        d = d.toString(); // cast numbers
+ 
+        if ( d.length <= cutoff ) {
+            return d;
+        }
+ 
+        var shortened = d.substr(0, cutoff-1);
+ 
+        // Find the last white space character in the string
+        if ( wordbreak ) {
+            shortened = shortened.replace(/\s([^\s]*)$/, '');
+        }
+ 
+        // Protect against uncontrolled HTML input
+        if ( escapeHtml ) {
+            shortened = esc( shortened );
+        }
+ 
+        return '<span class="ellipsis" title="'+esc(d)+'">'+shortened+'&#8230;</span>';
+    };
+};
+
+            $("#booking_table").DataTable({
+                "autoWidth": false,
+                ordering: true,
+                paging: false,
+                responsive: true,
+                "columns": [
+                    { "width": "30%" },
+                    { "width": "40%" },
+                    null,
+                    null,
+                   
+                ],
+    columnDefs: [
+     {
+      targets: 1,
+      render: $.fn.dataTable.render.ellipsis( 60, true )
+    }]
+            });
+
+});
 
 </script>
