@@ -15,6 +15,8 @@ using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
 using BExIS.Rbm.Services.ResourceStructure;
 using BExIS.Rbm.Entities.BookingManagementTime;
 using BExIS.Modules.RBM.UI.Helper;
+using BExIS.Dlm.Entities.Party;
+using BExIS.Dlm.Services.Party;
 
 namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 {
@@ -139,6 +141,8 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
     public class ScheduleListModel
     {
+        public long Id { get; set; }
+
         public string EventName { get; set; }
 
         public string EventDescription { get; set; }
@@ -154,7 +158,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         public DateTime EndDate { get; set; }
 
         public int Quantity { get; set; }
-
+       
         public string Activities { get; set; }
 
         public ScheduleListModel()
@@ -167,11 +171,27 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             EventName = s.BookingEvent.Name;
             EventDescription = s.BookingEvent.Description;
             ResourceName = s.Resource.Name;
-            ContactPerson = s.ForPerson.Contact.Name;
+            
             StartDate = s.StartDate;
             EndDate = s.EndDate;
             Quantity = s.Quantity;
-            
+
+            using (var partyManager = new PartyManager())
+            {
+                Party party = partyManager.GetPartyByUser(s.ForPerson.Contact.Id);
+                if (party != null)
+                {
+                    ContactPerson = party.Name;
+                }
+                else
+                {
+                    ContactPerson = s.ForPerson.Contact.Name;
+                }
+            }
+
+
+
+
             if (s.ForPerson is PersonGroup)
             {
                 PersonGroup pg = (PersonGroup)s.ForPerson;
@@ -414,7 +434,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                 IndividualPerson iPersonBy = (IndividualPerson)schedule.ByPerson.Self;
 
                 //ByPerson = new PersonInSchedule(iPersonBy.Id,iPersonBy.Person, true);
-                //ByPerson = iPersonBy.Person.FullName;
+                ByPerson = UserHelper.GetPartyByUserId(iPersonBy.Person.Id).Name; 
             }
         }
     }
