@@ -14,12 +14,13 @@
 <table id="booking_table" class="display" style="width:100%">
     <thead>
         <tr>
-
             <th title="Name">Name</th>
             <th title="Description">Description</th>
             <th title="Start date">Start date</th>
             <th title="End date">End date</th>
-        
+            <th title="Exploratory">Exploratory</th>
+            <th title="Resource(s)">Resource(s)</th>
+
         </tr>
     </thead>
     <tbody>
@@ -27,12 +28,14 @@
 
         @foreach (var m in Model)
         {
-            <tr>
-                <td><a href="../../RBM/Schedule/Show/@m.Id">@m.Name</a></td>
-                <td>@m.Description</td>
-                <td>@m.startDate.ToString("dd.MM.yyyy")</td>
-                <td>@m.endDate.ToString("dd.MM.yyyy")</td>
-            </tr>
+        <tr>
+            <td><a href="../../RBM/Schedule/Show/@m.Id">@m.Name</a></td>
+            <td>@m.Description</td>
+            <td>@m.startDate.ToString("dd.MM.yyyy")</td>
+            <td>@m.endDate.ToString("dd.MM.yyyy")</td>
+            <td>@m.ResourceAttributes</td>
+            <td>@m.ResourceName</td>
+        </tr>
         }
     </tbody>
 
@@ -95,6 +98,8 @@ jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml )
                     { "width": "40%" },
                     null,
                     null,
+                    null,
+                    null
                    
                 ],
     columnDefs: [

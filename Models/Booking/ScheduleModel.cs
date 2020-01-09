@@ -221,6 +221,9 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
         public string ResourceDescription { get; set; }
 
+        public ICollection<ResourceAttributeValue> ResourceAttributeValues { get; set; }
+
+
         public bool WithActivity { get; set; }
 
         public bool EditMode { get; set; }
@@ -342,6 +345,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             ResourceId = schedule.Resource.Id;
             ResourceName = schedule.Resource.Name;
             ResourceDescription = schedule.Resource.Description;
+            ResourceAttributeValues = schedule.Resource.ResourceAttributeValues;
             Files = new List<FileValueModel>();
             WithActivity = schedule.Resource.WithActivity;
 

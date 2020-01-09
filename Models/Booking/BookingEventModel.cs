@@ -46,6 +46,9 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         //store deleted schedule temporär
         public List<long> DeletedSchedules { get; set; }
 
+        public string ResourceName { get; set; }
+        public string ResourceAttributes { get; set; }
+
         public BookingEventModel()
         {
             Schedules = new List<ScheduleEventModel>();

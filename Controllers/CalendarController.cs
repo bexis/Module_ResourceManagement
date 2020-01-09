@@ -9,6 +9,7 @@ using BExIS.Security.Services.Subjects;
 using BExIS.Web.Shell.Areas.RBM.Helpers;
 using BExIS.Web.Shell.Areas.RBM.Models.Booking;
 using BExIS.Web.Shell.Areas.RBM.Models.Resource;
+using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -341,14 +342,33 @@ namespace BExIS.Modules.RBM.UI.Controllers
             else
                 allEvents.ForEach(r => model.Add(new BookingEventModel(r)));
 
+            // Remove dublicate booking events in resources list (without filter not dublicates, but with)
+            model = model.GroupBy(x => x.Id).Select(x => x.First()).ToList();
+
             foreach (BookingEventModel m in model)
             {
                 m.startDate = m.Schedules.Select(a => a.ScheduleDurationModel.StartDate).ToList().Min();
-                m.endDate = m.Schedules.Select(a => a.ScheduleDurationModel.EndDate).ToList().Min();
+                m.endDate = m.Schedules.Select(a => a.ScheduleDurationModel.EndDate).ToList().Max();
+                m.ResourceName = string.Join<string>(",", (m.Schedules.Select(a => a.ResourceName)).ToList());
+                List<string> attributes = new List<string>();
+                
+                foreach (var c in m.Schedules.Select(a => a.ResourceAttributeValues).ToList())
+                {
+
+                        // Assumption the first attribute (domain value) is of importance -> show it in the list
+                        ResourceAttributeValue value = c.First();
+                        if (value is TextValue)
+                        {
+                            TextValue tv = (TextValue)value;
+                            attributes.Add(tv.Value.ToString());
+                        }
+                }
+                m.ResourceAttributes = string.Join<string>(",", attributes.Distinct());
             }
 
             return PartialView("_listEvents", model);
         }
+
 
         public ActionResult GetSchedulesAsList(string myBookings)
         {
