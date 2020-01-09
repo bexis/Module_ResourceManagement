@@ -1146,17 +1146,20 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                     //check if user is contect person
                     bool isContact = false;
-                    if (tempSchedule.Contact.UserId == user.Id)
-                        isContact = true;
+                    if (user != null)
+                    {
+                        if (tempSchedule.Contact.UserId == user.Id)
+                            isContact = true;
 
-                    PersonInSchedule pu = new PersonInSchedule(0, user, isContact);
-                    pu.Index = int.Parse(index);
-                    pu.UserFullName = partyPerson.Name;
+                        PersonInSchedule pu = new PersonInSchedule(0, user, isContact);
+                        pu.Index = int.Parse(index);
+                        pu.UserFullName = partyPerson.Name;
 
-                    if (tempUserIds.Contains(user.Id))
-                        pu.IsSelected = true;
+                        if (tempUserIds.Contains(user.Id))
+                            pu.IsSelected = true;
 
-                    personList.Add(pu);
+                        personList.Add(pu);
+                    }
                 }
 
                 //users.ForEach(r => personList.Add(new PersonUsersList(r)));
@@ -1266,8 +1269,24 @@ namespace BExIS.Modules.RBM.UI.Controllers
             //    }
             //}
 
-            //get index of modify schedule and update it in the session list
-            var i = eventM.Schedules.FindIndex(p => p.Index == tempSchedule.Index);
+            if (tempSchedule.ForPersons != null)
+            {
+                tempSchedule.ForPersons.ForEach(a =>
+                {
+                    a.EditAccess = tempSchedule.EditAccess;
+                    a.EditMode = tempSchedule.EditMode;
+                    Party partyPerson = UserHelper.GetPartyByUserId(a.UserId);
+                    a.UserFullName = partyPerson.Name;
+                    //get party type attribute value
+                    a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
+
+                });
+            }
+
+
+
+                //get index of modify schedule and update it in the session list
+                var i = eventM.Schedules.FindIndex(p => p.Index == tempSchedule.Index);
             eventM.Schedules[i] = tempSchedule;
             Session["Event"] = eventM;
 

@@ -3,44 +3,105 @@
 
 @model List<ScheduleListModel>
 
-@{
-    GridPagerStyles pagerStyles = GridPagerStyles.PageSizeDropDown;
-    pagerStyles |= GridPagerStyles.NextPreviousAndNumeric;
-    pagerStyles |= GridPagerStyles.Numeric;
-}
 
-<div id="events">
-    @(Html.Telerik().Grid(Model)
-        .Name("Grid_Resource")
-        .Columns(columns =>
+
+<table id="resources_table" class="display" style="width:100%">
+    <thead>
+        <tr>
+            <th title="Name">Name</th>
+            <th title="Description">Description</th>
+            <th title="Resource(s)">Resource</th>
+            <th title="Quantity">Quantity</th>
+            <th title="Contact">Contact</th>
+            <th title="For Person">For</th>
+            <th title="Start date">Start date</th>
+            <th title="End date">End date</th>
+
+            <th title="Resource(s)">Activities</th>
+
+        </tr>
+    </thead>
+    <tbody>
+
+
+        @foreach (var m in Model)
         {
-            columns.Bound(r => r.EventName);
-            columns.Bound(r => r.EventDescription);
-            columns.Bound(r => r.ResourceName);
-            columns.Bound(r => r.Quantity);
-            columns.Bound(r => r.ContactPerson);
-            columns.Bound(r => r.ReservedFor);
-            columns.Bound(r => r.StartDate);
-            columns.Bound(r => r.EndDate);
-            columns.Bound(r => r.Activities);
-        })
-        .Pageable(paging =>
-         paging
-                    .Style(pagerStyles)
-                    .PageSize(10)
-                    .Position(GridPagerPosition.Both)
-                    )
-        .Filterable()
-    )
-</div>
+        <tr>
+            <td><a href="../../RBM/Schedule/Show/@m.Id">@m.EventName</a></td>
+  
+            <td>@m.EventDescription</td>
+            <td>@m.ResourceName</td>
+            <td>@m.Quantity</td>
+            <td>@m.ContactPerson</td>
+            <td>@m.ReservedFor</td>
+            <td>@m.StartDate.ToString("dd.MM.yyyy")</td>
+            <td>@m.EndDate.ToString("dd.MM.yyyy")</td>
+            <td>@m.Activities</td>
+        </tr>
+        }
+    </tbody>
+
+</table>
+
 
 
 <script type="text/javascript">
 
     $(document).ready(function () {
+        jQuery.fn.dataTable.render.ellipsis = function (cutoff, wordbreak, escapeHtml) {
+            var esc = function (t) {
+                return t
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+            };
 
-        resetAllTelerikIconTitles();
-        addTooltips();
-    })
+            return function (d, type, row) {
+                // Order, search and type get the original data
+                if (type !== 'display') {
+                    return d;
+                }
+
+                if (typeof d !== 'number' && typeof d !== 'string') {
+                    return d;
+                }
+
+                d = d.toString(); // cast numbers
+
+                if (d.length <= cutoff) {
+                    return d;
+                }
+
+                var shortened = d.substr(0, cutoff - 1);
+
+                // Find the last white space character in the string
+                if (wordbreak) {
+                    shortened = shortened.replace(/\s([^\s]*)$/, '');
+                }
+
+                // Protect against uncontrolled HTML input
+                if (escapeHtml) {
+                    shortened = esc(shortened);
+                }
+
+                return '<span class="ellipsis" title="' + esc(d) + '">' + shortened + '&#8230;</span>';
+            };
+        };
+
+        $("#resources_table").DataTable({
+            "autoWidth": false,
+            ordering: true,
+            paging: false,
+            responsive: true,
+            
+            columnDefs: [
+                {
+                    targets: 1,
+                    render: $.fn.dataTable.render.ellipsis(60, true)
+                }]
+        });
+
+    });
 
 </script>
