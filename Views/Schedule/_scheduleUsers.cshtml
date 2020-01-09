@@ -10,16 +10,17 @@
     {
       if(j<=1)
       {
-         <li class="fullName" style="font-size:12px;">@Html.DisplayFor(m=>m[j].UserFullName)
-             @if(Model[j].IsContactPerson)
-             {
-             <b> (Is Contact,  Mobil: @Model[j].MobileNumber)</b>
-             }
-             @if(Model[j].EditMode && Model[j].EditAccess)
-             { 
-                <span id="removeUser" class="bx bx-trash" onclick="RemoveUserFromSchedule(@Model[j].UserId, @Model[j].Index)"></span>
-             }
-         </li>
+      <li class="fullName" style="font-size:12px;">
+          @Html.DisplayFor(m => m[j].UserFullName)
+          @if (Model[j].IsContactPerson)
+          {
+              <b> (Is Contact,  Mobil: @Model[j].MobileNumber)</b>
+          }
+          @if (Model[j].EditMode && Model[j].EditAccess)
+          {
+              <span id="removeUser" class="bx bx-trash" onclick="RemoveUserFromSchedule(@Model[j].UserId, @Model[j].Index)"></span>
+          }
+      </li>
       }
       else
       {
