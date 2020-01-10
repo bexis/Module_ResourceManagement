@@ -9,7 +9,7 @@ using Vaiona.Utils.Cfg;
 
 namespace BExIS.Modules.RBM.UI.Helper
 {
-    public class Settings
+    static class Settings
     {
 
         private static String filePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RBM"), "Rbm.settings.xml");

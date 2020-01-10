@@ -956,7 +956,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         }
                         catch (Exception e)
                         {
-                            ModelState.AddModelError("error", e.Message);
+                            ModelState.AddModelError("", e.Message);
+                            return View("EditEvent", model);
                         }
                     }
                 }
@@ -1802,6 +1803,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                     foreach (TextValue tv in values)
                     {
+                        if (tv == null) break;
+
                         //query += string.Format("tmp.AttributeId == {0} && tmp.DomainItem == {1}", tv.ResourceAttributeUsage.ResourceStructureAttribute.Id, tv.Value);
                         var exp = Expression.AndAlso(
 

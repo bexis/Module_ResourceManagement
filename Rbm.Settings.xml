@@ -6,11 +6,11 @@
 
 
   <!--Setting for sending booking notifications-->
-  <add key="BookingMailReceiver" value="eleonora.petzold@uni-jena.de" />
-  <add key="BookingMailReceiverCC" value="eleonora.petzold@uni-jena.de" />
-  <add key="BookingMailReceiverBCC" value="eleonora.petzold@uni-jena.de" />
-  <add key="BookingMailSender" value="Biodiversity Exploratories: Fieldbook create reservation" />
-  <add key="BookingMailSubject" value="" />
+  <entry key="BookingMailReceiver" value="eleonora.petzold@uni-jena.de" type="string"/>
+  <entry key="BookingMailReceiverCC" value="david.blaa@googlemail.com" type="string"/>
+  <entry key="BookingMailReceiverBCC" value="franziska.zander@uni-jena.de" type="string"/>
+  <entry key="BookingMailSender" value="Biodiversity Exploratories: Fieldbook create reservation" type="string"/>
+  <entry key="BookingMailSubject" value="booking booking power" type="string"/>
 
   <!--Setting to define party type name-->
   <entry key="AccountPartyTypes" value="Person" type="string"/>  
