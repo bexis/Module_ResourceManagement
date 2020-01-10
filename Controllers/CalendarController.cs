@@ -1,5 +1,6 @@
 ﻿using BExIS.Modules.RBM.UI.Helper;
 using BExIS.Rbm.Entities.Booking;
+using BExIS.Rbm.Entities.BookingManagementTime;
 using BExIS.Rbm.Entities.Resource;
 using BExIS.Rbm.Entities.ResourceStructure;
 using BExIS.Rbm.Services.Booking;
@@ -16,6 +17,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Services;
+using Vaiona.Persistence.Api;
 using Vaiona.Web.Extensions;
 using Vaiona.Web.Mvc.Models;
 
@@ -82,7 +84,17 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<object> scheduleObjectList = new List<object>();
             foreach (Schedule s in scheduleList)
             {
-                scheduleObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource, s.StartDate, s.EndDate, s.BookingEvent.Id)) });
+                using (IUnitOfWork uow = this.GetUnitOfWork())
+                {
+                    if (s.Resource == null) break;
+
+                    var duration = uow.GetReadOnlyRepository<TimeDuration>().Get(s.Resource.Duration.Id);
+
+                    if (duration == null) break;
+                    var timeUnit = duration.TimeUnit;
+
+                    scheduleObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource.Name, s.Resource.Color, timeUnit, s.StartDate, s.EndDate, s.BookingEvent.Id)) });
+                }
             }
 
             Session["FilterSchedules"] = null;
@@ -144,7 +156,17 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<object> scheduleObjectList = new List<object>();
             foreach (Schedule s in scheduleList)
             {
-                scheduleObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource, s.StartDate, s.EndDate, s.BookingEvent.Id)) });
+                using (IUnitOfWork uow = this.GetUnitOfWork())
+                {
+                    if (s.Resource == null) break;
+
+                    var duration = uow.GetReadOnlyRepository<TimeDuration>().Get(s.Resource.Duration.Id);
+
+                    if (duration == null) break;
+                    var timeUnit = duration.TimeUnit;
+
+                    scheduleObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource.Name, s.Resource.Color, timeUnit, s.StartDate, s.EndDate, s.BookingEvent.Id)) });
+                }
             }
 
             Session["FilterSchedules"] = null;
@@ -161,7 +183,18 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<object> scheduleList = new List<object>();
             foreach (Schedule s in allSchedules)
             {
-                scheduleList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource, s.StartDate, s.EndDate, s.BookingEvent.Id)) });
+                using (IUnitOfWork uow = this.GetUnitOfWork())
+                {
+                    if (s.Resource == null) break;
+
+                    var duration = uow.GetReadOnlyRepository<TimeDuration>().Get(s.Resource.Duration.Id);
+
+                    if (duration == null) break;
+                    var timeUnit = duration.TimeUnit;
+
+                    scheduleList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource.Name, s.Resource.Color, timeUnit, s.StartDate, s.EndDate, s.BookingEvent.Id)) });
+                }
+
             }
 
             return Json(scheduleList.ToArray(), JsonRequestBehavior.AllowGet);

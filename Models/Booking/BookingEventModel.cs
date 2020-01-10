@@ -18,6 +18,7 @@ using System.ComponentModel.DataAnnotations;
 using BExIS.Rbm.Entities.BookingManagementTime;
 using BExIS.Dlm.Services.Party;
 using BExIS.Dlm.Entities.Party;
+using Vaiona.Persistence.Api;
 
 namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 {
@@ -151,18 +152,20 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             }
         }
 
-        public CalendarItemsModel(R.SingleResource resource, DateTime startDate, DateTime endDate, long eId)
+        public CalendarItemsModel(string resourceName,string resourceColor, SystemDefinedUnit timeUnit, DateTime startDate, DateTime endDate, long eId)
         {
             eventId = eId;
-            title = resource.Name;
-            color = resource.Color;
+            title = resourceName;
+            color = resourceColor;
             start = startDate;
             end = endDate;
 
-            if (resource.Duration.Self.TimeUnit == SystemDefinedUnit.day || resource.Duration.Self.TimeUnit == SystemDefinedUnit.week || resource.Duration.Self.TimeUnit == SystemDefinedUnit.year)
+
+            if (timeUnit == SystemDefinedUnit.day || timeUnit == SystemDefinedUnit.week || timeUnit == SystemDefinedUnit.year)
                 allDay = true;
             else
                 allDay = false;
+
         }
     }
 
