@@ -104,17 +104,23 @@
                             var events = [];
                             $.each(doc, function (key, value) {
                                 var val = $.parseJSON(value[0]);
+
+                                // the end date is exclusive in fullcalendar. To display the duration correct 1 days needs to be added
+                                var new_end_date = new Date(val['end']);
+                                new_end_date.setDate(new_end_date.getDate() + 1);
+
                                 events.push({
                                     allDay: true,
                                     title: val['title'],
                                     start: val['start'],
-                                    end: val['end'],
+                                    end: new_end_date,
                                     color: val['color'],
                                     eventId: val['eventId']
                                 });
                             });
 
                             callback(events);
+                            console.log(events);
                         }
                     });
                 }
@@ -131,11 +137,16 @@
                         var events = [];
                         $.each(doc, function (key, value) {
                             var val = $.parseJSON(value[0]);
+
+                            // the end date is exclusive in fullcalendar. To display the duration correct 1 days needs to be added
+                            var new_end_date = new Date(val['end']);
+                            new_end_date.setDate(new_end_date.getDate() + 1);
+
                             events.push({
                                 allDay: true,
                                 title: val['title'],
                                 start: val['start'],
-                                end: val['end'],
+                                end: new_end_date,
                                 color: val['color'],
                                 eventId: val['eventId']
                             });
@@ -159,11 +170,16 @@
                         var events = [];
                         $.each(doc, function (key, value) {
                             var val = $.parseJSON(value[0]);
+
+                            // the end date is exclusive in fullcalendar. To display the duration correct 1 days needs to be added
+                            var new_end_date = new Date(val['end']);
+                            new_end_date.setDate(new_end_date.getDate() + 1);
+
                             events.push({
                                 allDay: true,
                                 title: val['title'],
                                 start: val['start'],
-                                end: val['end'],
+                                end: new_end_date,
                                 color: val['color'],
                                 eventId: val['eventId']
                             });
@@ -186,10 +202,15 @@
                     var events = [];
                     $.each(doc, function (key, value) {
                         var val = $.parseJSON(value[0]);
+
+                        // the end date is exclusive in fullcalendar. To display the duration correct 1 days needs to be added
+                        var new_end_date = new Date(val['end']);
+                        new_end_date.setDate(new_end_date.getDate() + 1);
+
                         events.push({
                             title: val['title'],
                             start: val['start'],
-                            end: val['end'],
+                            end: new_end_date,
                             color: val['color'],
                             eventId: val['eventId'],
                             allDay: val['allDay']
@@ -255,6 +276,7 @@
                     window.location.href = '../Schedule/Show/' + id;
                 })
             },
+  
         });
 
 
