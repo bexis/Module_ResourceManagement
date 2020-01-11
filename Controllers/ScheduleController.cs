@@ -889,7 +889,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 {
                                     foreach (PersonInSchedule user in schedule.ForPersons)
                                     {
-                                        User u = userManager.FindByIdAsync(user.Id).Result;
+                                        User u = userManager.FindByIdAsync(user.UserId).Result;
 
                                         if (user.IsContactPerson == true)
                                         {
@@ -1107,6 +1107,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     a.UserFullName = partyPerson.Name;
                     //get party type attribute value
                     a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
+                    a.Index = int.Parse(index);
 
                 });
                 return PartialView("_scheduleUsers", tempSchedule.ForPersons);
@@ -1203,25 +1204,27 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             return new EmptyResult();
         }
-
+        // change contact person // remove old set new
         public ActionResult ChangeContactPerson(string userId, string index)
         {
-            //List<PersonInSchedule> sEventUser = (List<PersonInSchedule>)Session["ScheduleUsers"];
 
             BookingEventModel model = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = model.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
 
-            if (tempSchedule.ForPersons.Where(a => a.IsContactPerson == true).Count() > 0)
-            {
-                //Message to user they allready exsist a contact person 
-            }
-            else
-            {
-                tempSchedule.ForPersons.First(d => d.UserId == Convert.ToInt64(userId)).IsContactPerson = true;
-            }
+            // read current contact user and unset "is contact"
+            var currentContact = tempSchedule.ForPersons.First(a => a.IsContactPerson == true);
+            currentContact.IsContactPerson = false;
+
+            // find new contact
+            var newContact = tempSchedule.ForPersons.First(d => d.UserId == Convert.ToInt64(userId));
+            newContact.IsContactPerson = true;
+
+            // set new contact
+            tempSchedule.Contact = newContact;
+            tempSchedule.ContactName = newContact.UserFullName;
+
 
             Session["Event"] = model;
-            //Session["ScheduleUsers"] = sEventUser;
 
             return new EmptyResult();
         }
@@ -1328,10 +1331,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
             BookingEventModel sEventM = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
 
+            var index_int = Convert.ToInt32(index);
 
             if (tempSchedule.Activities != null)
             {
                 tempSchedule.Activities.ForEach(a => a.EditAccess = tempSchedule.EditAccess);
+                tempSchedule.Activities.ForEach(a => a.Index = index_int);
                 return PartialView("_showActivities", tempSchedule.Activities);
             }
             else
@@ -1346,9 +1351,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
             ActivityManager aManager = new ActivityManager();
             List<Activity> activities = aManager.GetAllAvailableActivityById().ToList();
 
+            
+
             BookingEventModel sEventM = (BookingEventModel)Session["Event"];
 
             ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
+            Session["ScheduleActivities"] = tempSchedule.Activities;
             List<long> tempActivityIds = tempSchedule.Activities.Select(c => c.Id).ToList();
             foreach (Activity a in activities)
             {
@@ -1360,6 +1368,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 }
                 model.Add(ae);
             }
+
+           
 
             return PartialView("_chooseActivities", model);
         }
@@ -1402,34 +1412,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             ActivityManager aManager = new ActivityManager();
 
-            //List<PersonUser> personGroup = new List<PersonUser>();
-            var activitiesIdsBefore = tempSchedule.Activities.Select(a => a.Id).ToList();
-
-            if (sScheduleActivities != null && sScheduleActivities.Count() > 1)
-            {
-                foreach (ActivityEventModel ae in sScheduleActivities)
-                {
-                    //PersonUser pu = tempSchedule.ForPersons.Select(a=>a.UserId == userId).FirstOrDefault();
-                    if (!activitiesIdsBefore.Contains(ae.Id))
-                    {
-                        tempSchedule.Activities.Add(ae);
-                    }
-                }
-            }
-            else
-            {
-                if (!activitiesIdsBefore.Contains(sScheduleActivities[0].Id))
-                {
-                    tempSchedule.Activities.Add(sScheduleActivities[0]);
-                }
-            }
-
+            if (sScheduleActivities != null && sScheduleActivities.Any()) tempSchedule.Activities = sScheduleActivities;
+        
             //get index of modify schedule and update it in the session list
             var i = eventM.Schedules.FindIndex(p => p.Index == tempSchedule.Index);
             eventM.Schedules[i] = tempSchedule;
             Session["Event"] = eventM;
 
-            return PartialView("_scheduleActivities", tempSchedule.Activities);
+            return PartialView("_showActivities", tempSchedule.Activities);
         }
 
         //open window to show all activities wich are related to one schedule
@@ -1453,7 +1443,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             sEventM.Schedules[i] = tempSchedule;
             Session["EventResources"] = sEventM;
 
-            return View("_scheduleActivities", tempSchedule.Activities);
+            return PartialView("_showActivities", tempSchedule.Activities);
         }
 
         #endregion

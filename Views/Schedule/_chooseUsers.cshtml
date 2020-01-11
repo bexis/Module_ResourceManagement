@@ -35,7 +35,7 @@
                columns.Template(
                         @<text>
                             <div id="IsContact">
-                                @Html.CheckBox("" + item.IsContactPerson, item.IsContactPerson, new { id = @item.UserId, index = @item.Index, OnChange = "changeContactPerson(this)" })
+                                @Html.RadioButton("contact", @item.UserId , item.IsContactPerson, new { id = @item.UserId, index = @item.Index, OnChange = "changeContactPerson(this)" })
                             </div>
                         </text>
                                ).Title("IsContact")
