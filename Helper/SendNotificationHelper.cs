@@ -1,4 +1,6 @@
-﻿using BExIS.Security.Services.Utilities;
+﻿using BExIS.Dlm.Services.Party;
+using BExIS.Security.Services.Subjects;
+using BExIS.Security.Services.Utilities;
 using BExIS.Web.Shell.Areas.RBM.Models.Booking;
 using System;
 using System.Collections.Generic;
@@ -55,33 +57,58 @@ namespace BExIS.Web.Shell.Areas.RBM.Helpers
             var subject = Modules.RBM.UI.Helper.Settings.get("BookingMailSubject").ToString();
 
             string message = "";
-            message += "The following event has been " + bookingAction + "\n";
-            message += "----------------------------------------------------------\n";
-            message += "Event name: " + model.Name + "\n";
+            message += "<p>The following booking has been " + bookingAction + "</p>";
+            message += "<table><tr><td>Booking name:</td><td>" + model.Name + "</td></tr>";
             if (model.Description != "")
-                message += "Event description: " + model.Description + "\n";
-            message += "Booked Resources: \n";
-            message += "----------------------------------------------------------\n";
-
-            foreach (ScheduleEventModel schedule in model.Schedules)
+                message += "<tr><td>Booking description:</td><td>" + model.Description + "</td></tr></table>";
+            message += "<p>Booked Resources:</p>";
+            message += "<table>";
+            using (var userManager = new UserManager())
+            using (var partyManager = new PartyManager())
             {
-                
-                message += "Resource: " + schedule.ResourceName + "\n";
-                message += "Startdate: " + schedule.ScheduleDurationModel.StartDate + "\n";
-                message += "Enddate: " + schedule.ScheduleDurationModel.EndDate + "\n";
-                message += "Reserved by:" + schedule.ByPerson + "\n";
-                message += "Reserved for: \n";
-                foreach (PersonInSchedule person in schedule.ForPersons)
-                {
-                    message += person.UserFullName + " \n";
-                }
 
-                message += "Contact person: " + schedule.ContactName + "( " + schedule.Contact.MobileNumber + ") \n";
-                message += "---------------------------------------------------------- \n\n";
+                foreach (ScheduleEventModel schedule in model.Schedules)
+                {
+
+                    message += "<tr><td>   </td><td>Resource:</td><td>" + schedule.ResourceName + "</td></tr>";
+                    message += "<tr><td>   </td><td>Start date:</td><td>" + schedule.ScheduleDurationModel.StartDate.ToString("dd.MM.yyyy") + " </td></tr>";
+                    message += "<tr><td>   </td><td>End date:</td><td>" + schedule.ScheduleDurationModel.EndDate.ToString("dd.MM.yyyy") + "</td></tr>";
+                    message += "<tr><td>   </td><td>Reserved by:</td><td>" + schedule.ByPerson + "</td></tr>";
+                    message += "<tr><td>   </td><td>Contact person:</td><td>" + schedule.ContactName + "( " + schedule.Contact.MobileNumber + ")</td></tr>";
+                    message += "<tr><td>   </td><td>Reserved for:</td><td></td></tr>";
+                    message += "<tr><td>   </td><td></td><td><ul>";
+
+
+                    foreach (PersonInSchedule person in schedule.ForPersons)
+                    {
+                        message += "<li>" + person.UserFullName + "</li>";
+
+                        var user = userManager.FindByIdAsync(person.UserId).Result;
+
+                        if (user != null)
+                        {
+                            receiver.Add(user.Email);
+                        }
+
+                    }
+
+
+                    message += "</ul></td></tr>";
+                }
             }
+            message += "</table>";
+
+            receiverBCC.Add(ConfigurationManager.AppSettings["SystemEmail"].ToString()); // Allways send BCC to SystemEmail 
+            
 
             var emailService = new EmailService();
-            emailService.Send(subject, message, receiver, receiverCC, receiverBCC);
+            emailService.Send(
+               subject,
+               message,
+               receiver.Distinct().ToList(), 
+               receiverCC, 
+               receiverBCC 
+               );
         }
 
     }
