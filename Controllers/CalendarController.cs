@@ -319,13 +319,22 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 }
 
                 //create schedule resource list with selected resources
-                foreach (SingleResource sr in resultResourceList)
+              /*  foreach (SingleResource sr in resultResourceList)
                 {
                     if (allSchedules.Any(s => s.Resource == sr))
-                    {
+                   {
                         resultScheduleList.Add(allSchedules.Where(r => r.Resource == sr).FirstOrDefault());
                     }
                 }
+                */
+                foreach (Schedule s in allSchedules)
+                {
+                    if (resultResourceList.Contains(s.Resource))
+                    {
+                        resultScheduleList.Add(s);
+                    }
+                }
+
 
                 Session["FilterSchedules"] = resultScheduleList;
 
@@ -399,6 +408,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 m.ResourceAttributes = string.Join<string>(",", attributes.Distinct());
             }
 
+            //model = model.OrderByDescending(a => a.startDate).ToList();
+
             return PartialView("_listEvents", model);
         }
 
@@ -430,10 +441,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
             else
                 allSchedules.ForEach(r => model.Add(new ScheduleListModel(r)));
 
+            //model = model.OrderByDescending(a => a.StartDate).ToList();
 
             return PartialView("_listSchedules", model);
         }
-
         #endregion
     }
 }
