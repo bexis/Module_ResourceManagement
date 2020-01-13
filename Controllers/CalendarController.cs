@@ -97,7 +97,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 }
             }
 
-            Session["FilterSchedules"] = null;
+            // Session["FilterSchedules"] = null;
             return Json(scheduleObjectList.ToArray(), JsonRequestBehavior.AllowGet);
         }
 
@@ -240,7 +240,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 List<Schedule> resultScheduleList = new List<Schedule>();
 
                 //result resource list after filtering
-                List<SingleResource> resultResourceList = new List<SingleResource>();
+                List<long> resultResourceIDList = new List<long>();
 
                 //Filter is this format: AttrID_DomainItem, AttrID_Domain
                 List<string> items = selectedItems.Split(',').ToList();
@@ -249,8 +249,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 ScheduleManager schManager = new ScheduleManager();
                 List<Schedule> allSchedules = schManager.GetAllSchedules().ToList();
 
-                //get all scheduled resources 
-                List<SingleResource> scheduledResources = allSchedules.Select(r => r.Resource).ToList();
+                //get all scheduled resources
+                ResourceManager srManager = new ResourceManager();
+                List<SingleResource> resourcesList = srManager.GetAllResources().ToList();
 
                 List<ResourceFilterHelper.FilterTreeItem> filterList = new List<ResourceFilterHelper.FilterTreeItem>();
                 //split Id and DomainItem and add it to a FilterItem list
@@ -285,7 +286,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 List<ResourceAttributeValueModel> treeDomainList = new List<ResourceAttributeValueModel>();
 
                 //Create for each Resource TreeDomainModel witch includes all Attribute Ids and all values
-                foreach (SingleResource r in scheduledResources)
+                foreach (SingleResource r in resourcesList)
                 {
                     ResourceAttributeValueModel treeDomainModel = new ResourceAttributeValueModel(r);
                     treeDomainList.Add(treeDomainModel);
@@ -301,40 +302,18 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 {
                     if (ResourceFilterHelper.CheckTreeDomainModel(m, filterDic))
                     {
-                        //if (selectedResources.Count > 0)
-                        //{
-                        //    if (selectedResources.Where(a => a.Id == m.Resource.Id).Count() > 0)
-                        //    {
-                        //        ResourceManagerModel rem = new ResourceManagerModel(m.Resource);
-                        //        //rem.InEvent = true;
-                        //        //TempSchedule tempS = selectedResources.Where(a => a.Id == m.Resource.Id).FirstOrDefault();
-                        //        //rem.StartDate = tempS.StartDate;
-                        //        //rem.EndDate = tempS.EndDate;
-                        //        resultList.Add(rem);
-                        //    }
-                        //}
-                        //else
-                        resultResourceList.Add(m.Resource);
+                        resultResourceIDList.Add(m.Resource.Id);
                     }
                 }
 
                 //create schedule resource list with selected resources
-              /*  foreach (SingleResource sr in resultResourceList)
-                {
-                    if (allSchedules.Any(s => s.Resource == sr))
-                   {
-                        resultScheduleList.Add(allSchedules.Where(r => r.Resource == sr).FirstOrDefault());
-                    }
-                }
-                */
                 foreach (Schedule s in allSchedules)
-                {
-                    if (resultResourceList.Contains(s.Resource))
+                {                   
+                    if (resultResourceIDList.Contains(s.Resource.Id))
                     {
                         resultScheduleList.Add(s);
                     }
                 }
-
 
                 Session["FilterSchedules"] = resultScheduleList;
 
@@ -416,6 +395,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult GetSchedulesAsList(string myBookings)
         {
+            var filteredSchedules = Session["FilterSchedules"];
+
             ScheduleManager sManager = new ScheduleManager();
             SubjectManager subManager = new SubjectManager();
             List<Schedule> allSchedules = new List<Rbm.Entities.Booking.Schedule>();
