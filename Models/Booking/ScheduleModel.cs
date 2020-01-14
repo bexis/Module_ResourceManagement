@@ -166,35 +166,38 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
         }
 
-        public ScheduleListModel(Schedule s)
+        //public ScheduleListModel(Schedule s)
+        public ScheduleListModel(
+            string bookingEventName, string bookingEventDescription, string resourceName, DateTime start, DateTime end, int quantity, Person forPerson, ICollection<Activity> activities)
         {
-            EventName = s.BookingEvent.Name;
-            EventDescription = s.BookingEvent.Description;
-            ResourceName = s.Resource.Name;
+
+            EventName = bookingEventName;
+            EventDescription = bookingEventDescription;
+            ResourceName = resourceName;
             
-            StartDate = s.StartDate;
-            EndDate = s.EndDate;
-            Quantity = s.Quantity;
+            StartDate = start;
+            EndDate = end;
+            Quantity = quantity;
 
             using (var partyManager = new PartyManager())
             {
-                Party party = partyManager.GetPartyByUser(s.ForPerson.Contact.Id);
+                Party party = partyManager.GetPartyByUser(forPerson.Contact.Id);
                 if (party != null)
                 {
                     ContactPerson = party.Name;
                 }
                 else
                 {
-                    ContactPerson = s.ForPerson.Contact.Name;
+                    ContactPerson = forPerson.Contact.Name;
                 }
             }
 
 
 
 
-            if (s.ForPerson is PersonGroup)
+            if (forPerson is PersonGroup)
             {
-                PersonGroup pg = (PersonGroup)s.ForPerson;
+                PersonGroup pg = (PersonGroup)forPerson;
                 int count = 0;
                 foreach(User u in pg.Users)
                 {
@@ -206,17 +209,17 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                     count++;
                 }
             }
-            else if(s.ForPerson is IndividualPerson)
+            else if(forPerson is IndividualPerson)
             {
-                IndividualPerson ip = (IndividualPerson)s.ForPerson;
+                IndividualPerson ip = (IndividualPerson)forPerson;
                 ReservedFor = ip.Person.Name;
             }
 
             int countA = 0;
 
-            foreach (Activity a in s.Activities)
+            foreach (Activity a in activities)
             {
-                if (countA < s.Activities.Count())
+                if (countA < activities.Count())
                     Activities += a.Name + " ,";
                 else
                     Activities += a.Name;

@@ -3,6 +3,7 @@ using BExIS.Rbm.Entities.Booking;
 using BExIS.Rbm.Entities.BookingManagementTime;
 using BExIS.Rbm.Entities.Resource;
 using BExIS.Rbm.Entities.ResourceStructure;
+using BExIS.Rbm.Entities.Users;
 using BExIS.Rbm.Services.Booking;
 using BExIS.Rbm.Services.Resource;
 using BExIS.Security.Entities.Subjects;
@@ -408,19 +409,39 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             List<ScheduleListModel> model = new List<ScheduleListModel>();
 
-            if (bool.Parse(myBookings))
-            {
-                User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-                foreach (Schedule s in allSchedules)
-                {
-                    //var s = schedules.Where(a => a.ByPerson.Person.Id == user.Id).ToList();
-                    if (s.ByPerson.Person.Id == user.Id)
-                        model.Add(new ScheduleListModel(s));
-                }
+            User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
 
+
+            // filter bookings when only my bookings should be loaded
+            List<Schedule> schedules = new List<Schedule>();
+
+                if(bool.Parse(myBookings))
+                    schedules = allSchedules.Where(s => s.ByPerson.Person.Id.Equals(user.Id)).ToList(); 
+                else
+                    schedules = allSchedules;
+
+            using (var uow = this.GetUnitOfWork())
+            {
+                foreach (Schedule s in schedules)
+                {
+                    var booking = uow.GetReadOnlyRepository<BookingEvent>().Get(s.BookingEvent.Id);
+                    var resource = uow.GetReadOnlyRepository<Resource>().Get(s.Resource.Id);
+                    var forperson = uow.GetReadOnlyRepository<Person>().Get(s.ForPerson.Id);
+                   
+
+                    model.Add(new ScheduleListModel(
+                        booking.Name,
+                        booking.Description,
+                        resource.Name,
+                        s.StartDate,
+                        s.EndDate,
+                        s.Quantity,
+                        forperson,
+                        s.Activities
+                        ));
+                }
             }
-            else
-                allSchedules.ForEach(r => model.Add(new ScheduleListModel(r)));
+
 
             //model = model.OrderByDescending(a => a.StartDate).ToList();
 
