@@ -512,7 +512,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 userTask.Wait();
                                 var user = userTask.Result;
 
-                                PersonInSchedule byPerson = new PersonInSchedule(0, user, false);
+                                PersonInSchedule byPerson = new PersonInSchedule(0, user, true);
+
+                                //set contact                       
+                                s.Contact = byPerson;
+                                s.ContactName = byPerson.UserFullName;
                                 s.ForPersons.Add(byPerson);
 
                                 //s.Index = rc.Index;
@@ -1212,8 +1216,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
             ScheduleEventModel tempSchedule = model.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
 
             // read current contact user and unset "is contact"
-            var currentContact = tempSchedule.ForPersons.First(a => a.IsContactPerson == true);
-            currentContact.IsContactPerson = false;
+            var currentContact = tempSchedule.ForPersons.FirstOrDefault(a => a.IsContactPerson == true);
+            if(currentContact!=null) currentContact.IsContactPerson = false;
 
             // find new contact
             var newContact = tempSchedule.ForPersons.First(d => d.UserId == Convert.ToInt64(userId));
