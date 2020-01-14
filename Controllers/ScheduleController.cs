@@ -702,7 +702,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                      
 
 
-                        if ((availableQuantity - s.ScheduleQuantity) < 0)
+                        if ((availableQuantity - s.ScheduleQuantity) <= 0)
                         {
                             isError = true;
                             sError = true;
