@@ -41,6 +41,7 @@ using BExIS.Security.Services.Objects;
 using System.Configuration;
 using System.Web.Configuration;
 using Vaiona.Utils.Cfg;
+using Vaiona.Persistence.Api;
 
 namespace BExIS.Modules.RBM.UI.Controllers
 {
@@ -512,7 +513,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 userTask.Wait();
                                 var user = userTask.Result;
 
-                                PersonInSchedule byPerson = new PersonInSchedule(0, user, false);
+                                PersonInSchedule byPerson = new PersonInSchedule(0, user, true);
+
+                                //set contact                       
+                                s.Contact = byPerson;
+                                s.ContactName = byPerson.UserFullName;
                                 s.ForPersons.Add(byPerson);
 
                                 //s.Index = rc.Index;
@@ -702,7 +707,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                      
 
 
-                        if ((availableQuantity - s.ScheduleQuantity) < 0)
+                        if ((availableQuantity - s.ScheduleQuantity) <= 0)
                         {
                             isError = true;
                             sError = true;
@@ -867,20 +872,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 //Users
                                 List<User> users = new List<User>();
 
-                                //Activities
-                                List<Activity> activityList = new List<Activity>();
 
-                                //if schedule hat activities, add them to the list
-                                if (schedule.Activities.Count > 0)
-                                {
-                                    using (var activityManager = new ActivityManager())
-                                    {
-                                        foreach (ActivityEventModel ae in schedule.Activities)
-                                        {
-                                            activityList.Add(activityManager.GetActivityById(ae.Id));
-                                        }
-                                    }
-                                }
 
                                 User contact = new User();
                                 Person person = new Person();
@@ -908,9 +900,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                                 //Create or Update schedule
                                 if (model.Id == 0 || (countSchedulesCurrent > countSchedulesBefor && schedule.ScheduleId == 0))
-                                    newSchedule = scheduleManager.CreateSchedule(schedule.ScheduleDurationModel.StartDate, schedule.ScheduleDurationModel.EndDate, eEvent, tempResource, person, createdBy, activityList, schedule.ScheduleQuantity, index);
+                                    newSchedule = scheduleManager.CreateSchedule(schedule.ScheduleDurationModel.StartDate, schedule.ScheduleDurationModel.EndDate, eEvent, tempResource, person, createdBy, schedule.Activities.Select(a=>a.Id), schedule.ScheduleQuantity, index);
                                 else
-                                    UpdateSchedule(schedule, activityList, person, contact);
+                                    UpdateSchedule(schedule, schedule.Activities.Select(a => a.Id), person, contact);
 
 
                                 //Get affected notificationen for the schedule
@@ -971,8 +963,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return RedirectToAction("Calendar","Calendar");
         }
 
-        private Schedule UpdateSchedule(ScheduleEventModel schedule, List<Activity> activityList, Person person, User contact)
+        private Schedule UpdateSchedule(ScheduleEventModel schedule, IEnumerable<long> activityList, Person person, User contact)
         {
+
+            using (var uow = this.GetUnitOfWork())
             using (var pManager = new PersonManager())
             using (var schManager = new ScheduleManager())
             {
@@ -995,8 +989,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     s.ForPerson = iPerson;
                 }
 
-                s.Activities = activityList;
-
+                //load activites
+                activityList.ToList().ForEach(a => s.Activities.Add(uow.GetReadOnlyRepository<Activity>().Get(a)));
                 schManager.UpdateSchedule(s);
 
                 return s;
@@ -1212,8 +1206,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
             ScheduleEventModel tempSchedule = model.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
 
             // read current contact user and unset "is contact"
-            var currentContact = tempSchedule.ForPersons.First(a => a.IsContactPerson == true);
-            currentContact.IsContactPerson = false;
+            var currentContact = tempSchedule.ForPersons.FirstOrDefault(a => a.IsContactPerson == true);
+            if(currentContact!=null) currentContact.IsContactPerson = false;
 
             // find new contact
             var newContact = tempSchedule.ForPersons.First(d => d.UserId == Convert.ToInt64(userId));
