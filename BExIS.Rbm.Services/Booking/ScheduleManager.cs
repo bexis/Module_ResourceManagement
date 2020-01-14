@@ -53,14 +53,15 @@ namespace BExIS.Rbm.Services.Booking
 
         #region Methods
 
-        public Schedule CreateSchedule(DateTime startDate, DateTime endDate, BookingEvent thisEvent, R.SingleResource resource, Person forPerson, Person byPerson, List<Activity> activities,int quantity, int index)
+        public Schedule CreateSchedule(DateTime startDate, DateTime endDate, BookingEvent thisEvent, R.SingleResource resource, Person forPerson, Person byPerson, IEnumerable<long> activities,int quantity, int index)
         {
             Schedule schedule = new Schedule();
+            schedule.Activities = new List<Activity>();
             schedule.StartDate = startDate;
             schedule.EndDate = endDate;
             schedule.BookingEvent = thisEvent;
             schedule.Resource = resource;
-            schedule.Activities = activities;
+            //schedule.Activities = activities;
             schedule.Index = index;
             schedule.Quantity = quantity;
 
@@ -80,6 +81,11 @@ namespace BExIS.Rbm.Services.Booking
 
             using (IUnitOfWork uow = this.GetUnitOfWork())
             {
+
+                //load activites
+
+                activities.ToList().ForEach(a => schedule.Activities.Add(uow.GetReadOnlyRepository<Activity>().Get(a)));
+
                 IRepository<Schedule> repo = uow.GetRepository<Schedule>();
                 repo.Put(schedule);
                 uow.Commit();
