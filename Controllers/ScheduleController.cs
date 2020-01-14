@@ -1098,9 +1098,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     a.EditAccess = tempSchedule.EditAccess;
                     a.EditMode = tempSchedule.EditMode;
                     Party partyPerson = UserHelper.GetPartyByUserId(a.UserId);
+                    
                     a.UserFullName = partyPerson.Name;
                     //get party type attribute value
                     a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
+  
                     a.Index = int.Parse(index);
 
                 });
@@ -1277,7 +1279,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     a.UserFullName = partyPerson.Name;
                     //get party type attribute value
                     a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
-
                 });
             }
 
@@ -1918,14 +1919,26 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                 //get permission from logged in user
                 long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
-                Entity entity = entityTypeManager.FindByName("Schedule");
 
+                //Check permission for BookingEvent
+                Entity entity = entityTypeManager.FindByName("BookingEvent");
                 model.EditAccess = permissionManager.HasEffectiveRight(userId, entity.Id, id, RightType.Write);
                 model.DeleteAccess = permissionManager.HasEffectiveRight(userId, entity.Id, id, RightType.Delete);
 
-                model.Schedules.ForEach(a => a.EditAccess = model.EditAccess);
-                model.Schedules.ForEach(a => a.DeleteAccess = model.DeleteAccess);
 
+                //Check permission for Schedule
+                Entity entity2 = entityTypeManager.FindByName("Schedule");
+                model.Schedules.ForEach(a => a.EditAccess = permissionManager.HasEffectiveRight(userId, entity2.Id, a.ScheduleId, RightType.Write));
+                model.Schedules.ForEach(a => a.DeleteAccess = permissionManager.HasEffectiveRight(userId, entity2.Id, a.ScheduleId, RightType.Delete));
+
+                //Set Edit access 
+                foreach (var s in model.Schedules)
+                {
+                    if (s.EditAccess == true)
+                    {
+                        model.EditAccess = true;
+                    }
+                }
 
                 Session["Event"] = model;
 
