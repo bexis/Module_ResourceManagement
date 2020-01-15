@@ -143,6 +143,8 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
     {
         public long Id { get; set; }
 
+        public long EventID { get; set; }
+
         public string EventName { get; set; }
 
         public string EventDescription { get; set; }
@@ -167,10 +169,11 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         }
 
         //public ScheduleListModel(Schedule s)
-        public ScheduleListModel(
+        public ScheduleListModel(long eventId,
             string bookingEventName, string bookingEventDescription, string resourceName, DateTime start, DateTime end, int quantity, Person forPerson, ICollection<Activity> activities)
         {
 
+            EventID = eventId;
             EventName = bookingEventName;
             EventDescription = bookingEventDescription;
             ResourceName = resourceName;

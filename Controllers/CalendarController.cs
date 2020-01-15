@@ -396,7 +396,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult GetSchedulesAsList(string myBookings)
         {
-            var filteredSchedules = Session["FilterSchedules"];
 
             ScheduleManager sManager = new ScheduleManager();
             SubjectManager subManager = new SubjectManager();
@@ -430,6 +429,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                    
 
                     model.Add(new ScheduleListModel(
+                        booking.Id,
                         booking.Name,
                         booking.Description,
                         resource.Name,
@@ -441,9 +441,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         ));
                 }
             }
-
-
-            //model = model.OrderByDescending(a => a.StartDate).ToList();
 
             return PartialView("_listSchedules", model);
         }

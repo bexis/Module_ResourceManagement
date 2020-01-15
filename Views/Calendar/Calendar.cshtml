@@ -262,7 +262,7 @@
             selectHelper: false,
 
             editable: false,
-            eventSources: [ calsources.eventsource],
+            eventSources: [ calsources.schedulesource],
 
             dayClick: function (date, jsEvent, view) {
                 $.get('@Url.Action("SetFilter", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { startdate: date.format() }, function (data) {
