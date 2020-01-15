@@ -1650,7 +1650,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         if (c is DomainConstraint)
                         {
                             TextValue value = rsaManager.GetTextValueByUsageAndResource(usage.Id, resourceId);
-                            DomainItems.Add(value.Value);
+                            
+                            if(value!=null)DomainItems.Add(value.Value);
                         }
                     }
                 }
