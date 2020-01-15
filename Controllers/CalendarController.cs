@@ -447,6 +447,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             return PartialView("_listSchedules", model);
         }
+
+
         #endregion
     }
 }

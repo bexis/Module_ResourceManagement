@@ -44,7 +44,9 @@
     </div>
 
     @if (Model.Count > 0)
-    {  @Html.ActionLink("Remove all", "Calendar", "Calendar", new { area = "RBM", @class = "t-button action", @title = "Remove all", style = "float: left;  margin-top: 10px;", @tabindex = "5" })
+    {  
+        <button class = "t-button action" onclick="removeAll()" >Remove all</button>
+        @*@Html.ActionLink("Remove all", "Calendar", "Calendar", new { area = "RBM", @class = "t-button action", @title = "Remove all", style = "float: left;  margin-top: 10px;", @tabindex = "5" })*@
         <small>@Html.ValidationMessage("CartEmpty")</small>
         @Html.ActionLink("Continue booking", "CreateEvent", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Create event with all selected resources", style = "float: right;  margin-top: 10px;", @tabindex = "5" })
         }
@@ -65,6 +67,13 @@
         $.get('@Url.Action("RemoveResourceFromCart", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', { index: index }, function (data) {
             $('#ResourceCart').replaceWith(data);
             });
+    }
+
+    function removeAll() {
+
+        $.get('@Url.Action("RemoveAll", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', function (data) {
+            $('#ResourceCart').replaceWith(data);
+        });
     }
 
     @*function changeQuantityInCart(e) {

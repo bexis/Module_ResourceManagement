@@ -380,6 +380,13 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return PartialView("_cartResources", model);
         }
 
+        public ActionResult RemoveAll()
+        {
+            Session["ResourceCart"] = new List<ResourceCart>();
+
+            return PartialView("_cartResources", new List<ResourceCart>());
+        }
+
         //für eventview später wiederverenden
         //Load schedule to event, if a new event the list is empty
         public ActionResult LoadSchedules()
