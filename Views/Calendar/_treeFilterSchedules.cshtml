@@ -111,10 +111,16 @@
         console.log(displayView, contentView);
         if (displayView == "List")
         {
+
             $("#calendar").toggle();
 
+            var myBooking = false;
+            if ($('#MyBookings').is(':checked')) {
+                    myBooking = true;
+            }
+
             if (contentView == "Events") {
-                $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: false }, function (data) {
+                $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: myBooking }, function (data) {
                     $('#eventList').html(data);
 
                     if ($("#eventList").is(":hidden")) {
@@ -123,7 +129,7 @@
                 });
             }
             else if (contentView == "Schedules") {
-                $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: false }, function (data) {
+                $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: myBooking }, function (data) {
                     $('#scheduleList').html(data);
 
                     if ($("#scheduleList").is(":hidden")) {
@@ -135,13 +141,15 @@
         else if (displayView == "Calendar")
         {
             $("#calendar").toggle();
-            if (contentView == "Events") {
 
-                $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
-                $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
+            $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
+            $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
+            $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
+            $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
+
+
+            if (contentView == "Events") {
                 if ($('#MyBookings').is(':checked')) {
-                    $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
-                    $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
                     $('#calendar').fullCalendar('addEventSource', calsources.usereventsource);
                 }
                 else {
@@ -149,13 +157,7 @@
                 }
             }
             else if (contentView == "Schedules") {
-
-                $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
-                $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
-
                 if ($('#MyBookings').is(':checked')) {
-                    $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
-                    $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
                     $('#calendar').fullCalendar('addEventSource', calsources.userschedulesource);
                 }
                 else {
@@ -179,16 +181,20 @@
 
       //  var displayView = $("input[name='DisplayView']:checked").val();
       //  var contentView = $("input[name='ContentView']:checked").val();
+        var myBooking = false;
+        if ($('#MyBookings').is(':checked')) {
+            myBooking = true;
+        }
+
+        $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
+        $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
+        $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
+        $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
 
         if (displayView == "Calendar") {
 
             if (contentView == "Events") {
-
-                 $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
-
                 if ($('#MyBookings').is(':checked')) {
-
-                    $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
                     $('#calendar').fullCalendar('addEventSource', calsources.usereventsource);
                 }
                 else {
@@ -196,11 +202,7 @@
                 }
             }
             else if (contentView == "Schedules") {
-
-                $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
-
                 if ($('#MyBookings').is(':checked')) {
-                    $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
                     $('#calendar').fullCalendar('addEventSource', calsources.userschedulesource);
                 }
                 else {
@@ -211,12 +213,11 @@
         else if(displayView == "List")
         {
             if (contentView == "Events") {
-
                 if ($("#scheduleList").is(":visible")) {
                     $('#scheduleList').toggle();
                 }
 
-                $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: false }, function (data) {
+                $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings : myBooking }, function (data) {
                     $('#eventList').html(data);
                 });
 
@@ -230,7 +231,7 @@
                     $('#eventList').toggle();
                 }
 
-                $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings :false}, function (data) {
+                $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: myBooking}, function (data) {
                     $('#scheduleList').html(data);
                 });
 
@@ -249,17 +250,16 @@
             var contentView = $("input[name='ContentView']:checked").val();
             var displayView = $("input[name='DisplayView']:checked").val();
 
+            $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
+            $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
+            $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
+            $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
+
             if (displayView == "Calendar") {
                 if (contentView == "Events") {
-                    $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
-                    $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
-                    $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
                     $('#calendar').fullCalendar('addEventSource', calsources.usereventsource);
                 }
-                else if (contentView == "Schedules") {
-                    $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
-                    $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
-                    $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
+                else if (contentView == "Schedules") {            
                     $('#calendar').fullCalendar('addEventSource', calsources.userschedulesource);
                 }
             }
@@ -283,7 +283,7 @@
                         $('#eventList').toggle();
                     }
 
-                    $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', {myBookings:true}, function (data) {
+                    $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', {myBookings: true}, function (data) {
                         $('#scheduleList').html(data);
                     });
 
@@ -300,17 +300,16 @@
             var contentView = $("input[name='ContentView']:checked").val();
             var displayView = $("input[name='DisplayView']:checked").val();
 
+            $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
+            $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
+            $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
+            $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
+
             if (displayView == "Calendar") {
                 if (contentView == "Events") {
-                    $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
-                    $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
-                    $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
                     $('#calendar').fullCalendar('addEventSource', calsources.eventsource);
                 }
                 else if (contentView == "Schedules") {
-                    $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
-                    $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
-                    $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
                     $('#calendar').fullCalendar('addEventSource', calsources.schedulesource);
                 }
             }
