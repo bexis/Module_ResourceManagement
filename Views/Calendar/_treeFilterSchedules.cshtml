@@ -135,14 +135,13 @@
         else if (displayView == "Calendar")
         {
             $("#calendar").toggle();
-
             if (contentView == "Events") {
 
                 $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
                 $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
                 if ($('#MyBookings').is(':checked')) {
-
                     $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
+                    $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
                     $('#calendar').fullCalendar('addEventSource', calsources.usereventsource);
                 }
                 else {
@@ -155,6 +154,7 @@
                 $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
 
                 if ($('#MyBookings').is(':checked')) {
+                    $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
                     $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
                     $('#calendar').fullCalendar('addEventSource', calsources.userschedulesource);
                 }
