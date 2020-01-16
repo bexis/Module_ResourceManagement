@@ -36,27 +36,63 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         #region Schedule Calendar
 
+        // Get all events filtered by date and optional also by "my bookings"
+
         [WebMethod]
-        public JsonResult GetAllEvents(object st, object ed)
+        public JsonResult GetAllEvents(object st, object ed, bool byUser = false)
         {
             DateTime startDate = DateTime.Parse(st.ToString());
             DateTime endDate = DateTime.Parse(ed.ToString());
 
             List<BookingEvent> eventList = new List<BookingEvent>();
+            List<BookingEvent> eventListTmp = new List<BookingEvent>();
             if (Session["FilterSchedules"] == null)
             {
                 BookingEventManager eManager = new BookingEventManager();
                 eventList = eManager.GetAllEventByTimePeriod(startDate, endDate);
+
+                if (byUser == true)
+                {
+                    ScheduleManager schManager = new ScheduleManager();
+
+                    SubjectManager subManager = new SubjectManager();
+                    User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
+
+                    foreach (BookingEvent e in eventList)
+                    {
+                        List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
+                        var s = schedules.Where(a => a.ByPerson.Person.Id == user.Id).ToList();
+                        if (s.Count > 0)
+                            eventListTmp.Add(e);
+                    }
+
+                    eventList = eventListTmp;
+                }
             }
             else
             {
                 BookingEventManager eManager = new BookingEventManager();
                 List<Schedule> scheduleList = new List<Schedule>();
                 scheduleList = Session["FilterSchedules"] as List<Schedule>;
+
+                // filter list by user
+                if (byUser == true)
+                {
+                    SubjectManager subManager = new SubjectManager();
+                    User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
+
+                    scheduleList = scheduleList.Where(a => a.ByPerson.Person.Id == user.Id).ToList();  
+                }
+
+                scheduleList = scheduleList.Where(a => ((DateTime)a.StartDate >= startDate && (DateTime)a.EndDate <= endDate) || ((DateTime)a.EndDate >= startDate && (DateTime)a.EndDate <= endDate) || (DateTime)a.StartDate <= startDate && (DateTime)a.EndDate >= endDate).ToList();
                 foreach (Schedule s in scheduleList)
                 {
                     if (!eventList.Select(a => a.Id).ToList().Contains(s.BookingEvent.Id))
+ 
+                    {
                         eventList.Add(eManager.GetBookingEventById(s.BookingEvent.Id));
+                    }
+
                 }
 
             }
@@ -70,9 +106,13 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return Json(eventObjectList.ToArray(), JsonRequestBehavior.AllowGet);
         }
 
-        [HttpGet]
-        public JsonResult GetAllSchedules()
+        // Get all schedules filtered by date and optional by user
+        [WebMethod]
+        public JsonResult GetAllSchedules(object st, object ed, bool byUser = false)
         {
+            DateTime startDate = DateTime.Parse(st.ToString());
+            DateTime endDate = DateTime.Parse(ed.ToString());
+
             List<Schedule> scheduleList = new List<Schedule>();
             scheduleList = Session["FilterSchedules"] as List<Schedule>;
 
@@ -82,76 +122,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 scheduleList = schManager.GetAllSchedules().ToList();
             }
 
-            List<object> scheduleObjectList = new List<object>();
-            foreach (Schedule s in scheduleList)
+            scheduleList = scheduleList.Where(a => ((DateTime)a.StartDate >= startDate && (DateTime)a.EndDate <= endDate) || ((DateTime)a.EndDate >= startDate && (DateTime)a.EndDate <= endDate) || (DateTime)a.StartDate <= startDate && (DateTime)a.EndDate >= endDate).ToList();
+
+            if (byUser == true)
             {
-                using (IUnitOfWork uow = this.GetUnitOfWork())
-                {
-                    if (s.Resource == null) break;
+                SubjectManager subManager = new SubjectManager();
+                User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
 
-                    var duration = uow.GetReadOnlyRepository<TimeDuration>().Get(s.Resource.Duration.Id);
-
-                    if (duration == null) break;
-                    var timeUnit = duration.TimeUnit;
-
-                    scheduleObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource.Name, s.Resource.Color, timeUnit, s.StartDate, s.EndDate, s.BookingEvent.Id)) });
-                }
-            }
-
-            // Session["FilterSchedules"] = null;
-            return Json(scheduleObjectList.ToArray(), JsonRequestBehavior.AllowGet);
-        }
-
-
-        public JsonResult GetEventsByUser()
-        {
-            List<BookingEvent> eventList = new List<BookingEvent>();
-            SubjectManager subManager = new SubjectManager();
-
-            User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-            if (Session["FilterSchedules"] == null)
-            {
-                BookingEventManager eManager = new BookingEventManager();
-                ScheduleManager schManager = new ScheduleManager();
-
-                List<BookingEvent> temp = eManager.GetAllBookingEvents().ToList();
-                foreach (BookingEvent e in temp)
-                {
-                    List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
-                    var s = schedules.Where(a => a.ByPerson.Person.Id == user.Id).ToList();
-                    if (s.Count > 0)
-                        eventList.Add(e);
-                }
-            }
-
-            List<object> eventObjectList = new List<object>();
-            foreach (BookingEvent e in eventList)
-            {
-                eventObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(e)) });
-            }
-
-            return Json(eventObjectList.ToArray(), JsonRequestBehavior.AllowGet);
-
-        }
-
-        public JsonResult GetSchedulesByUser()
-        {
-            List<Schedule> scheduleList = new List<Schedule>();
-            SubjectManager subManager = new SubjectManager();
-
-            User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-            if (Session["FilterSchedules"] == null)
-            {
-                ScheduleManager schManager = new ScheduleManager();
-                List<Schedule> temp = schManager.GetAllSchedules().ToList();
-
-                foreach (Schedule s in temp)
-                {
-                    if (s.ByPerson.Person.Id == user.Id)
-                        scheduleList.Add(s);
-                }
+                scheduleList = scheduleList.Where(a => a.ByPerson.Person.Id == user.Id).ToList();
             }
 
             List<object> scheduleObjectList = new List<object>();
@@ -170,62 +148,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 }
             }
 
-            Session["FilterSchedules"] = null;
             return Json(scheduleObjectList.ToArray(), JsonRequestBehavior.AllowGet);
-
         }
 
-        //use if resource not avalible in event creation
-        public JsonResult GetAllSchedulesFromResource(string resourceId)
-        {
-            ScheduleManager schManager = new ScheduleManager();
-            List<Schedule> allSchedules = schManager.GetAllSchedulesByResource(Convert.ToInt64(resourceId));
-
-            List<object> scheduleList = new List<object>();
-            foreach (Schedule s in allSchedules)
-            {
-                using (IUnitOfWork uow = this.GetUnitOfWork())
-                {
-                    if (s.Resource == null) break;
-
-                    var duration = uow.GetReadOnlyRepository<TimeDuration>().Get(s.Resource.Duration.Id);
-
-                    if (duration == null) break;
-                    var timeUnit = duration.TimeUnit;
-
-                    scheduleList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource.Name, s.Resource.Color, timeUnit, s.StartDate, s.EndDate, s.BookingEvent.Id)) });
-                }
-
-            }
-
-            return Json(scheduleList.ToArray(), JsonRequestBehavior.AllowGet);
-        }
-
-        public ActionResult TreeFilterSchedules()
-        {
-            ResourceFilterModel model = new ResourceFilterModel();
-            ResourceManager rManager = new ResourceManager();
-            List<SingleResource> singleResources = rManager.GetAllResources().ToList();
-
-            List<ResourceModel> resources = new List<ResourceModel>();
-            singleResources.ForEach(r => resources.Add(new ResourceModel(r)));
-
-            foreach (ResourceModel r in resources)
-            {
-                foreach (ResourceAttributeUsage usage in r.ResourceStructure.ResourceAttributeUsages)
-                {
-                    ResourceStructureAttribute attr = usage.ResourceStructureAttribute;
-                    AttributeDomainItemsModel item = new AttributeDomainItemsModel(attr);
-                    if (item.DomainItems.Count != 0)
-                    {
-                        if (!model.TreeItems.Any(a => a.AttrId == item.AttrId))
-                            model.TreeItems.Add(item);
-                    }
-                }
-            }
-
-            return PartialView("_treeFilterSchedules", model);
-        }
 
 
         public ActionResult OnSelectTreeViewItemFilter(string selectedItems)

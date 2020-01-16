@@ -178,7 +178,7 @@
 
 
     function showContent(displayView, contentView) {
-
+        console.log(displayView, contentView);
       //  var displayView = $("input[name='DisplayView']:checked").val();
       //  var contentView = $("input[name='ContentView']:checked").val();
         var myBooking = false;
@@ -247,9 +247,10 @@
 
         if($('#MyBookings').is(':checked'))
         {
-            var contentView = $("input[name='ContentView']:checked").val();
-            var displayView = $("input[name='DisplayView']:checked").val();
+            var contentView = $('#contentView .active').find('input').val();
+            var displayView = $('#displayView .active').find('input').val();
 
+            console.log(displayView, contentView);
             $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
             $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
             $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);

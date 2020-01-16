@@ -83,121 +83,26 @@
 
 <script type="text/javascript">
 
+    function getURL(type) {
+        if (type == "eventsource") {
+            return '@Url.Content("~/RBM/Calendar/GetAllEvents")';
+        }
+        else if (type == "schedulesource") {
+            return '@Url.Content("~/RBM/Calendar/GetAllSchedules")';
+        }  
+    }
 
+    function getFunction(type, byUser = false) {
+        return function (start, end, timezone, callback) {
+            var o = { st: start, ed: end, byUser: byUser};
 
-    var calsources = {
-
-        eventsource: {
-            events: function (start, end, timezone, callback) {
-                var o = { st: start, ed:end };
-                console.log(start, end);
-                $.ajax({
-                    url: '@Url.Content("~/RBM/Calendar/GetAllEvents")',
-                    dataType: 'json',
-                    type: 'POST',
-                    //data: {start:start, end: end},
-                    data: JSON.stringify(o),
-                    contentType: 'application/json; charset=utf-8',
-                        //data: '{"st":"' + start + '","ed":"' + end + '"}',
-
-                        success: function (doc) {
-                            var events = [];
-                            $.each(doc, function (key, value) {
-                                var val = $.parseJSON(value[0]);
-
-                                // the end date is exclusive in fullcalendar. To display the duration correct 1 days needs to be added
-                                var new_end_date = new Date(val['end']);
-                                new_end_date.setDate(new_end_date.getDate() + 1);
-
-                                events.push({
-                                    allDay: true,
-                                    title: val['title'],
-                                    start: val['start'],
-                                    end: new_end_date,
-                                    color: val['color'],
-                                    eventId: val['eventId']
-                                });
-                            });
-
-                            callback(events);
-                            console.log(events);
-                        }
-                    });
-                }
-        },
-
-        usereventsource: {
-            events: function (start, end, timezone, callback) {
-                $.ajax({
-                    url: '@Url.Content("~/RBM/Calendar/GetEventsByUser")',
-                    dataType: 'json',
-                    data: 'title=' + "titl" + '&start=' + start + '&end=' + end,
-
-                    success: function (doc) {
-                        var events = [];
-                        $.each(doc, function (key, value) {
-                            var val = $.parseJSON(value[0]);
-
-                            // the end date is exclusive in fullcalendar. To display the duration correct 1 days needs to be added
-                            var new_end_date = new Date(val['end']);
-                            new_end_date.setDate(new_end_date.getDate() + 1);
-
-                            events.push({
-                                allDay: true,
-                                title: val['title'],
-                                start: val['start'],
-                                end: new_end_date,
-                                color: val['color'],
-                                eventId: val['eventId']
-                            });
-                        });
-
-                        callback(events);
-                    }
-                });
-            }
-        },
-
-        userschedulesource: {
-            events: function (start, end, timezone, callback) {
-
-                $.ajax({
-                    url: '@Url.Content("~/RBM/Calendar/GetSchedulesByUser")',
-                    dataType: 'json',
-                    data: 'title=' + "titl" + '&start=' + start + '&end=' + end,
-
-                    success: function (doc) {
-                        var events = [];
-                        $.each(doc, function (key, value) {
-                            var val = $.parseJSON(value[0]);
-
-                            // the end date is exclusive in fullcalendar. To display the duration correct 1 days needs to be added
-                            var new_end_date = new Date(val['end']);
-                            new_end_date.setDate(new_end_date.getDate() + 1);
-
-                            events.push({
-                                allDay: true,
-                                title: val['title'],
-                                start: val['start'],
-                                end: new_end_date,
-                                color: val['color'],
-                                eventId: val['eventId']
-                            });
-                        });
-
-                        callback(events);
-                    }
-                });
-            }
-        },
-
-                schedulesource: {
-                    events: function (start, end, timezone, callback) {
-                        $.ajax({
-                            url: '@Url.Content("~/RBM/Calendar/GetAllSchedules")',
+            $.ajax({
+                url: getURL(type),
                 dataType: 'json',
-                data: 'title=' + "titl" + '&start=' + start + '&end=' + end,
-
+                type: 'POST',
+                //data: {start:start, end: end},
+                data: JSON.stringify(o),
+                contentType: 'application/json; charset=utf-8',
                 success: function (doc) {
                     var events = [];
                     $.each(doc, function (key, value) {
@@ -208,25 +113,41 @@
                         new_end_date.setDate(new_end_date.getDate() + 1);
 
                         events.push({
+                            allDay: true,
                             title: val['title'],
                             start: val['start'],
                             end: new_end_date,
                             color: val['color'],
-                            eventId: val['eventId'],
-                            allDay: val['allDay']
+                            eventId: val['eventId']
                         });
                     });
 
                     callback(events);
+                    console.log(events);
                 }
             });
-            }
-            }
+        }
+
 
 
 
     }
 
+    var calsources = {
+
+        eventsource: {
+            events: getFunction("eventsource")
+        },
+        usereventsource: {
+            events: getFunction("eventsource", true)
+        },
+        userschedulesource: {
+            events: getFunction("schedulesource", true)
+        },
+        schedulesource: {
+            events: getFunction("schedulesource")
+        }
+    }
 
 
     $(window).load(function () {
