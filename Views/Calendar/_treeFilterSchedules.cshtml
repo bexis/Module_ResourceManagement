@@ -21,17 +21,7 @@
         </div>
     </div>
 
-
-
-
-
-
-
-    <!--  <small>Event View: </small>@Html.RadioButton("ContentView", "Events", true, new { title = "Show events in the calendar" })
-      <small>Schedule View:</small> @Html.RadioButton("ContentView", "Schedules", new { title = "Show individual resouce schedules in the calendar" }) <br /><br />
-      <small>Calendar View: </small>@Html.RadioButton("DisplayView", "Calendar", true, new { title = "Show events in a tabular view" })
-      <small>List View:</small> @Html.RadioButton("DisplayView", "List", new { title = "Show individual resouce schedules in a tabular view" }) <br /><br />-->
-    <br />
+      <br />
     <div class="overlayHeader">
         <span>Filter</span>
     </div>
@@ -39,36 +29,36 @@
     <br /><br />
 
     @(Html.Telerik().TreeView()
-                                                                                                        .Name("TreeView")
-                                                                                                        .ShowCheckBox(true)
-                                                                                                        .ClientEvents(events => events
-                                                                                                                //.OnSelect("onSelect")
-                                                                                                                .OnChecked("onChecked")
-                                                                                                        )
+        .Name("TreeView")
+        .ShowCheckBox(true)
+        .ClientEvents(events => events
+                //.OnSelect("onSelect")
+                .OnChecked("onChecked")
+        )
 
-                                                                                                         .BindTo<AttributeDomainItemsModel>(Model.TreeItems.Distinct(), (item, attribute) =>
-                                                                                                             {
-                                                                                                                 item.Text = attribute.AttrName;
-                                                                                                                 item.Value = attribute.AttrId.ToString();
-                                                                                                                 item.Checkable = false;
-                                                                                                                 item.Checked = false;
-                                                                                                                 item.Expanded = true;
+            .BindTo<AttributeDomainItemsModel>(Model.TreeItems.Distinct(), (item, attribute) =>
+                {
+                    item.Text = attribute.AttrName;
+                    item.Value = attribute.AttrId.ToString();
+                    item.Checkable = false;
+                    item.Checked = false;
+                    item.Expanded = true;
 
-                                                                                                                 foreach (BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.DomainItemModel di in attribute.DomainItems)
-                                                                                                                 {
-                                                                                                                     TreeViewItem subitem = new TreeViewItem();
-                                                                                                                     item.Items.Add(subitem);
+                    foreach (BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.DomainItemModel di in attribute.DomainItems)
+                    {
+                        TreeViewItem subitem = new TreeViewItem();
+                        item.Items.Add(subitem);
 
-                                                                                                                     subitem.Text = di.Key;
-                                                                                                                     subitem.Value = di.Key;
-                                                                                                                     subitem.LinkHtmlAttributes["id"] = attribute.AttrId;
-                                                                                                                     subitem.LinkHtmlAttributes["class"] = "domainItem";
+                        subitem.Text = di.Key;
+                        subitem.Value = di.Key;
+                        subitem.LinkHtmlAttributes["id"] = attribute.AttrId;
+                        subitem.LinkHtmlAttributes["class"] = "domainItem";
 
-                                                                                                         //subitem.Action("OnSelectTreeViewItem", "Schedule", new RouteValueDictionary { { "area", "RBM" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
-                                                                                                     }
-                                                                                                             }
-                                                                                                        )
-                                                                                                        .ExpandAll(true)
+            //subitem.Action("OnSelectTreeViewItem", "Schedule", new RouteValueDictionary { { "area", "RBM" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
+        }
+                }
+        )
+        .ExpandAll(true)
     )
 
 </div>
@@ -106,64 +96,18 @@
 
     function showDisplay(displayView, contentView) {
 
-       // var displayView = $("input[name='DisplayView']:checked").val();
-    // var contentView = $("input[name='ContentView']:checked").val();
         console.log(displayView, contentView);
         if (displayView == "List")
         {
-
             $("#calendar").toggle();
-
-            var myBooking = false;
-            if ($('#MyBookings').is(':checked')) {
-                    myBooking = true;
-            }
-
-            if (contentView == "Events") {
-                $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: myBooking }, function (data) {
-                    $('#eventList').html(data);
-
-                    if ($("#eventList").is(":hidden")) {
-                        $('#eventList').toggle();
-                    }
-                });
-            }
-            else if (contentView == "Schedules") {
-                $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: myBooking }, function (data) {
-                    $('#scheduleList').html(data);
-
-                    if ($("#scheduleList").is(":hidden")) {
-                        $('#scheduleList').toggle();
-                    }
-                });
-            }
+            setListEvents(contentView);
         }
         else if (displayView == "Calendar")
         {
             $("#calendar").toggle();
 
-            $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
-            $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
-            $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
-            $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
-
-
-            if (contentView == "Events") {
-                if ($('#MyBookings').is(':checked')) {
-                    $('#calendar').fullCalendar('addEventSource', calsources.usereventsource);
-                }
-                else {
-                    $('#calendar').fullCalendar('addEventSource', calsources.eventsource);
-                }
-            }
-            else if (contentView == "Schedules") {
-                if ($('#MyBookings').is(':checked')) {
-                    $('#calendar').fullCalendar('addEventSource', calsources.userschedulesource);
-                }
-                else {
-                    $('#calendar').fullCalendar('addEventSource', calsources.schedulesource);
-                }
-            }
+            removeCalendarEvents();
+            setCalendarEvents(contentView);
 
             if ($("#eventList").is(":visible"))
             {
@@ -175,180 +119,108 @@
         }
     }
 
-
-
     function showContent(displayView, contentView) {
         console.log(displayView, contentView);
-      //  var displayView = $("input[name='DisplayView']:checked").val();
-      //  var contentView = $("input[name='ContentView']:checked").val();
+
+        removeCalendarEvents();
+
+        if (displayView == "Calendar") {
+
+            setCalendarEvents(contentView);
+        }
+        else if (displayView == "List") {
+            setListEvents(contentView);
+        }
+    }
+
+
+    function setCalendarEvents(contentView) {
+        if (contentView == "Events") {
+            if ($('#MyBookings').is(':checked')) {
+                $('#calendar').fullCalendar('addEventSource', calsources.usereventsource);
+            }
+            else {
+                $('#calendar').fullCalendar('addEventSource', calsources.eventsource);
+            }
+        }
+        else if (contentView == "Schedules") {
+            if ($('#MyBookings').is(':checked')) {
+                $('#calendar').fullCalendar('addEventSource', calsources.userschedulesource);
+            }
+            else {
+                $('#calendar').fullCalendar('addEventSource', calsources.schedulesource);
+            }
+        }
+    }
+
+  
+
+   
+
+
+    $("input[name='MyBookings']").change(function () {
+
+        var contentView = $('#contentView .active').find('input').val();
+        var displayView = $('#displayView .active').find('input').val();
+
+        console.log(displayView, contentView);
+     
+            removeCalendarEvents();
+
+            if (displayView == "Calendar") {
+                setCalendarEvents(contentView);
+            }
+            else if(displayView =="List")
+            {
+                setListEvents(contentView);
+            }
+
+
+    });
+
+    function removeCalendarEvents() {
+        $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
+        $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
+        $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
+        $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
+    }
+
+    function setListEvents(contentView) {
         var myBooking = false;
         if ($('#MyBookings').is(':checked')) {
             myBooking = true;
         }
 
-        $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
-        $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
-        $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
-        $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
-
-        if (displayView == "Calendar") {
-
-            if (contentView == "Events") {
-                if ($('#MyBookings').is(':checked')) {
-                    $('#calendar').fullCalendar('addEventSource', calsources.usereventsource);
-                }
-                else {
-                    $('#calendar').fullCalendar('addEventSource', calsources.eventsource);
-                }
+        if (contentView == "Events") {
+            if ($("#scheduleList").is(":visible")) {
+                $('#scheduleList').toggle();
             }
-            else if (contentView == "Schedules") {
-                if ($('#MyBookings').is(':checked')) {
-                    $('#calendar').fullCalendar('addEventSource', calsources.userschedulesource);
-                }
-                else {
-                    $('#calendar').fullCalendar('addEventSource', calsources.schedulesource);
-                }
+
+            $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings : myBooking }, function (data) {
+                $('#eventList').html(data);
+            });
+
+            if ($("#eventList").is(":hidden")) {
+                $('#eventList').toggle();
             }
         }
-        else if(displayView == "List")
-        {
-            if (contentView == "Events") {
-                if ($("#scheduleList").is(":visible")) {
-                    $('#scheduleList').toggle();
-                }
+        else if (contentView == "Schedules") {
 
-                $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings : myBooking }, function (data) {
-                    $('#eventList').html(data);
-                });
-
-                if ($("#eventList").is(":hidden")) {
-                    $('#eventList').toggle();
-                }
+            if ($("#eventList").is(":visible")) {
+                $('#eventList').toggle();
             }
-            else if (contentView == "Schedules") {
 
-                if ($("#eventList").is(":visible")) {
-                    $('#eventList').toggle();
-                }
+            $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: myBooking}, function (data) {
+                $('#scheduleList').html(data);
+            });
 
-                $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: myBooking}, function (data) {
-                    $('#scheduleList').html(data);
-                });
-
-                if ($("#scheduleList").is(":hidden")) {
-                    $('#scheduleList').toggle();
-                }
+            if ($("#scheduleList").is(":hidden")) {
+                $('#scheduleList').toggle();
             }
         }
     }
 
 
-    $("input[name='MyBookings']").change(function () {
-
-        if($('#MyBookings').is(':checked'))
-        {
-            var contentView = $('#contentView .active').find('input').val();
-            var displayView = $('#displayView .active').find('input').val();
-
-            console.log(displayView, contentView);
-            $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
-            $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
-            $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
-            $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
-
-            if (displayView == "Calendar") {
-                if (contentView == "Events") {
-                    $('#calendar').fullCalendar('addEventSource', calsources.usereventsource);
-                }
-                else if (contentView == "Schedules") {            
-                    $('#calendar').fullCalendar('addEventSource', calsources.userschedulesource);
-                }
-            }
-            else if(displayView == "List")
-            {
-                if (contentView == "Events") {
-
-                    $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', {myBookings: true}, function (data) {
-
-                        $('#eventList').html(data);
-
-                        if ($("#eventList").is(":hidden")) {
-                            $('#eventList').toggle();
-                        }
-                    });
-                }
-
-                else if (contentView == "Schedules") {
-
-                    if ($("#eventList").is(":visible")) {
-                        $('#eventList').toggle();
-                    }
-
-                    $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', {myBookings: true}, function (data) {
-                        $('#scheduleList').html(data);
-                    });
-
-                    if ($("#scheduleList").is(":hidden")) {
-                        $('#scheduleList').toggle();
-                    }
-
-                }
-            }
-
-        }
-        else
-        {
-            var contentView = $("input[name='ContentView']:checked").val();
-            var displayView = $("input[name='DisplayView']:checked").val();
-
-            $('#calendar').fullCalendar('removeEventSource', calsources.schedulesource);
-            $('#calendar').fullCalendar('removeEventSource', calsources.eventsource);
-            $('#calendar').fullCalendar('removeEventSource', calsources.usereventsource);
-            $('#calendar').fullCalendar('removeEventSource', calsources.userschedulesource);
-
-            if (displayView == "Calendar") {
-                if (contentView == "Events") {
-                    $('#calendar').fullCalendar('addEventSource', calsources.eventsource);
-                }
-                else if (contentView == "Schedules") {
-                    $('#calendar').fullCalendar('addEventSource', calsources.schedulesource);
-                }
-            }
-            else if(displayView =="List")
-            {
-                if (contentView == "Events") {
-
-                    $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: false }, function (data) {
-
-                        $('#eventList').html(data);
-
-                        if ($("#eventList").is(":hidden")) {
-                            $('#eventList').toggle();
-                        }
-                    });
-
-                }
-
-                else if (contentView == "Schedules") {
-
-                    if ($("#eventList").is(":visible")) {
-                        $('#eventList').toggle();
-                    }
-
-                    $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: false }, function (data) {
-                        $('#scheduleList').html(data);
-                    });
-
-                    if ($("#scheduleList").is(":hidden")) {
-                        $('#scheduleList').toggle();
-                    }
-
-                }
-            }
-
-        }
-
-    });
 
     function onChecked(e) {
 
@@ -357,6 +229,12 @@
         var contentView = $("input[name='ContentView']:checked").val();
 
         var displayView = $("input[name='DisplayView']:checked").attr("value");
+
+        var myBooking = false;
+        if ($('#MyBookings').is(':checked')) {
+            myBooking = true;
+        }
+
 
         if ($('#TreeView>ul>li>ul>li>div :checked').length > 0) {
 
@@ -378,37 +256,13 @@
 
             $.get('@Url.Action("OnSelectTreeViewItemFilter", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { selectedItems: checkedItemAsString }, function (data) {
 
-                if (displayView == "Calendar") {
+                if (displayView == "Calendar")
+                {
                     $('#calendar').fullCalendar('refetchEvents');
                 }
-                else if (displayView == "List") {
-
-                    if (contentView == "Events") {
-
-                        $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: false }, function (data) {
-
-                            $('#eventList').html(data);
-
-                            if ($("#eventList").is(":hidden")) {
-                                $('#eventList').toggle();
-                            }
-
-                        });
-                    }
-                    else if(contentView == "Schedules")
-                    {
-                        if ($("#eventList").is(":visible")) {
-                            $('#eventList').toggle();
-                        }
-
-                        $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: false }, function (data) {
-                            $('#scheduleList').html(data);
-                        });
-
-                        if ($("#scheduleList").is(":hidden")) {
-                            $('#scheduleList').toggle();
-                        }
-                    }
+                else if (displayView == "List")
+                {
+                    setListEvents(contentView);
                 }
             });
         }
@@ -420,32 +274,7 @@
                 }
                 else if(displayView== "List")
                 {
-
-                    if (contentView == "Events") {
-
-                        $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: false }, function (data) {
-
-                            $('#eventList').html(data);
-
-                            if ($("#eventList").is(":hidden")) {
-                                $('#eventList').toggle();
-                            }
-
-                        });
-                    }
-                    else if (contentView == "Schedules") {
-                        if ($("#eventList").is(":visible")) {
-                            $('#eventList').toggle();
-                        }
-
-                        $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: false }, function (data) {
-                            $('#scheduleList').html(data);
-                        });
-
-                        if ($("#scheduleList").is(":hidden")) {
-                            $('#scheduleList').toggle();
-                        }
-                    }
+                    setListEvents(contentView);
                 }
             });
         }
