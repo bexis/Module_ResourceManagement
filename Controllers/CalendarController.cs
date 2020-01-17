@@ -83,14 +83,25 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         #region List view
         // get all events as list and optional by user
-        public ActionResult GetEventsAsList(string myBookings)
+        public ActionResult GetEventsAsList(string myBookings, string history = "false")
         {
             List<BookingEventModel> model = new List<BookingEventModel>();
             List<BookingEvent> eventList = new List<BookingEvent>();
 
             // Get all events optional filtered by user
-            //eventList = GetAllEventsFiltered(bool.Parse(myBookings));
-            eventList = GetAllEventsFiltered(bool.Parse(myBookings), DateTime.Now.ToString() );
+            if (bool.Parse(history) == true)
+            {
+                eventList = GetAllEventsFiltered(bool.Parse(myBookings)); // gut full list with history
+                ViewBag.history = "true";
+            }
+            else
+            {
+                eventList = GetAllEventsFiltered(bool.Parse(myBookings), DateTime.Now.ToString()); // get list without historical events
+                ViewBag.history = "false";
+            }
+
+            
+            
             // Remove dublicate booking events in resources list (without filter not dublicates, but with)
             eventList = eventList.GroupBy(x => x.Id).Select(x => x.First()).ToList();
 
@@ -126,12 +137,22 @@ namespace BExIS.Modules.RBM.UI.Controllers
         }
 
         // get all schedules as list and optional by user
-        public ActionResult GetSchedulesAsList(string myBookings)
+        public ActionResult GetSchedulesAsList(string myBookings, string history = "false")
         {
 
             List<Schedule> scheduleList = new List<Rbm.Entities.Booking.Schedule>();
-            scheduleList = GetAllScheduleFiltered(bool.Parse(myBookings));
 
+            if (bool.Parse(history) == true)
+            {
+                scheduleList = GetAllScheduleFiltered(bool.Parse(myBookings)); // get full list
+                ViewBag.history = "true";
+            }
+            else
+            {
+                scheduleList = GetAllScheduleFiltered(bool.Parse(myBookings), DateTime.Now.ToString()); // get list without historical events
+                ViewBag.history = "false";
+            }
+                        
             List<ScheduleListModel> model = new List<ScheduleListModel>();
 
             using (var uow = this.GetUnitOfWork())

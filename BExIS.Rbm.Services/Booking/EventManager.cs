@@ -122,6 +122,11 @@ namespace BExIS.Rbm.Services.Booking
             return EventRepo.Query(a => ((DateTime)a.MinDate >= startDate && (DateTime)a.MinDate <= endDate) || ((DateTime)a.MaxDate >= startDate && (DateTime)a.MaxDate <= endDate) || (DateTime)a.MinDate <= startDate && (DateTime)a.MaxDate >= endDate).ToList(); 
         }
 
+        public List<E.BookingEvent> GetAllEventByTimePeriod(DateTime startDate)
+        {
+            return EventRepo.Query(a => (DateTime)a.MaxDate >= startDate).ToList();
+        }
+
         public BookingEvent GetBookingEventById(long id)
         {
             BookingEvent e = EventRepo.Query(a => a.Id == id).FirstOrDefault();
