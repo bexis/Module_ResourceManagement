@@ -38,7 +38,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         // Get all events filtered by date and optional by user
         [WebMethod]
-        public JsonResult GetAllEvents(object st, object ed, bool byUser = false)
+        public JsonResult GetAllEvents(string st, string ed, bool byUser = false)
         {
             List<BookingEvent> eventList = new List<BookingEvent>();
             eventList = GetAllEventsFiltered(byUser, st, ed);
@@ -54,7 +54,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         // Get all schedules filtered by date and optional by user
         [WebMethod]
-        public JsonResult GetAllSchedules(object st, object ed, bool byUser = false)
+        public JsonResult GetAllSchedules(string st, string ed, bool byUser = false)
         {
 
             List<Schedule> scheduleList = new List<Rbm.Entities.Booking.Schedule>();
@@ -89,8 +89,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<BookingEvent> eventList = new List<BookingEvent>();
 
             // Get all events optional filtered by user
-            eventList = GetAllEventsFiltered(bool.Parse(myBookings));
-
+            //eventList = GetAllEventsFiltered(bool.Parse(myBookings));
+            eventList = GetAllEventsFiltered(bool.Parse(myBookings), DateTime.Now.ToString() );
             // Remove dublicate booking events in resources list (without filter not dublicates, but with)
             eventList = eventList.GroupBy(x => x.Id).Select(x => x.First()).ToList();
 
@@ -332,7 +332,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return filteredScheduleList.Distinct().ToList();
         }
 
-        private List<BookingEvent> GetAllEventsFiltered(bool byUser, object start = null, object end = null)
+        private List<BookingEvent> GetAllEventsFiltered(bool byUser, string start_date = null, string end_date = null)
         {
             List<BookingEvent> eventList = new List<BookingEvent>();
             List<BookingEvent> eventListTmp = new List<BookingEvent>();
@@ -340,11 +340,17 @@ namespace BExIS.Modules.RBM.UI.Controllers
             if (Session["FilterSchedules"] == null)
             {
                 BookingEventManager eManager = new BookingEventManager();
-                if (start != null && end != null)
+                if (start_date != null && end_date != null)
                 {
-                    DateTime startDate = DateTime.Parse(start.ToString());
-                    DateTime endDate = DateTime.Parse(end.ToString());
+                    DateTime startDate = DateTime.Parse(start_date.ToString());
+                    DateTime endDate = DateTime.Parse(end_date.ToString());
                     eventList = eManager.GetAllEventByTimePeriod(startDate, endDate);
+                }
+                else if (start_date != null && end_date == null)
+                {
+                    DateTime startDate = DateTime.Parse(start_date.ToString());
+                   
+                    eventList = eManager.GetAllEventByTimePeriod(startDate);
                 }
                 else
                 {
@@ -387,17 +393,22 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 }
 
                 // filter by start and end date
-                if (start != null && end != null)
+                if (start_date != null && end_date != null)
                 {
-                    DateTime startDate = DateTime.Parse(start.ToString());
-                    DateTime endDate = DateTime.Parse(end.ToString());
+                    DateTime startDate = DateTime.Parse(start_date.ToString());
+                    DateTime endDate = DateTime.Parse(end_date.ToString());
                     scheduleList = scheduleList.Where(a => ((DateTime)a.StartDate >= startDate && (DateTime)a.EndDate <= endDate) || ((DateTime)a.EndDate >= startDate && (DateTime)a.EndDate <= endDate) || (DateTime)a.StartDate <= startDate && (DateTime)a.EndDate >= endDate).ToList();
+                }
+                else if (start_date != null && end_date == null)
+                {
+                    DateTime startDate = DateTime.Parse(start_date.ToString());
+
+                    scheduleList = scheduleList.Where(a => ((DateTime)a.EndDate >= startDate)).ToList();
                 }
 
                 foreach (Schedule s in scheduleList)
                 {
                     if (!eventList.Select(a => a.Id).ToList().Contains(s.BookingEvent.Id))
-
                     {
                         eventList.Add(eManager.GetBookingEventById(s.BookingEvent.Id));
                     }
@@ -407,7 +418,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return eventList;
         }
 
-        private List<Schedule> GetAllScheduleFiltered(bool byUser, object start = null, object end = null)
+        private List<Schedule> GetAllScheduleFiltered(bool byUser, string start_date = null, string end_date = null)
         {
 
             List<Schedule> scheduleList = new List<Schedule>();
@@ -422,14 +433,20 @@ namespace BExIS.Modules.RBM.UI.Controllers
             }
 
             // filter by start and end date
-            if (start != null && end !=null)
+            if (start_date != null && end_date != null)
             {
-                DateTime startDate = DateTime.Parse(start.ToString());
-                DateTime endDate = DateTime.Parse(end.ToString());
+                DateTime startDate = DateTime.Parse(start_date.ToString());
+                DateTime endDate = DateTime.Parse(end_date.ToString());
 
                 scheduleList = scheduleList.Where(a => ((DateTime)a.StartDate >= startDate && (DateTime)a.EndDate <= endDate) || ((DateTime)a.EndDate >= startDate && (DateTime)a.EndDate <= endDate) || (DateTime)a.StartDate <= startDate && (DateTime)a.EndDate >= endDate).ToList();
             }
-            
+            else if (start_date != null && end_date == null)
+            {
+                DateTime startDate = DateTime.Parse(start_date.ToString());
+
+                scheduleList = scheduleList.Where(a => ((DateTime)a.EndDate >= startDate)).ToList();
+            }
+
             if (byUser == true)
             {
                 SubjectManager subManager = new SubjectManager();
