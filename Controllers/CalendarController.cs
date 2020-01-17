@@ -34,68 +34,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return View("Calendar");
         }
 
-        #region Schedule Calendar
+        #region  Calendar view
 
-        // Get all events filtered by date and optional also by "my bookings"
-
+        // Get all events filtered by date and optional by user
         [WebMethod]
         public JsonResult GetAllEvents(object st, object ed, bool byUser = false)
         {
-            DateTime startDate = DateTime.Parse(st.ToString());
-            DateTime endDate = DateTime.Parse(ed.ToString());
-
             List<BookingEvent> eventList = new List<BookingEvent>();
-            List<BookingEvent> eventListTmp = new List<BookingEvent>();
-            if (Session["FilterSchedules"] == null)
-            {
-                BookingEventManager eManager = new BookingEventManager();
-                eventList = eManager.GetAllEventByTimePeriod(startDate, endDate);
-
-                if (byUser == true)
-                {
-                    ScheduleManager schManager = new ScheduleManager();
-
-                    SubjectManager subManager = new SubjectManager();
-                    User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-                    foreach (BookingEvent e in eventList)
-                    {
-                        List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
-                        var s = schedules.Where(a => a.ByPerson.Person.Id == user.Id).ToList();
-                        if (s.Count > 0)
-                            eventListTmp.Add(e);
-                    }
-
-                    eventList = eventListTmp;
-                }
-            }
-            else
-            {
-                BookingEventManager eManager = new BookingEventManager();
-                List<Schedule> scheduleList = new List<Schedule>();
-                scheduleList = Session["FilterSchedules"] as List<Schedule>;
-
-                // filter list by user
-                if (byUser == true)
-                {
-                    SubjectManager subManager = new SubjectManager();
-                    User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-                    scheduleList = scheduleList.Where(a => a.ByPerson.Person.Id == user.Id).ToList();  
-                }
-
-                scheduleList = scheduleList.Where(a => ((DateTime)a.StartDate >= startDate && (DateTime)a.EndDate <= endDate) || ((DateTime)a.EndDate >= startDate && (DateTime)a.EndDate <= endDate) || (DateTime)a.StartDate <= startDate && (DateTime)a.EndDate >= endDate).ToList();
-                foreach (Schedule s in scheduleList)
-                {
-                    if (!eventList.Select(a => a.Id).ToList().Contains(s.BookingEvent.Id))
- 
-                    {
-                        eventList.Add(eManager.GetBookingEventById(s.BookingEvent.Id));
-                    }
-
-                }
-
-            }
+            eventList = GetAllEventsFiltered(byUser, st, ed);
 
             List<object> eventObjectList = new List<object>();
             foreach (BookingEvent e in eventList)
@@ -110,27 +56,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
         [WebMethod]
         public JsonResult GetAllSchedules(object st, object ed, bool byUser = false)
         {
-            DateTime startDate = DateTime.Parse(st.ToString());
-            DateTime endDate = DateTime.Parse(ed.ToString());
 
-            List<Schedule> scheduleList = new List<Schedule>();
-            scheduleList = Session["FilterSchedules"] as List<Schedule>;
-
-            if (scheduleList == null)
-            {
-                ScheduleManager schManager = new ScheduleManager();
-                scheduleList = schManager.GetAllSchedules().ToList();
-            }
-
-            scheduleList = scheduleList.Where(a => ((DateTime)a.StartDate >= startDate && (DateTime)a.EndDate <= endDate) || ((DateTime)a.EndDate >= startDate && (DateTime)a.EndDate <= endDate) || (DateTime)a.StartDate <= startDate && (DateTime)a.EndDate >= endDate).ToList();
-
-            if (byUser == true)
-            {
-                SubjectManager subManager = new SubjectManager();
-                User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-                scheduleList = scheduleList.Where(a => a.ByPerson.Person.Id == user.Id).ToList();
-            }
+            List<Schedule> scheduleList = new List<Rbm.Entities.Booking.Schedule>();
+            scheduleList = GetAllScheduleFiltered(byUser);
 
             List<object> scheduleObjectList = new List<object>();
             foreach (Schedule s in scheduleList)
@@ -151,7 +79,115 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return Json(scheduleObjectList.ToArray(), JsonRequestBehavior.AllowGet);
         }
 
+        #endregion
 
+        #region List view
+        // get all events as list and optional by user
+        public ActionResult GetEventsAsList(string myBookings)
+        {
+            List<BookingEventModel> model = new List<BookingEventModel>();
+            List<BookingEvent> eventList = new List<BookingEvent>();
+
+            // Get all events optional filtered by user
+            eventList = GetAllEventsFiltered(bool.Parse(myBookings));
+
+            // Remove dublicate booking events in resources list (without filter not dublicates, but with)
+            eventList = eventList.GroupBy(x => x.Id).Select(x => x.First()).ToList();
+
+            foreach (BookingEvent e in eventList)
+            {
+                model.Add(new BookingEventModel(e));
+            }
+
+            foreach (BookingEventModel m in model)
+            {
+                m.startDate = m.Schedules.Select(a => a.ScheduleDurationModel.StartDate).ToList().Min();
+                m.endDate = m.Schedules.Select(a => a.ScheduleDurationModel.EndDate).ToList().Max();
+                m.ResourceName = string.Join<string>(",", (m.Schedules.Select(a => a.ResourceName)).ToList());
+                List<string> attributes = new List<string>();
+
+                foreach (var c in m.Schedules.Select(a => a.ResourceAttributeValues).ToList())
+                {
+
+                    // Assumption the first attribute (domain value) is of importance -> show it in the list
+                    ResourceAttributeValue value = c.First();
+                    if (value is TextValue)
+                    {
+                        TextValue tv = (TextValue)value;
+                        attributes.Add(tv.Value.ToString());
+                    }
+                }
+                m.ResourceAttributes = string.Join<string>(",", attributes.Distinct());
+            }
+
+            //model = model.OrderByDescending(a => a.startDate).ToList();
+
+            return PartialView("_listEvents", model);
+        }
+
+        // get all schedules as list and optional by user
+        public ActionResult GetSchedulesAsList(string myBookings)
+        {
+
+            List<Schedule> scheduleList = new List<Rbm.Entities.Booking.Schedule>();
+            scheduleList = GetAllScheduleFiltered(bool.Parse(myBookings));
+
+            List<ScheduleListModel> model = new List<ScheduleListModel>();
+
+            using (var uow = this.GetUnitOfWork())
+            {
+                foreach (Schedule s in scheduleList)
+                {
+                    var booking = uow.GetReadOnlyRepository<BookingEvent>().Get(s.BookingEvent.Id);
+                    var resource = uow.GetReadOnlyRepository<Resource>().Get(s.Resource.Id);
+                    var forperson = uow.GetReadOnlyRepository<Person>().Get(s.ForPerson.Id);
+
+                    model.Add(new ScheduleListModel(
+                        booking.Id,
+                        booking.Name,
+                        booking.Description,
+                        resource.Name,
+                        s.StartDate,
+                        s.EndDate,
+                        s.Quantity,
+                        forperson,
+                        s.Activities
+                        ));
+                }
+            }
+
+            return PartialView("_listSchedules", model);
+        }
+
+        #endregion
+
+        #region Show and set Filter
+
+        public ActionResult TreeFilterSchedules()
+        {
+            ResourceFilterModel model = new ResourceFilterModel();
+            ResourceManager rManager = new ResourceManager();
+            List<SingleResource> singleResources = rManager.GetAllResources().ToList();
+
+            List<ResourceModel> resources = new List<ResourceModel>();
+            singleResources.ForEach(r => resources.Add(new ResourceModel(r)));
+
+            foreach (ResourceModel r in resources)
+            {
+                foreach (ResourceAttributeUsage usage in r.ResourceStructure.ResourceAttributeUsages)
+                {
+                    ResourceStructureAttribute attr = usage.ResourceStructureAttribute;
+                    AttributeDomainItemsModel item = new AttributeDomainItemsModel(attr);
+                    if (item.DomainItems.Count != 0)
+                    {
+                        if (!model.TreeItems.Any(a => a.AttrId == item.AttrId))
+                            model.TreeItems.Add(item);
+                    }
+                }
+            }
+
+            return PartialView("_treeFilterSchedules", model);
+        }
 
         public ActionResult OnSelectTreeViewItemFilter(string selectedItems)
         {
@@ -250,127 +286,164 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         #endregion
 
-        #region Schedule List
+        #region Functions
 
-        public ActionResult GetEventsAsList(string myBookings)
+        private List<Schedule> FilterSchedulesByUser(List<Schedule> scheduleList, long userId)
         {
-            BookingEventManager eManager = new BookingEventManager();
-            ScheduleManager schManager = new ScheduleManager();
-            SubjectManager subManager = new SubjectManager();
+            scheduleList = scheduleList.Where(a => a.ByPerson.Person.Id == userId).ToList();
 
-            List<BookingEventModel> model = new List<BookingEventModel>();
-
-            List<BookingEvent> allEvents = new List<BookingEvent>();
-
-            if (Session["FilterSchedules"] == null)
-                allEvents = eManager.GetAllBookingEvents().ToList();
-            else
-            {
-                List<Schedule> scheduleList = new List<Schedule>();
-                scheduleList = Session["FilterSchedules"] as List<Schedule>;
-                foreach (Schedule s in scheduleList)
-                {
-                    allEvents.Add(eManager.GetBookingEventById(s.BookingEvent.Id));
-                }
-            }
-
-            if (bool.Parse(myBookings))
-            {
-                User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-                foreach (BookingEvent e in allEvents)
-                {
-                    List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
-                    var s = schedules.Where(a => a.ByPerson.Person.Id == user.Id).ToList();
-                    if (s.Count > 0)
-                        model.Add(new BookingEventModel(e));
-                }
-            }
-            else
-                allEvents.ForEach(r => model.Add(new BookingEventModel(r)));
-
-            // Remove dublicate booking events in resources list (without filter not dublicates, but with)
-            model = model.GroupBy(x => x.Id).Select(x => x.First()).ToList();
-
-            foreach (BookingEventModel m in model)
-            {
-                m.startDate = m.Schedules.Select(a => a.ScheduleDurationModel.StartDate).ToList().Min();
-                m.endDate = m.Schedules.Select(a => a.ScheduleDurationModel.EndDate).ToList().Max();
-                m.ResourceName = string.Join<string>(",", (m.Schedules.Select(a => a.ResourceName)).ToList());
-                List<string> attributes = new List<string>();
-                
-                foreach (var c in m.Schedules.Select(a => a.ResourceAttributeValues).ToList())
-                {
-
-                        // Assumption the first attribute (domain value) is of importance -> show it in the list
-                        ResourceAttributeValue value = c.First();
-                        if (value is TextValue)
-                        {
-                            TextValue tv = (TextValue)value;
-                            attributes.Add(tv.Value.ToString());
-                        }
-                }
-                m.ResourceAttributes = string.Join<string>(",", attributes.Distinct());
-            }
-
-            //model = model.OrderByDescending(a => a.startDate).ToList();
-
-            return PartialView("_listEvents", model);
+            return scheduleList;
         }
 
-
-        public ActionResult GetSchedulesAsList(string myBookings)
+        private List<Schedule> FilterSchedulesForUser(List<Schedule> scheduleList, long userId)
         {
-
-            ScheduleManager sManager = new ScheduleManager();
-            SubjectManager subManager = new SubjectManager();
-            List<Schedule> allSchedules = new List<Rbm.Entities.Booking.Schedule>();
-
-            if (Session["FilterSchedules"] == null)
-                allSchedules = sManager.GetAllSchedules().ToList();
-            else
-                allSchedules = Session["FilterSchedules"] as List<Schedule>;
-
-            List<ScheduleListModel> model = new List<ScheduleListModel>();
-
-            User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-
-            // filter bookings when only my bookings should be loaded
-            List<Schedule> schedules = new List<Schedule>();
-
-                if(bool.Parse(myBookings))
-                    schedules = allSchedules.Where(s => s.ByPerson.Person.Id.Equals(user.Id)).ToList(); 
-                else
-                    schedules = allSchedules;
+            List<Schedule> filteredScheduleList = new List<Schedule>();
 
             using (var uow = this.GetUnitOfWork())
             {
-                foreach (Schedule s in schedules)
+                foreach (Schedule s in scheduleList)
                 {
-                    var booking = uow.GetReadOnlyRepository<BookingEvent>().Get(s.BookingEvent.Id);
-                    var resource = uow.GetReadOnlyRepository<Resource>().Get(s.Resource.Id);
-                    var forperson = uow.GetReadOnlyRepository<Person>().Get(s.ForPerson.Id);
-                   
 
-                    model.Add(new ScheduleListModel(
-                        booking.Id,
-                        booking.Name,
-                        booking.Description,
-                        resource.Name,
-                        s.StartDate,
-                        s.EndDate,
-                        s.Quantity,
-                        forperson,
-                        s.Activities
-                        ));
+                    var forPerson = uow.GetReadOnlyRepository<Person>().Get(s.ForPerson.Id);
+
+                    if (forPerson is PersonGroup)
+                    {
+                        PersonGroup pg = (PersonGroup)forPerson;
+                        foreach (User u in pg.Users)
+                        {
+                            if (u.Id == userId)
+                            {
+                                filteredScheduleList.Add(s);
+                                break;
+                            }
+                        }
+                    }
+                    else if (forPerson is IndividualPerson)
+                    {
+                        IndividualPerson ip = (IndividualPerson)forPerson;
+                        if (ip.Person.Id == userId)
+                        {
+                            filteredScheduleList.Add(s);
+                            break;
+                        }
+                    }
                 }
             }
-
-            return PartialView("_listSchedules", model);
+            return filteredScheduleList.Distinct().ToList();
         }
 
+        private List<BookingEvent> GetAllEventsFiltered(bool byUser, object start = null, object end = null)
+        {
+            List<BookingEvent> eventList = new List<BookingEvent>();
+            List<BookingEvent> eventListTmp = new List<BookingEvent>();
+
+            if (Session["FilterSchedules"] == null)
+            {
+                BookingEventManager eManager = new BookingEventManager();
+                if (start != null && end != null)
+                {
+                    DateTime startDate = DateTime.Parse(start.ToString());
+                    DateTime endDate = DateTime.Parse(end.ToString());
+                    eventList = eManager.GetAllEventByTimePeriod(startDate, endDate);
+                }
+                else
+                {
+                    eventList = eManager.GetAllBookingEvents().ToList();
+                }
+
+
+                if (byUser == true)
+                {
+                    ScheduleManager schManager = new ScheduleManager();
+
+                    SubjectManager subManager = new SubjectManager();
+                    User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
+
+                    foreach (BookingEvent e in eventList)
+                    {
+                        List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
+                        var s = FilterSchedulesByUser(schedules, user.Id).Concat(FilterSchedulesForUser(schedules, user.Id)).ToList();
+                        if (s.Count > 0)
+                            eventListTmp.Add(e);
+                    }
+
+                    eventList = eventListTmp;
+                }
+            }
+            else
+            {
+                BookingEventManager eManager = new BookingEventManager();
+                List<Schedule> scheduleList = new List<Schedule>();
+                scheduleList = Session["FilterSchedules"] as List<Schedule>;
+
+                // filter list by user
+                if (byUser == true)
+                {
+                    SubjectManager subManager = new SubjectManager();
+                    User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
+
+                    var scheduleListNew = FilterSchedulesByUser(scheduleList, user.Id).Concat(FilterSchedulesForUser(scheduleList, user.Id)).ToList();
+                    scheduleList = scheduleListNew.Distinct().ToList();
+                }
+
+                // filter by start and end date
+                if (start != null && end != null)
+                {
+                    DateTime startDate = DateTime.Parse(start.ToString());
+                    DateTime endDate = DateTime.Parse(end.ToString());
+                    scheduleList = scheduleList.Where(a => ((DateTime)a.StartDate >= startDate && (DateTime)a.EndDate <= endDate) || ((DateTime)a.EndDate >= startDate && (DateTime)a.EndDate <= endDate) || (DateTime)a.StartDate <= startDate && (DateTime)a.EndDate >= endDate).ToList();
+                }
+
+                foreach (Schedule s in scheduleList)
+                {
+                    if (!eventList.Select(a => a.Id).ToList().Contains(s.BookingEvent.Id))
+
+                    {
+                        eventList.Add(eManager.GetBookingEventById(s.BookingEvent.Id));
+                    }
+                }
+
+            }
+            return eventList;
+        }
+
+        private List<Schedule> GetAllScheduleFiltered(bool byUser, object start = null, object end = null)
+        {
+
+            List<Schedule> scheduleList = new List<Schedule>();
+            scheduleList = Session["FilterSchedules"] as List<Schedule>;
+
+            if (scheduleList == null)
+            {
+                ScheduleManager schManager = new ScheduleManager();
+                scheduleList = schManager.GetAllSchedules().ToList();
+                // Set filtered list to full list
+                Session["FilterSchedules"] = scheduleList;
+            }
+
+            // filter by start and end date
+            if (start != null && end !=null)
+            {
+                DateTime startDate = DateTime.Parse(start.ToString());
+                DateTime endDate = DateTime.Parse(end.ToString());
+
+                scheduleList = scheduleList.Where(a => ((DateTime)a.StartDate >= startDate && (DateTime)a.EndDate <= endDate) || ((DateTime)a.EndDate >= startDate && (DateTime)a.EndDate <= endDate) || (DateTime)a.StartDate <= startDate && (DateTime)a.EndDate >= endDate).ToList();
+            }
+            
+            if (byUser == true)
+            {
+                SubjectManager subManager = new SubjectManager();
+                User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
+
+                var scheduleListNew = FilterSchedulesByUser(scheduleList, user.Id).Concat(FilterSchedulesForUser(scheduleList, user.Id)).ToList();
+                scheduleList = scheduleListNew.Distinct().ToList();
+            }
+
+            return scheduleList;
+        }
 
         #endregion
+
+
     }
 }
