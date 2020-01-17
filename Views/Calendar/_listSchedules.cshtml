@@ -3,6 +3,22 @@
 
 @model List<ScheduleListModel>
 
+<p id="date_filter">
+    <span id="date-label-from" class="date-label">From: </span><input class="date_range_filter date" type="text" id="datepicker_from_book" />
+    <span id="date-label-to" class="date-label">To:<input class="date_range_filter date" type="text" id="datepicker_to_book" />
+</p>
+
+
+@if (ViewBag.history == "true")
+{
+    <div id="history_yes"  class="history_list">Show without history</div>
+    <div id="history_no" style="display:none" class="history_list">Show with history</div>
+}
+else
+{
+    <div id="history_yes" style="display:none" class="history_list">Show without history</div>
+    <div id="history_no"  class="history_list">Show with history</div>
+}
 
 
 <table id="resources_table" class="display" style="width:100%">
@@ -26,18 +42,18 @@
 
         @foreach (var m in Model)
         {
-        <tr>
-            <td><a href="../../RBM/Schedule/Show/@m.Id">@m.EventName</a></td>
-  
-            <td>@m.EventDescription</td>
-            <td>@m.ResourceName</td>
-            <td>@m.Quantity</td>
-            <td>@m.ContactPerson</td>
-            <td>@m.ReservedFor</td>
-            <td>@m.StartDate.ToString("dd.MM.yyyy")</td>
-            <td>@m.EndDate.ToString("dd.MM.yyyy")</td>
-            <td>@m.Activities</td>
-        </tr>
+            <tr>
+                <td><a href="../../RBM/Schedule/Show/@m.EventID">@m.EventName</a></td>
+
+                <td>@m.EventDescription</td>
+                <td>@m.ResourceName</td>
+                <td>@m.Quantity</td>
+                <td>@m.ContactPerson</td>
+                <td>@m.ReservedFor</td>
+                <td>@m.StartDate.ToString("dd.MM.yyyy")</td>
+                <td>@m.EndDate.ToString("dd.MM.yyyy")</td>
+                <td>@m.Activities</td>
+            </tr>
         }
     </tbody>
 
@@ -48,6 +64,40 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
+
+                $('.history_list').on('click', function () {
+            var history = false;
+           console.log("click history");
+            if ($("#history_yes").is(":visible")) {  
+            }
+            else {
+                history = true; 
+                
+            }
+
+            var myBooking = false;
+            if ($('#MyBookings').is(':checked')) {
+                myBooking = true;
+            }
+
+            var contentView = $('#contentView .active').find('input').val();
+
+
+            if (contentView == "Events") {
+                $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: myBooking, history: history }, function (data) {
+                    $('#eventList').html(data);
+                });
+            }
+            else { 
+                $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: myBooking, history: history}, function (data) {
+                $('#scheduleList').html(data);
+            });
+            }
+
+        });
+
+
+
         jQuery.fn.dataTable.render.ellipsis = function (cutoff, wordbreak, escapeHtml) {
             var esc = function (t) {
                 return t
@@ -89,12 +139,13 @@
             };
         };
 
-        $("#resources_table").DataTable({
+        var oTable = $("#resources_table").DataTable({
             "autoWidth": false,
             ordering: true,
+            order: [[6, "desc"]], // order by startDate
             paging: false,
             responsive: true,
-            
+
             columnDefs: [
                 {
                     targets: 1,
@@ -102,6 +153,72 @@
                 }]
         });
 
+        $("#datepicker_from_book").datepicker({
+            showOn: "button",
+            buttonText: "<i class='fa fa-calendar'></i>",
+            "onSelect": function (date) {
+                minDateFilter = new Date(date).getTime();
+                oTable.draw();
+            }
+        }).keyup(function () {
+            minDateFilter = new Date(this.value).getTime();
+            oTable.draw();
+        }).next('button').button({
+            icons: {
+                primary: 'ui-icon-calendar'
+            }, text: false
+        });
+
+        $("#datepicker_to_book").datepicker({
+            showOn: "button",
+            buttonText: "<i class='fa fa-calendar'></i>",
+            "onSelect": function (date) {
+                maxDateFilter = new Date(date).getTime();
+                oTable.draw();
+            }
+        }).keyup(function () {
+            maxDateFilter = new Date(this.value).getTime();
+            oTable.draw();
+        });
+
     });
 
+    // Date range filter
+    minDateFilter = "";
+    maxDateFilter = "";
+
+    $.fn.dataTableExt.afnFiltering.push(
+        function (oSettings, aData, iDataIndex) {
+
+            if (typeof aData._date == 'undefined') {
+                aData._date = moment(aData[6], "DD.MM.YYYY").toDate().getTime();
+            }
+            if (minDateFilter && !isNaN(minDateFilter)) {
+                if (aData._date < minDateFilter) {
+                    return false;
+                }
+            }
+
+            if (maxDateFilter && !isNaN(maxDateFilter)) {
+                if (aData._date > maxDateFilter) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    );
+
+
+
+
+//    });
+
 </script>
+<style>
+    .ui-datepicker-trigger {
+        border: none;
+        background: none;
+        color: black;
+    }
+</style>

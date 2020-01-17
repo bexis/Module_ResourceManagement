@@ -3,13 +3,23 @@
 
 @model List<BookingEventModel>
 
-@{
-                /**/
 
-                GridPagerStyles pagerStyles = GridPagerStyles.PageSizeDropDown;
-                pagerStyles |= GridPagerStyles.NextPreviousAndNumeric;
-                pagerStyles |= GridPagerStyles.Numeric;
+<p id="date_filter">
+    <span id="date-label-from" class="date-label">From: </span><input class="date_range_filter date" type="text" id="datepicker_from" />
+    <span id="date-label-to" class="date-label">To:<input class="date_range_filter date" type="text" id="datepicker_to" />
+</p>
+
+@if (ViewBag.history == "true")
+{
+    <div id="history_yes" class="history_list_booking">Show without history</div>
+    <div id="history_no" style="display:none" class="history_list_booking">Show with history</div>
 }
+else
+{
+    <div id="history_yes" style="display:none" class="history_list_booking">Show without history</div>
+    <div id="history_no" class="history_list_booking">Show with history</div>
+}
+
 
 <table id="booking_table" class="display" style="width:100%">
     <thead>
@@ -28,14 +38,14 @@
 
         @foreach (var m in Model)
         {
-        <tr>
-            <td><a href="../../RBM/Schedule/Show/@m.Id">@m.Name</a></td>
-            <td>@m.Description</td>
-            <td>@m.startDate.ToString("dd.MM.yyyy")</td>
-            <td>@m.endDate.ToString("dd.MM.yyyy")</td>
-            <td>@m.ResourceAttributes</td>
-            <td>@m.ResourceName</td>
-        </tr>
+            <tr>
+                <td><a href="../../RBM/Schedule/Show/@m.Id">@m.Name</a></td>
+                <td>@m.Description</td>
+                <td>@m.startDate.ToString("dd.MM.yyyy")</td>
+                <td>@m.endDate.ToString("dd.MM.yyyy")</td>
+                <td>@m.ResourceAttributes</td>
+                <td>@m.ResourceName</td>
+            </tr>
         }
     </tbody>
 
@@ -45,8 +55,40 @@
 
     $(document).ready(function () {
 
-        resetAllTelerikIconTitles();
-        addTooltips();
+             $('.history_list_booking').on('click', function () {
+            var history = false;
+           console.log("click history");
+            if ($("#history_yes").is(":visible")) {  
+            }
+            else {
+                history = true; 
+                
+            }
+
+            var myBooking = false;
+            if ($('#MyBookings').is(':checked')) {
+                myBooking = true;
+            }
+
+            var contentView = $('#contentView .active').find('input').val();
+
+
+            if (contentView == "Events") {
+                $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: myBooking, history: history }, function (data) {
+                    $('#eventList').html(data);
+                });
+            }
+            else { 
+                $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: myBooking, history: history}, function (data) {
+                $('#scheduleList').html(data);
+            });
+            }
+
+        });    
+
+
+
+
 jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml ) {
     var esc = function ( t ) {
         return t
@@ -55,42 +97,43 @@ jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml )
             .replace( />/g, '&gt;' )
             .replace( /"/g, '&quot;' );
     };
- 
+
     return function ( d, type, row ) {
         // Order, search and type get the original data
         if ( type !== 'display' ) {
             return d;
         }
- 
+
         if ( typeof d !== 'number' && typeof d !== 'string' ) {
             return d;
         }
- 
+
         d = d.toString(); // cast numbers
- 
+
         if ( d.length <= cutoff ) {
             return d;
         }
- 
+
         var shortened = d.substr(0, cutoff-1);
- 
+
         // Find the last white space character in the string
         if ( wordbreak ) {
             shortened = shortened.replace(/\s([^\s]*)$/, '');
         }
- 
+
         // Protect against uncontrolled HTML input
         if ( escapeHtml ) {
             shortened = esc( shortened );
         }
- 
+
         return '<span class="ellipsis" title="'+esc(d)+'">'+shortened+'&#8230;</span>';
     };
 };
 
-            $("#booking_table").DataTable({
+          var bookingTable = $("#booking_table").DataTable({
                 "autoWidth": false,
                 ordering: true,
+                order: [[ 2, "desc" ]], // order by startDate
                 paging: false,
                 responsive: true,
                 "columns": [
@@ -100,7 +143,7 @@ jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml )
                     null,
                     null,
                     null
-                   
+
                 ],
     columnDefs: [
      {
@@ -109,6 +152,69 @@ jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml )
     }]
             });
 
-});
+      
+        $("#datepicker_from").datepicker({
+            showOn: "button",
+            buttonText: "<i class='fa fa-calendar'></i>",
+            "onSelect": function (date) {
+                minDateFilter = new Date(date).getTime();
+                bookingTable.draw();
+            }
+        }).keyup(function () {
+            minDateFilter = new Date(this.value).getTime();
+            bookingTable.draw();
+        }).next('button').button({
+            icons: {
+                primary: 'ui-icon-calendar'
+            }, text: false
+        });
+
+        $("#datepicker_to").datepicker({
+            showOn: "button",
+            buttonText: "<i class='fa fa-calendar'></i>",
+            "onSelect": function (date) {
+                maxDateFilter = new Date(date).getTime();
+                bookingTable.draw();
+            }
+        }).keyup(function () {
+            maxDateFilter = new Date(this.value).getTime();
+            bookingTable.draw();
+        });
+
+    });
+
+    // Date range filter
+    minDateFilter = "";
+    maxDateFilter = "";
+
+    $.fn.dataTableExt.afnFiltering.push(
+        function (oSettings, aData, iDataIndex) {
+
+            if (typeof aData._date == 'undefined') {
+                aData._date = moment(aData[2], "DD.MM.YYYY").toDate().getTime();
+            }
+            if (minDateFilter && !isNaN(minDateFilter)) {
+                if (aData._date < minDateFilter) {
+                    return false;
+                }
+            }
+
+            if (maxDateFilter && !isNaN(maxDateFilter)) {
+                if (aData._date > maxDateFilter) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    );
+
 
 </script>
+<style>
+    .ui-datepicker-trigger {
+        border: none;
+        background: none;
+        color: black;
+    }
+</style>

@@ -87,6 +87,7 @@
 
         });
 
+
         //$.validator.unobtrusive.parse("#contentEdit");
     });
 
@@ -191,12 +192,17 @@
             myBooking = true;
         }
 
+        var history = false;
+        if ($("#history_yes").is(":visible")) {
+            history = true;
+        }
+
         if (contentView == "Events") {
             if ($("#scheduleList").is(":visible")) {
                 $('#scheduleList').toggle();
             }
 
-            $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings : myBooking }, function (data) {
+            $.get('@Url.Action("GetEventsAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings : myBooking, history : history }, function (data) {
                 $('#eventList').html(data);
             });
 
@@ -210,7 +216,7 @@
                 $('#eventList').toggle();
             }
 
-            $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: myBooking}, function (data) {
+            $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: myBooking, history: history}, function (data) {
                 $('#scheduleList').html(data);
             });
 
@@ -226,9 +232,8 @@
 
         var checkedItems = [];
 
-        var contentView = $("input[name='ContentView']:checked").val();
-
-        var displayView = $("input[name='DisplayView']:checked").attr("value");
+        var contentView = $('#contentView .active').find('input').val();
+        var displayView = $('#displayView .active').find('input').val();
 
         var myBooking = false;
         if ($('#MyBookings').is(':checked')) {
