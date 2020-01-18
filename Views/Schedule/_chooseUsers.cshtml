@@ -3,64 +3,41 @@
 
 @model List<PersonInSchedule>
 
-@{
-    GridPagerStyles pagerStyles = GridPagerStyles.Numeric;
-    pagerStyles |= GridPagerStyles.NextPreviousAndDropDown;
-}
-
 <div>
-    @(Html.Telerik().Grid(Model)
-                .Name("Grid_Users")
-                .HtmlAttributes(new { style = "width:500px" })
-                .DataKeys(keys =>
-                {
-                    keys.Add(r => r.UserId);
-                })
-                .Columns(columns =>
-                {
-                    columns.Bound(r => r.Index).Hidden().HtmlAttributes(new { name = "scheduleIndex" });
-                    columns.Bound(r => r.UserId).Hidden();
-                    columns.Bound(r => r.UserFullName).Width(50);
-                    columns.Template(
-                                @<text>
-                                    <div id="checkboxesUserSelect">
-                                        @Html.CheckBox("selected_userId_" + item.UserId, item.IsSelected, new { id = @item.UserId, index = @item.Index, OnChange = "changeUserSelection(this)" })
-                                    </div>
-                                </text>
-                                       ).Title("Select")
-                                       .Width(40);
-               //.ClientTemplate(
-               //    @Html.CheckBox("<#= UserId #>", new { id = "UserId", OnChange = "changeUserSelection(this)" }).ToHtmlString()
-               //).Width(30);
-               columns.Template(
-                        @<text>
-                            <div id="IsContact">
-                                @Html.RadioButton("contact", @item.UserId , item.IsContactPerson, new { id = @item.UserId, index = @item.Index, OnChange = "changeContactPerson(this)" })
-                            </div>
-                        </text>
-                               ).Title("IsContact")
-                               .Width(50);
-                    //.ClientTemplate(
-                    //    @Html.CheckBox("IsContact").ToHtmlString()
-                    //).Width(30);
 
-
-                })
-                             .ClientEvents(clientEvents => clientEvents
-                              .OnDataBound("onDataBound"))
-                             .Filterable()
-                             .Sortable(sortable => sortable
-                             .OrderBy(orderby => orderby
-                             .Add(r => r.UserId).Descending()))
-                             //.Scrollable()
-                             .Pageable(paging =>
-                                    paging
-                                        .Style(pagerStyles)
-                                        .PageSize(10)
-                                        .Position(GridPagerPosition.Bottom)
-                                        )
-    )
     <br />
+    <table id="choose_user" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th title="Name">Name</th>
+                <th title="">Select</th>
+                <th title="Is Contact">Contact</th>
+               
+            </tr>
+        </thead>
+        <tbody>
+
+
+            @foreach (var m in Model)
+            {
+            <tr>
+                <td scheduleIndex="@m.Index">@m.UserFullName</td>
+                <td>
+                    @Html.CheckBox("selected_userId_" + m.UserId, m.IsSelected, new { id = @m.UserId, index = @m.Index, OnChange = "changeUserSelection(this)" })
+                </td>
+                <td>
+                    @Html.RadioButton("contact", @m.UserId, m.IsContactPerson, new { id = @m.UserId, index = @m.Index, OnChange = "changeContactPerson(this)" })
+                </td>
+            </tr>
+            }
+        </tbody>
+
+    </table>
+
+
+
+
+
     <div class="bx-rpm-submit bx-rpm-buttons">
         <button class="bx-button action" name="AddUsersToSchedule" onclick="addSelectedUsers()">Add</button>
     </div>
@@ -68,14 +45,73 @@
 
 <script type="text/javascript">
 
-    function onDataBound() {
-        resetAllTelerikIconTitles();
-        addTooltips();
-    }
+     $(document).ready(function () {
+
+        jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml ) 
+         {
+    var esc = function ( t ) {
+        return t
+            .replace( /&/g, '&amp;' )
+            .replace( /</g, '&lt;' )
+            .replace( />/g, '&gt;' )
+            .replace( /"/g, '&quot;' );
+    };
+
+    return function ( d, type, row ) {
+        // Order, search and type get the original data
+        if ( type !== 'display' ) {
+            return d;
+        }
+
+        if ( typeof d !== 'number' && typeof d !== 'string' ) {
+            return d;
+        }
+
+        d = d.toString(); // cast numbers
+
+        if ( d.length <= cutoff ) {
+            return d;
+        }
+
+        
+    return d;
+    // remove HTML check to allow checkbox and radio button
+    /*   var shortened = d.substr(0, cutoff-1);
+
+        // Find the last white space character in the string
+        if ( wordbreak ) {
+            shortened = shortened.replace(/\s([^\s]*)$/, '');
+         }
+
+        // Protect against uncontrolled HTML input
+       if ( escapeHtml ) {
+            shortened = esc( shortened );
+       }
+
+       return '<span class="ellipsis" title="'+esc(d)+'">'+shortened+'&#8230;</span>';
+    */
+    };
+};
+
+    $("#choose_user").DataTable({
+                "autoWidth": false,
+                ordering: true,
+                order: [[ 0, "asc" ]], // order by name
+                paging: false,
+                responsive: true,
+                columnDefs: [
+                {
+                    targets: 1,
+                     render: $.fn.dataTable.render.ellipsis( 60, true )
+                }]
+    });
+
+    });
+    
 
     function addSelectedUsers() {
 
-        var index = $("td[name=scheduleIndex]:first").text();
+        var index = $("td[scheduleIndex]:first").attr("scheduleIndex");
         $.post('@Url.Action("AddUsersToSchedule", "Schedule", new RouteValueDictionary { { "area", "RBM" } })', {scheduleIndex: index }, function (data) {
             $("#users_"+index).html(data)
             Window_Choose_OnClose();
