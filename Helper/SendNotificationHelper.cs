@@ -54,7 +54,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Helpers
 
             var sender = Modules.RBM.UI.Helper.Settings.get("BookingMailSender").ToString();
 
-            var subject = Modules.RBM.UI.Helper.Settings.get("BookingMailSubject").ToString();
+            var subject = Modules.RBM.UI.Helper.Settings.get("BookingMailSubject").ToString() + ": " + bookingAction;
 
             string message = "";
             message += "<p>The following booking has been " + bookingAction + "</p>";
