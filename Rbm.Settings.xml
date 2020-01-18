@@ -10,7 +10,7 @@
   <entry key="BookingMailReceiverCC" value="david.blaa@googlemail.com" type="string"/>
   <entry key="BookingMailReceiverBCC" value="franziska.zander@uni-jena.de" type="string"/>
   <entry key="BookingMailSender" value="Biodiversity Exploratories: Fieldbook create reservation" type="string"/>
-  <entry key="BookingMailSubject" value="booking booking power" type="string"/>
+  <entry key="BookingMailSubject" value="Fieldbook reservation" type="string"/>
   <entry key="AlumniGroup" value="alumni" type="string"/>
 
   <!--Setting to define party type name-->
