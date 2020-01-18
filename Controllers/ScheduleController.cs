@@ -176,7 +176,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return PartialView("_gridResources", resultList);
         }
 
-       
+
         public ActionResult RemoveFilter(string selectedItems)
         {
             Session["Filter"] = null;
@@ -612,7 +612,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         {
                             seModel.ScheduleQuantity = quantity;
                             // get index of modify schedule and update it in the session list
-                             i = model.Schedules.FindIndex(p => p.Index == int.Parse(index));
+                            i = model.Schedules.FindIndex(p => p.Index == int.Parse(index));
                             model.Schedules[i] = seModel;
                             Session["Event"] = model;
                         }
@@ -688,7 +688,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     }
 
                     //check contact person
-                    if(s.Contact.UserId == 0)
+                    if (s.Contact.UserId == 0)
                     {
                         ModelState.AddModelError("ContactMissing_" + s.Index, "Contact person is missing.");
                         isError = true;
@@ -711,7 +711,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     {
                         int availableQuantity = GetAvailableQuantity(s.ResourceId, s.ResourceQuantity, s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate, s.ScheduleQuantity, s.ScheduleId);
 
-                     
+
 
 
                         if ((availableQuantity - s.ScheduleQuantity) <= 0)
@@ -897,7 +897,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                         users.Add(u);
                                     }
 
-                                     person = personManager.CreatePersonGroup(users, contact);
+                                    person = personManager.CreatePersonGroup(users, contact);
                                 }
                                 else
                                 {
@@ -907,7 +907,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                                 //Create or Update schedule
                                 if (model.Id == 0 || (countSchedulesCurrent > countSchedulesBefor && schedule.ScheduleId == 0))
-                                    newSchedule = scheduleManager.CreateSchedule(schedule.ScheduleDurationModel.StartDate, schedule.ScheduleDurationModel.EndDate, eEvent, tempResource, person, createdBy, schedule.Activities.Select(a=>a.Id), schedule.ScheduleQuantity, index);
+                                    newSchedule = scheduleManager.CreateSchedule(schedule.ScheduleDurationModel.StartDate, schedule.ScheduleDurationModel.EndDate, eEvent, tempResource, person, createdBy, schedule.Activities.Select(a => a.Id), schedule.ScheduleQuantity, index);
                                 else
                                     UpdateSchedule(schedule, schedule.Activities.Select(a => a.Id), person, contact);
 
@@ -918,33 +918,33 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                                 //Add rights to the schedule and event for all user reserved for
 
-                                    //get entities types
-                                    var entityTypeSchedule = entityTypeManager.FindByName("Schedule");
-                                    var entityTypeEvent = entityTypeManager.FindByName("BookingEvent");
+                                //get entities types
+                                var entityTypeSchedule = entityTypeManager.FindByName("Schedule");
+                                var entityTypeEvent = entityTypeManager.FindByName("BookingEvent");
 
-                                    //add rights to logged in user if not exsit
-                                    //rights on schedule 31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
-                                    var userIdLoggedIn = UserHelper.GetUserId(HttpContext.User.Identity.Name);
-                                    if(permissionManager.GetRights(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id) == 0)
-                                        permissionManager.Create(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id, 31);
+                                //add rights to logged in user if not exsit
+                                //rights on schedule 31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
+                                var userIdLoggedIn = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+                                if (permissionManager.GetRights(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id) == 0)
+                                    permissionManager.Create(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id, 31);
 
-                                    //rights on event
-                                    if (permissionManager.GetRights(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id) == 0)
-                                        permissionManager.Create(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id, 31);
+                                //rights on event
+                                if (permissionManager.GetRights(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id) == 0)
+                                    permissionManager.Create(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id, 31);
 
-                                    foreach (PersonInSchedule user in schedule.ForPersons)
+                                foreach (PersonInSchedule user in schedule.ForPersons)
+                                {
+                                    User us = userManager.FindByIdAsync(user.UserId).Result;
+                                    if (us.Id != userIdLoggedIn)
                                     {
-                                        User us = userManager.FindByIdAsync(user.UserId).Result;
-                                        if (us.Id != userIdLoggedIn)
-                                        {
-                                            //rights on schedule 15 is the sum from this rights:  Read = 1, Download = 2, Write = 4, Delete = 8
-                                            if (permissionManager.GetRights(us.Id, entityTypeSchedule.Id, newSchedule.Id) == 0)
-                                                permissionManager.Create(us.Id, entityTypeSchedule.Id, newSchedule.Id, 15);
-                                            //rights on event, Read = 1, Write = 4
-                                            if (permissionManager.GetRights(us.Id, entityTypeEvent.Id, eEvent.Id) == 0)
-                                                permissionManager.Create(us.Id, entityTypeEvent.Id, eEvent.Id, 5);
-                                        }
+                                        //rights on schedule 15 is the sum from this rights:  Read = 1, Download = 2, Write = 4, Delete = 8
+                                        if (permissionManager.GetRights(us.Id, entityTypeSchedule.Id, newSchedule.Id) == 0)
+                                            permissionManager.Create(us.Id, entityTypeSchedule.Id, newSchedule.Id, 15);
+                                        //rights on event, Read = 1, Write = 4
+                                        if (permissionManager.GetRights(us.Id, entityTypeEvent.Id, eEvent.Id) == 0)
+                                            permissionManager.Create(us.Id, entityTypeEvent.Id, eEvent.Id, 5);
                                     }
+                                }
 
                                 if (notifications.Count > 0)
                                     SendNotification(notifications, model.Schedules);
@@ -967,7 +967,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 }
             }
 
-            return RedirectToAction("Calendar","Calendar");
+            return RedirectToAction("Calendar", "Calendar");
         }
 
         private Schedule UpdateSchedule(ScheduleEventModel schedule, IEnumerable<long> activityList, Person person, User contact)
@@ -989,7 +989,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     pManager.UpdatePersonGroup(pGroup);
                     s.ForPerson = pGroup;
                 }
-                else if(person is IndividualPerson)
+                else if (person is IndividualPerson)
                 {
                     IndividualPerson iPerson = (IndividualPerson)person;
                     pManager.UpdateIndividualPerson(iPerson);
@@ -1012,7 +1012,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             using (var permissionManager = new EntityPermissionManager())
             using (var subjectManager = new SubjectManager())
-            { 
+            {
                 BookingEventModel model = (BookingEventModel)Session["Event"];
                 if (model != null)
                 {
@@ -1105,11 +1105,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     a.EditAccess = tempSchedule.EditAccess;
                     a.EditMode = tempSchedule.EditMode;
                     Party partyPerson = UserHelper.GetPartyByUserId(a.UserId);
-                    
+
                     a.UserFullName = partyPerson.Name;
                     //get party type attribute value
                     a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
-  
+
                     a.Index = int.Parse(index);
 
                 });
@@ -1127,6 +1127,19 @@ namespace BExIS.Modules.RBM.UI.Controllers
             BookingEventModel sEventM = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
 
+            // retreive list of all users 
+            DataTable result = null;
+            string groupName = Modules.RBM.UI.Helper.Settings.get("AlumniGroup").ToString();
+            var query = "SELECT partyid, userid FROM public.partyusers Left join users on partyusers.userid = users.id where users.id not in (select userref from users_groups where groupref = (SELECT id FROM groups WHERE name = '"+ groupName +"'))";
+
+            result = retrieve(query);
+            List<object> personsIsList = new List<object>();
+
+            for (int i = 0; i < result.Rows.Count; i++)
+            {
+                personsIsList.Add(new { partyid = result.Rows[i].ItemArray[0], userid = result.Rows[i].ItemArray[1] });
+            }
+
             using (var partyManager = new PartyManager())
             using (var partyTypeManager = new PartyTypeManager())
             {
@@ -1143,35 +1156,48 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                 List<long> tempUserIds = tempSchedule.ForPersons.Select(c => c.UserId).ToList();
 
+                var found = false; var userId = 0;
                 foreach (var partyPerson in partyPersons)
                 {
-                    var userTask = userManager.FindByIdAsync(partyManager.GetUserIdByParty(partyPerson.Id));
-                    userTask.Wait();
-                    var user = userTask.Result;
+                   //    var userTask = userManager.FindByIdAsync(partyManager.GetUserIdByParty(partyPerson.Id));
+                   //    userTask.Wait();
+                   //    var user = userTask.Result;
+   
+                    found = false;
 
-                    //check if user is contect person
-                    bool isContact = false;
-                    if (user != null)
+                    // Search if user is in the list -> if not it is a alumni and will be not shown
+                    for (int i = 0; i < personsIsList.Count; i++)
                     {
-                        if (tempSchedule.Contact.UserId == user.Id)
+                        var partyid = personsIsList[i].GetType().GetProperty("partyid").GetValue(personsIsList[i], null);
+
+                        if (long.Parse(partyid.ToString()) == partyPerson.Id)
+                        {
+                            found = true;
+                            userId = int.Parse(personsIsList[i].GetType().GetProperty("userid").GetValue(personsIsList[i], null).ToString());
+                            break;
+                        }
+                    }
+               
+                    bool isContact = false;
+                    if (found == true)
+                    {
+                        //check if user is contect person
+                        if (tempSchedule.Contact.UserId == userId)
                             isContact = true;
 
-                        PersonInSchedule pu = new PersonInSchedule(0, user, isContact);
+                        PersonInSchedule pu = new PersonInSchedule();
                         pu.Index = int.Parse(index);
                         pu.UserFullName = partyPerson.Name;
-
-                        if (tempUserIds.Contains(user.Id))
+                        pu.UserId = userId;
+                        if (tempUserIds.Contains(userId))
                             pu.IsSelected = true;
 
                         personList.Add(pu);
                     }
-                }
-
-                //users.ForEach(r => personList.Add(new PersonUsersList(r)));
-
-                return PartialView("_chooseUsers", personList);
             }
+            return PartialView("_chooseUsers", personList);
         }
+    } 
 
         public ActionResult ChangeSelectedUser(string userId, string selected, string index)
         {
@@ -1321,6 +1347,22 @@ namespace BExIS.Modules.RBM.UI.Controllers
             Session["Event"] = sEventM;
 
             return PartialView("_scheduleUsers", tempSchedule.ForPersons);
+        }
+
+        private DataTable retrieve(string queryStr)
+        {
+            try
+            {
+                using (IUnitOfWork uow = this.GetUnitOfWork())
+                {
+                    DataTable table = uow.ExecuteQuery(queryStr);
+                    return table;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(string.Format("Could not retrieve alumni information"), ex);
+            }
         }
 
 
