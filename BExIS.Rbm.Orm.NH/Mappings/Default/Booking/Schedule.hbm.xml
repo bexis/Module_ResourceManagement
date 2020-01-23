@@ -26,7 +26,7 @@
     <property name="Index" type="Int32" />
 
 
-    <many-to-one name="Resource" class="BExIS.Rbm.Entities.Resource.SingleResource" not-null="true" column="ResourceRef"/>
+    <many-to-one name="Resource" class="BExIS.Rbm.Entities.Resource.SingleResource" not-null="true" column="ResourceRef" lazy="false"/>
 
     <many-to-one name="BookingEvent" class="BExIS.Rbm.Entities.Booking.BookingEvent" not-null="true"  column="BookingEventRef"/>
 

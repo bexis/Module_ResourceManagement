@@ -84,7 +84,7 @@
       <one-to-many class="BExIS.Rbm.Entities.ResourceConstraint.ResourceConstraint, BExIS.Rbm.Entities" />
     </set>
 
-    <set name="ResourceAttributeValues" cascade="all-delete-orphan" lazy="true">
+    <set name="ResourceAttributeValues" cascade="all-delete-orphan" lazy="false">
       <key column="ResourceRef"/>
       <one-to-many class="BExIS.Rbm.Entities.ResourceStructure.ResourceAttributeValue, BExIS.Rbm.Entities" />
     </set>
