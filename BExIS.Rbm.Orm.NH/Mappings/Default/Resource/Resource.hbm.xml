@@ -77,7 +77,7 @@
     <!-- Mapping Entity Associations -->
 
  
-    <many-to-one name="Duration" class="BExIS.Rbm.Entities.BookingManagementTime.TimeDuration, BExIS.Rbm.Entities" column="Duration" unique="true" cascade="all-delete-orphan"/>
+    <many-to-one name="Duration" class="BExIS.Rbm.Entities.BookingManagementTime.TimeDuration, BExIS.Rbm.Entities" column="Duration" unique="true" cascade="all-delete-orphan" lazy="false"/>
 
     <set name="ResourceConstraints" cascade="all-delete-orphan" lazy="true">
       <key column="ResourceRef"/>

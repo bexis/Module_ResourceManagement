@@ -32,11 +32,11 @@
 
     <many-to-one name="ByPerson" class="BExIS.Rbm.Entities.Users.Person" not-null="true"  column="ByPerson" lazy="false"/>
 
-    <many-to-one name="ForPerson" class="BExIS.Rbm.Entities.Users.Person" not-null="true"  column="ForPerson"/>
+    <many-to-one name="ForPerson" class="BExIS.Rbm.Entities.Users.Person" not-null="true"  column="ForPerson" lazy="false"/>
 
-    <set name="Activities" table="Schedule_Activity"  cascade="save-update" lazy="true">
+    <set name="Activities" table="Schedule_Activity"  cascade="save-update" lazy="false">
       <key column="ScheduleRef"/>
-      <many-to-many column="ActivityRef" class="BExIS.Rbm.Entities.Booking.Activity, BExIS.Rbm.Entities"/>
+      <many-to-many column="ActivityRef" class="BExIS.Rbm.Entities.Booking.Activity, BExIS.Rbm.Entities" lazy="false"/>
     </set>
 
     <!--<set name="Notifications" table="Schedule_Notification" inverse="true" cascade="save-update" lazy="true">
