@@ -17,10 +17,10 @@
 
     <table id="enterSchedules" style="margin-bottom:20px">
         <tr>
-            <th>1. Please specify details for your selected resources.</th>
+            <th>1. Step: Add details for each resource</th>
         </tr>
     </table>
-
+    <div></div>
 
     @Html.Partial("_schedules", Model.Schedules)
 
@@ -31,9 +31,10 @@
 
     <table id="enterSchedules" style="margin-bottom:20px; margin-top:20px">
         <tr>
-            <th>2. Please name your booking (e.g. 1st soil sampling campaign BExIS)  and describe your planned activities.</th>
+            <th>2. Step: Name and discribe your reservation</th>
         </tr>
     </table>
+    <div></div>
 
     <table class="bx-table-form" style="width: 500px;">
         <tr>
@@ -44,7 +45,7 @@
             <td>
                 @if (Model.EditMode || Model.Id == 0)
                 {
-                    @Html.TextBoxFor(m => m.Name, new { OnChange = "onChangeControl(this)", @class = "bx-input", @tabindex = "2", @Name = "Name_" })<br />
+                    @Html.TextBoxFor(m => m.Name, new { OnChange = "onChangeControl(this)", @class = "bx-input", @tabindex = "2", @Name = "Name_", @placeholder = "1st soil sampling campaign <project name>" })<br />
                     <small>@Html.ValidationMessage("Name")</small><br />
                 }
                 else
@@ -61,7 +62,7 @@
             <td>
                 @if (Model.EditMode || Model.Id == 0)
                 {
-                    @Html.TextAreaFor(m => m.Description, new { OnChange = "onChangeControl(this)", @class = "bx-input", @tabindex = "2", @Name = "Description_" })<br />
+                    @Html.TextAreaFor(m => m.Description, new { OnChange = "onChangeControl(this)", @class = "bx-input", @tabindex = "2", @Name = "Description_", @placeholder = "Please describe your planned activities." })<br />
                     <small>@Html.ValidationMessage("Description")</small><br />
                 }
                 else
