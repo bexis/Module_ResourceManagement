@@ -46,7 +46,7 @@
 <script type="text/javascript">
 
      $(document).ready(function () {
-
+  
         jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml ) 
          {
     var esc = function ( t ) {
@@ -99,15 +99,22 @@
                 order: [[ 0, "asc" ]], // order by name
                 paging: false,
                 responsive: true,
+                scrollY: "200px",
+            
                 columnDefs: [
                 {
                     targets: 1,
                      render: $.fn.dataTable.render.ellipsis( 60, true )
                 }]
-    });
+    }).columns.adjust();
 
     });
     
+    setTimeout(function () {
+     $($.fn.dataTable.tables( true ) ).DataTable().columns.adjust().draw();
+},200);
+
+
 
     function addSelectedUsers() {
 
