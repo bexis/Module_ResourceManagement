@@ -1192,6 +1192,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         if (tempUserIds.Contains(userId))
                             pu.IsSelected = true;
 
+                        pu.IsContactPerson = isContact;
                         personList.Add(pu);
                     }
             }
