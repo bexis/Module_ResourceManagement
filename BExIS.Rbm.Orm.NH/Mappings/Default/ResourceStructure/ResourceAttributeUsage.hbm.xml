@@ -24,7 +24,7 @@
 
 
   <!-- Mapping Entity Associations -->
-    <many-to-one name="ResourceStructureAttribute" class="BExIS.Rbm.Entities.ResourceStructure.ResourceStructureAttribute" not-null="true" column="ResourceStructureAttributeRef"/>
+    <many-to-one name="ResourceStructureAttribute" class="BExIS.Rbm.Entities.ResourceStructure.ResourceStructureAttribute" not-null="true" column="ResourceStructureAttributeRef" not-found="ignore" />
     <many-to-one name="ResourceStructure" class="BExIS.Rbm.Entities.ResourceStructure.ResourceStructure" not-null="true" column="ResourceStructureRef"/>
 
   </class>
