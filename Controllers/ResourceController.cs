@@ -320,7 +320,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult OnChangeResourceItem(string element, string value, string valuetype, string constraintelement, string constraintindex, string periodicTimeIntervalElement, string dayId)
         {
             EditResourceModel model = (EditResourceModel)Session["Resource"];
-
+  
             if (model != null)
             {
                 switch (element)

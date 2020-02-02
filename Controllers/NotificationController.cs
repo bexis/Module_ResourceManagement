@@ -36,188 +36,201 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult CreateNotification()
         {
-            using (ResourceManager rManager = new ResourceManager())
+            ResourceManager rManager = null;
+            try
             {
-                List<SingleResource> resources = rManager.GetAllResources().ToList();
-                List<ResourceModel> rModelList = new List<ResourceModel>();
-                resources.ToList().ForEach(r => rModelList.Add(new ResourceModel(r)));
-                EditNotificationModel model = new EditNotificationModel(rModelList);
-                Session["FilterOptions"] = model.AttributeDomainItems;
-                return PartialView("_editNotification", model);
+                using (rManager = new ResourceManager())
+                {
+                    List<SingleResource> resources = rManager.GetAllResources().ToList();
+                    List<ResourceModel> rModelList = new List<ResourceModel>();
+                    resources.ToList().ForEach(r => rModelList.Add(new ResourceModel(r)));
+                    EditNotificationModel model = new EditNotificationModel(rModelList);
+                    Session["FilterOptions"] = model.AttributeDomainItems;
+                    return PartialView("_editNotification", model);
+                }
+            }
+            finally
+            {
+                rManager.Dispose();
             }
         }
 
         [HttpPost]
         public ActionResult Save(EditNotificationModel model)
         {
-            if (ModelState.IsValid)
+            using (NotificationManager nManager = new NotificationManager())
+            using (EntityPermissionManager pManager = new EntityPermissionManager())
+            using (EntityManager entityTypeManager = new EntityManager())
+            using (UserManager userManager = new UserManager())
             {
-                NotificationManager nManager = new NotificationManager();
-
-                //if edit need comarison between stored dependensies and set in session
-                //get resource filter from the notification
-                Dictionary<long, List<string>> dictionary = (Dictionary<long, List<string>>)Session["ResourceFilter"];
-                Session["ResourceFilter"] = null;
-
-                List<Schedule> affectedSchedules = GetAffectedSchedules(dictionary, model.StartDate, model.EndDate);
-
-                Notification notification = new Rbm.Entities.Booking.Notification();
-                if (model.Id == 0)
+                if (ModelState.IsValid)
                 {
-                    notification = nManager.CreateNotification(model.Subject, model.StartDate, model.EndDate, model.Message);
-                }
-                else
-                {
-                    notification = nManager.GetNotificationById(model.Id);
-                    notification.Subject = model.Subject;
-                    notification.StartDate = model.StartDate;
-                    notification.EndDate = model.EndDate;
-                    notification.Message = model.Message;
-                    nManager.UpdateNotification(notification);
-                }
 
-                //save or update dependencies 
-                if (model.Id == 0)
-                {
-                    foreach (KeyValuePair<long, List<string>> kp in dictionary)
+                    //if edit need comarison between stored dependensies and set in session
+                    //get resource filter from the notification
+                    Dictionary<long, List<string>> dictionary = (Dictionary<long, List<string>>)Session["ResourceFilter"];
+                    Session["ResourceFilter"] = null;
+
+                    List<Schedule> affectedSchedules = GetAffectedSchedules(dictionary, model.StartDate, model.EndDate);
+
+                    Notification notification = new Rbm.Entities.Booking.Notification();
+                    if (model.Id == 0)
                     {
-                        foreach (string value in kp.Value)
+                        notification = nManager.CreateNotification(model.Subject, model.StartDate, model.EndDate, model.Message);
+                    }
+                    else
+                    {
+                        notification = nManager.GetNotificationById(model.Id);
+                        notification.Subject = model.Subject;
+                        notification.StartDate = model.StartDate;
+                        notification.EndDate = model.EndDate;
+                        notification.Message = model.Message;
+                        nManager.UpdateNotification(notification);
+                    }
+
+                    //save or update dependencies 
+                    if (model.Id == 0)
+                    {
+                        foreach (KeyValuePair<long, List<string>> kp in dictionary)
                         {
-                            nManager.CreateNotificationDependency(notification, Convert.ToInt64(kp.Key), value);
+                            foreach (string value in kp.Value)
+                            {
+                                nManager.CreateNotificationDependency(notification, Convert.ToInt64(kp.Key), value);
+                            }
                         }
                     }
-                }
-                else
-                {
-                    //remove dep.
-                    foreach(NotificationDependency d in notification.NotificationDependency)
+                    else
                     {
-                        if (dictionary.ContainsKey(d.AttributeId))
+                        //remove dep.
+                        foreach (NotificationDependency d in notification.NotificationDependency)
                         {
-                            if(dictionary[d.AttributeId].Contains(d.DomainItem))
+                            if (dictionary.ContainsKey(d.AttributeId))
                             {
-                                //:)
+                                if (dictionary[d.AttributeId].Contains(d.DomainItem))
+                                {
+                                    //:)
+                                }
+                                else
+                                {
+                                    nManager.DeleteNotificationDependency(d);
+                                }
+
                             }
                             else
                             {
-                                nManager.DeleteNotificationDependency(d);
+                                //delete all dep. by id
                             }
 
                         }
-                        else
-                        { 
-                            //delete all dep. by id
-                        }
 
-                    }
-
-                    //add dep
-                    foreach(KeyValuePair<long, List<string>> kvp in dictionary)
-                    {
-                        long id = kvp.Key;
-                        foreach (string value in kvp.Value)
+                        //add dep
+                        foreach (KeyValuePair<long, List<string>> kvp in dictionary)
                         {
-                            if(!notification.NotificationDependency.Any(a=> a.AttributeId == id && a.DomainItem == value))
-                                nManager.CreateNotificationDependency(notification, Convert.ToInt64(id), value);
-                        }
-                    }
-                }
-
-
-                if (notification.Id != 0 && model.Id == 0)
-                {
-                    //Start -> add security ----------------------------------------
-
-                    using (var pManager = new EntityPermissionManager())
-                    using (var entityTypeManager = new EntityManager())
-                    {
-                        UserManager userManager = new UserManager();
-                        var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                        userTask.Wait();
-                        var user = userTask.Result;
-
-                        Entity entityType = entityTypeManager.FindByName("Notification");
-
-                        //31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
-                        pManager.Create(user, entityType, notification.Id, 31);
-                    }
-
-                    //End -> add security ------------------------------------------
-                }
-
-                //ToDo: Send email with notification to all in a affected schedule involved people
-                if (affectedSchedules.Count > 0)
-                {
-                    SendNotification(notification, affectedSchedules);
-                }
-
-                //return View("NotificationManager");
-                return Json(new { success = true });
-            }
-            else
-            {
-                List<AttributeDomainItemsModel> attributeDomainItems = (List<AttributeDomainItemsModel>)Session["FilterOptions"];
-                Dictionary<long, List<string>> dictionary = (Dictionary<long, List<string>>)Session["ResourceFilter"];
-                if (dictionary != null)
-                {
-                    foreach (AttributeDomainItemsModel m in attributeDomainItems)
-                    {
-                        for (int i = 0; i < m.DomainItems.Count(); i++)
-                        {
-                            var list = dictionary.SelectMany(x => x.Value);
-                            if (list.Contains(m.DomainItems[i].Key))
+                            long id = kvp.Key;
+                            foreach (string value in kvp.Value)
                             {
-                                m.DomainItems[i].Selected = true;
+                                if (!notification.NotificationDependency.Any(a => a.AttributeId == id && a.DomainItem == value))
+                                    nManager.CreateNotificationDependency(notification, Convert.ToInt64(id), value);
                             }
                         }
                     }
-                }
 
-                model.AttributeDomainItems = attributeDomainItems;
-                return PartialView("_editNotification", model);
+
+                    if (notification.Id != 0 && model.Id == 0)
+                    {
+                        //Start -> add security ----------------------------------------
+
+
+                        {
+                            var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                            userTask.Wait();
+                            var user = userTask.Result;
+
+                            Entity entityType = entityTypeManager.FindByName("Notification");
+
+                            //31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
+                            pManager.Create(user, entityType, notification.Id, 31);
+                        }
+
+                        //End -> add security ------------------------------------------
+                    }
+
+                    //ToDo: Send email with notification to all in a affected schedule involved people
+                    if (affectedSchedules.Count > 0)
+                    {
+                        SendNotification(notification, affectedSchedules);
+                    }
+
+                    //return View("NotificationManager");
+                    return Json(new { success = true });
+                }
+                else
+                {
+                    List<AttributeDomainItemsModel> attributeDomainItems = (List<AttributeDomainItemsModel>)Session["FilterOptions"];
+                    Dictionary<long, List<string>> dictionary = (Dictionary<long, List<string>>)Session["ResourceFilter"];
+                    if (dictionary != null)
+                    {
+                        foreach (AttributeDomainItemsModel m in attributeDomainItems)
+                        {
+                            for (int i = 0; i < m.DomainItems.Count(); i++)
+                            {
+                                var list = dictionary.SelectMany(x => x.Value);
+                                if (list.Contains(m.DomainItems[i].Key))
+                                {
+                                    m.DomainItems[i].Selected = true;
+                                }
+                            }
+                        }
+                    }
+
+                    model.AttributeDomainItems = attributeDomainItems;
+                    return PartialView("_editNotification", model);
+                }
             }
         }
 
         private List<Schedule> GetAffectedSchedules(Dictionary<long, List<string>> dictionary, DateTime startDate, DateTime endDate)
         {
-            ScheduleManager sManager = new ScheduleManager();
-            ResourceManager srManager = new ResourceManager();
-
-            List<ResourceAttributeValueModel> resourceAttributeValueModels = new List<ResourceAttributeValueModel>();
-
-            //get all resources
-            List<SingleResource> resources = srManager.GetAllResources().ToList();
-
-            //Create for each Resource ResourceAttributeValueModel witch includes all Attribute Ids and all values
-            foreach (SingleResource r in resources)
+            using (ScheduleManager sManager = new ScheduleManager())
+            using (ResourceManager srManager = new ResourceManager())
             {
-                ResourceAttributeValueModel treeDomainModel = new ResourceAttributeValueModel(r);
-                resourceAttributeValueModels.Add(treeDomainModel);
+
+                List<ResourceAttributeValueModel> resourceAttributeValueModels = new List<ResourceAttributeValueModel>();
+
+                //get all resources
+                List<SingleResource> resources = srManager.GetAllResources().ToList();
+
+                //Create for each Resource ResourceAttributeValueModel witch includes all Attribute Ids and all values
+                foreach (SingleResource r in resources)
+                {
+                    ResourceAttributeValueModel treeDomainModel = new ResourceAttributeValueModel(r);
+                    resourceAttributeValueModels.Add(treeDomainModel);
+                }
+
+                List<ResourceAttributeValueModel> temp = new List<ResourceAttributeValueModel>();
+                List<ResourceModel> resultResourceList = new List<ResourceModel>();
+
+                //check for every TreeDomainModel (resource) if fits the filter
+                foreach (ResourceAttributeValueModel m in resourceAttributeValueModels)
+                {
+                    if (CheckTreeDomainModel(m, dictionary))
+                        resultResourceList.Add(new ResourceModel(m.Resource));
+                }
+
+                //get all schedules in the selected time period
+                List<Schedule> tempSchedules = sManager.GetSchedulesBetweenStartAndEndDate(startDate, endDate);
+                List<Schedule> affectedSchedules = new List<Schedule>();
+
+                //go through all resource which have the selected filter a check if there are schedules
+                foreach (ResourceModel resource in resultResourceList)
+                {
+                    List<Schedule> s = tempSchedules.Where(a => a.Resource.Id == resource.Id).ToList();
+                    if (s.Count() > 0)
+                        affectedSchedules.AddRange(s);
+                }
+
+                return affectedSchedules;
             }
-
-            List<ResourceAttributeValueModel> temp = new List<ResourceAttributeValueModel>();
-            List<ResourceModel> resultResourceList = new List<ResourceModel>();
-
-            //check for every TreeDomainModel (resource) if fits the filter
-            foreach (ResourceAttributeValueModel m in resourceAttributeValueModels)
-            {
-                if (CheckTreeDomainModel(m, dictionary))
-                    resultResourceList.Add(new ResourceModel(m.Resource));
-            }
-
-            //get all schedules in the selected time period
-            List<Schedule> tempSchedules = sManager.GetSchedulesBetweenStartAndEndDate(startDate, endDate);
-            List<Schedule> affectedSchedules = new List<Schedule>();
-
-            //go through all resource which have the selected filter a check if there are schedules
-            foreach (ResourceModel resource in resultResourceList)
-            {
-                List<Schedule> s = tempSchedules.Where(a => a.Resource.Id == resource.Id).ToList();
-                if (s.Count() > 0)
-                    affectedSchedules.AddRange(s);
-            }
-
-            return affectedSchedules;
         }
 
         private void SendNotification(Notification notification, List<Schedule> affectedSchedules)
@@ -254,36 +267,39 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult Edit(long id)
         {
-            NotificationManager nManager = new NotificationManager();
-            Notification notification = nManager.GetNotificationById(id);
-
-            ResourceManager rManager = new ResourceManager();
-            List<SingleResource> resources = rManager.GetAllResources().ToList();
-            List<ResourceModel> rModelList = new List<ResourceModel>();
-            resources.ToList().ForEach(r => rModelList.Add(new ResourceModel(r)));
-
-            EditNotificationModel model = new EditNotificationModel(rModelList, notification);
-
-            //add dependensies to Session
-            Dictionary<long, List<string>> newDictionary = new Dictionary<long, List<string>>();
-            foreach (NotificationDependency d in notification.NotificationDependency)
+            using (NotificationManager nManager = new NotificationManager())
+            using (ResourceManager rManager = new ResourceManager())
             {
-                if (newDictionary.ContainsKey(d.AttributeId))
-                {
-                    List<string> tmp = (List<string>)newDictionary[d.AttributeId];
-                    if (!tmp.Contains(d.DomainItem)) tmp.Add(d.DomainItem);
+                Notification notification = nManager.GetNotificationById(id);
 
-                    //newDictionary[d.AttributeId] = tmp;
-                }
-                else
+                List<SingleResource> resources = rManager.GetAllResources().ToList();
+                List<ResourceModel> rModelList = new List<ResourceModel>();
+                resources.ToList().ForEach(r => rModelList.Add(new ResourceModel(r)));
+
+                EditNotificationModel model = new EditNotificationModel(rModelList, notification);
+
+                //add dependensies to Session
+                Dictionary<long, List<string>> newDictionary = new Dictionary<long, List<string>>();
+                foreach (NotificationDependency d in notification.NotificationDependency)
                 {
-                    newDictionary.Add(d.AttributeId, new List<string>() { d.DomainItem });
+                    if (newDictionary.ContainsKey(d.AttributeId))
+                    {
+                        List<string> tmp = (List<string>)newDictionary[d.AttributeId];
+                        if (!tmp.Contains(d.DomainItem)) tmp.Add(d.DomainItem);
+
+                        //newDictionary[d.AttributeId] = tmp;
+                    }
+                    else
+                    {
+                        newDictionary.Add(d.AttributeId, new List<string>() { d.DomainItem });
+                    }
                 }
+
+                Session["ResourceFilter"] = newDictionary;
+
+                return PartialView("_editNotification", model);
             }
-
-            Session["ResourceFilter"] = newDictionary;
-
-            return PartialView("_editNotification", model);
+             
         }
 
         public ActionResult Delete(long id)
@@ -420,16 +436,19 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult Blackboard()
         {
-            NotificationManager nManager = new NotificationManager();
-            List<Notification> nList = nManager.GetAllNotifications().ToList();
-            List<NotificationBlackboardModel> model = new List<NotificationBlackboardModel>();
-
-            foreach (Notification n in nList)
+            using (NotificationManager nManager = new NotificationManager())
             {
-                model.Add(new NotificationBlackboardModel(n));
-            }
+                List<Notification> nList = nManager.GetAllNotifications().ToList();
+                List<NotificationBlackboardModel> model = new List<NotificationBlackboardModel>();
 
-            return View("NotificationBlackboard", model);
+                foreach (Notification n in nList)
+                {
+                    model.Add(new NotificationBlackboardModel(n));
+                }
+
+                return View("NotificationBlackboard", model);
+            }
+            
         }
 
 

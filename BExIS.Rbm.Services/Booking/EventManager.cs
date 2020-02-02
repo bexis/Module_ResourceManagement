@@ -131,6 +131,7 @@ namespace BExIS.Rbm.Services.Booking
         {
             BookingEvent e = EventRepo.Query(a => a.Id == id).FirstOrDefault();
             EventRepo.LoadIfNot(e.Schedules);
+
             return e;
         }
 

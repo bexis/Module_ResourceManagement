@@ -39,45 +39,47 @@ namespace BExIS.Modules.RBM.UI.Controllers
         //[HttpPost]
         public ActionResult Create(ActivityModel model)
         {
-            ActivityManager aManager = new ActivityManager();
 
-            //check name
-            Activity temp = aManager.GetActivityByName(StringHelper.CutSpaces(model.Name));
-            if(temp != null)
-                ModelState.AddModelError("NameExist", "Name already exist");
-
-            if (ModelState.IsValid)
+            using (ActivityManager aManager = new ActivityManager())
             {
-                Activity a = aManager.CreateActivity(model.Name, model.Description, model.Disable);
 
-                //Start -> add security ----------------------------------------
+                //check name
+                Activity temp = aManager.GetActivityByName(StringHelper.CutSpaces(model.Name));
+                if (temp != null)
+                    ModelState.AddModelError("NameExist", "Name already exist");
 
-                using (EntityPermissionManager pManager = new EntityPermissionManager())
-                using (SubjectManager subManager = new SubjectManager())
-                using (var entityTypeManager = new EntityManager())
+                if (ModelState.IsValid)
                 {
+                    Activity a = aManager.CreateActivity(model.Name, model.Description, model.Disable);
 
-                    UserManager userManager = new UserManager();
-                    var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                    userTask.Wait();
-                    var user = userTask.Result;
+                    //Start -> add security ----------------------------------------
 
-                    Entity entityType = entityTypeManager.FindByName("Activity");
+                    using (EntityPermissionManager pManager = new EntityPermissionManager())
+                    using (SubjectManager subManager = new SubjectManager())
+                    using (var entityTypeManager = new EntityManager())
+                    {
 
-                    //31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
-                    pManager.Create(user, entityType, a.Id, 31);
+                        UserManager userManager = new UserManager();
+                        var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                        userTask.Wait();
+                        var user = userTask.Result;
 
-                    //End -> add security ------------------------------------------
-                }
+                        Entity entityType = entityTypeManager.FindByName("Activity");
+
+                        //31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
+                        pManager.Create(user, entityType, a.Id, 31);
+
+                        //End -> add security ------------------------------------------
+                    }
 
                     //return View("ActivityManager");
                     return Json(new { success = true });
                 }
-            else
-            {
+                else
+                {
                     return PartialView("_createActivity", model);
+                }
             }
-            
             
         }
 
@@ -130,14 +132,15 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult Delete(long id)
         {
-             ActivityManager aManager = new ActivityManager();
-             Activity activity = aManager.GetActivityById(id);
+            using (ActivityManager aManager = new ActivityManager())
+            {
+                Activity activity = aManager.GetActivityById(id);
 
-             if (activity != null)
-             {
-                 aManager.DeleteActivity(activity);
-             }
-
+                if (activity != null)
+                {
+                    aManager.DeleteActivity(activity);
+                }
+            }
              return View("ActivityManager");
         }
 

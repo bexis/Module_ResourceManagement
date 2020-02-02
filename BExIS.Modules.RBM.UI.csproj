@@ -149,9 +149,8 @@
     <Reference Include="Vaiona.Web.Mvc.Modularity">
       <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.Web.Mvc.Modularity.dll</HintPath>
     </Reference>
-    <Reference Include="WebActivator">
-      <HintPath>..\..\..\..\packages\WebActivator.1.2.0.0\lib\NETFramework40\WebActivator.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="WebActivatorEx, Version=2.0.0.0, Culture=neutral, PublicKeyToken=7b26dc2a43f6a0d4, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\WebActivatorEx.2.2.0\lib\net40\WebActivatorEx.dll</HintPath>
     </Reference>
     <Reference Include="WebGrease">
       <HintPath>..\..\..\..\packages\WebGrease.1.5.2\lib\WebGrease.dll</HintPath>
@@ -769,7 +768,6 @@
     <Content Include="Scripts\fullcalendar\readme.md" />
     <Content Include="Scripts\fullcalendar\tests\lib\themeswitcher\README.md" />
     <Content Include="Scripts\fullcalendar\tests\slot_event_overlap.json" />
-    <Content Include="Views\Calendar\Temp_ExploInfo.cshtml" />
     <Content Include="Scripts\umd\popper.js.map" />
     <Content Include="Scripts\umd\popper-utils.min.js.map" />
     <Content Include="Scripts\umd\popper-utils.js.map" />

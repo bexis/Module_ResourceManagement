@@ -58,6 +58,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
         public BookingEventModel(List<ResourceCart> cart)
         {
+            using (UserManager userManager = new UserManager())
             using (var rManager = new ResourceManager())
             {
                 Schedules = new List<ScheduleEventModel>();
@@ -73,10 +74,9 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                     s.ScheduleQuantity = rc.PreselectdQuantity;
                     s.ResourceQuantity = resource.Quantity;
                     s.ByPerson = rc.ByPersonName;
-                    
+
 
                     //add as default resvered by user as reserved for user
-                    UserManager userManager = new UserManager();
                     var userTask = userManager.FindByIdAsync(rc.ByPersonUserId);
                     userTask.Wait();
                     var user = userTask.Result;
@@ -105,15 +105,21 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             EditAccess = false;
             DeleteAccess = false;
 
-            foreach (Schedule s in e.Schedules)
+            using (BookingEventManager em = new BookingEventManager())
             {
-                ScheduleEventModel seM = new ScheduleEventModel(s);
-                seM.Index = s.Index;
-                seM.EditMode = false;
-                seM.EventId = e.Id;
-                seM.Activities = new List<ActivityEventModel>();
-                s.Activities.ToList().ForEach(r => seM.Activities.Add(new ActivityEventModel(r)));
-                Schedules.Add(seM);
+                //Get event again as not everything needed already fetched
+                var event_ =  em.GetBookingEventById(e.Id);
+           
+                foreach (Schedule s in event_.Schedules)
+                {
+                    ScheduleEventModel seM = new ScheduleEventModel(s);
+                    seM.Index = s.Index;
+                    seM.EditMode = false;
+                    seM.EventId = e.Id;
+                    seM.Activities = new List<ActivityEventModel>();
+                    s.Activities.ToList().ForEach(r => seM.Activities.Add(new ActivityEventModel(r)));
+                    Schedules.Add(seM);
+                }
             }
         }
     }

@@ -199,27 +199,27 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 model.EndDate = filter.EndDate;
                 model.IsPreSelected = true;
             }
-            ResourceManager rManager = new ResourceManager();
-            List<SingleResource> singleResources = rManager.GetAllResources().ToList();
 
-            List<ResourceModel> resources = new List<ResourceModel>();
-            singleResources.ForEach(r => resources.Add(new ResourceModel(r)));
-
-            foreach (ResourceModel r in resources)
+            using (ResourceStructureManager rsManager = new ResourceStructureManager())
             {
-                foreach (ResourceAttributeUsage usage in r.ResourceStructure.ResourceAttributeUsages)
+                List<ResourceStructure> resourceStructures = rsManager.GetAllResourceStructures().ToList();
+
+                foreach (ResourceStructure rs in resourceStructures)
                 {
-                    ResourceStructureAttribute attr = usage.ResourceStructureAttribute;
-                    AttributeDomainItemsModel item = new AttributeDomainItemsModel(attr);
-                    if (item.DomainItems.Count != 0)
+                    foreach (ResourceAttributeUsage usage in rs.ResourceAttributeUsages)
                     {
-                        if (!model.TreeItems.Any(a => a.AttrId == item.AttrId))
-                            model.TreeItems.Add(item);
+                        ResourceStructureAttribute attr = usage.ResourceStructureAttribute;
+                        AttributeDomainItemsModel item = new AttributeDomainItemsModel(attr);
+                        if (item.DomainItems.Count != 0)
+                        {
+                            if (!model.TreeItems.Any(a => a.AttrId == item.AttrId))
+                                model.TreeItems.Add(item);
+                        }
                     }
                 }
-            }
 
-            return PartialView("_filterResources", model);
+                return PartialView("_filterResources", model);
+            }
         }
 
         //fill grid view in select resources with resources
@@ -228,21 +228,24 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<SelectResourceForEventModel> allResourceList = new List<SelectResourceForEventModel>();
             List<SelectResourceForEventModel> results = new List<SelectResourceForEventModel>();
 
-            ResourceManager srManager = new ResourceManager();
-            List<SingleResource> singelResources = new List<SingleResource>();
-            singelResources = srManager.GetAllResources().ToList();
-            singelResources.ForEach(r => allResourceList.Add(new SelectResourceForEventModel(r)));
-
-            if (Session["Filter"] != null)
+            using (ResourceManager srManager = new ResourceManager())
             {
-                ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
-                filter = (ResourceFilterHelper.Filter)Session["Filter"];
-                results = ResourceFilterHelper.ApplyFilter(allResourceList, filter);
-            }
-            else
-                results = allResourceList;
+                List<SingleResource> singelResources = new List<SingleResource>();
+                singelResources = srManager.GetAllResources().ToList();
+                singelResources.ForEach(r => allResourceList.Add(new SelectResourceForEventModel(r)));
 
-            return PartialView("_gridResources", results);
+                if (Session["Filter"] != null)
+                {
+                    ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
+                    filter = (ResourceFilterHelper.Filter)Session["Filter"];
+                    results = ResourceFilterHelper.ApplyFilter(allResourceList, filter);
+                }
+                else
+                    results = allResourceList;
+
+                return PartialView("_gridResources", results);
+            }
+
         }
 
         public ActionResult SelectedResources()
@@ -1124,12 +1127,13 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             //Session["ScheduleUsers"] = null;
 
-            BookingEventModel sEventM = (BookingEventModel)Session["Event"];
-            ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
+
+
+
 
             // retreive list of all users 
             DataTable result = null;
-            string groupName = Modules.RBM.UI.Helper.Settings.get("AlumniGroup").ToString();
+            string groupName = Helper.Settings.get("AlumniGroup").ToString();
             var query = "SELECT partyid, userid FROM public.partyusers Left join users on partyusers.userid = users.id where users.id not in (select userref from users_groups where groupref = (SELECT id FROM groups WHERE name = '"+ groupName +"'))";
 
             result = retrieve(query);
@@ -1153,6 +1157,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 List<Party> partyPersons = partyManager.PartyRepository.Query(p => p.PartyType == partyType).ToList();
 
                 List<PersonInSchedule> personList = new List<PersonInSchedule>();
+
+                BookingEventModel sEventM = (BookingEventModel)Session["Event"];
+                ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
 
                 List<long> tempUserIds = tempSchedule.ForPersons.Select(c => c.UserId).ToList();
 

@@ -33,35 +33,41 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult Create(CreateResourceGroupModel model)
         {
            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Create Group Manager", this.Session.GetTenant());
-           ResourceManager rManager = new ResourceManager();
-           ResourceGroupModel rsModel = new ResourceGroupModel(rManager.CreateResourceGroup(model.Name, model.ClassifierMode, null));
+            using (ResourceManager rManager = new ResourceManager())
+            {
+                ResourceGroupModel rsModel = new ResourceGroupModel(rManager.CreateResourceGroup(model.Name, model.ClassifierMode, null));
 
-            return View("EditResourceGroup", rsModel);
+                return View("EditResourceGroup", rsModel);
+            }
         }
 
         public ActionResult Edit(long id)
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Edit Group Manager", this.Session.GetTenant());
-            ResourceManager rManager = new ResourceManager();
-            ResourceGroup rc = rManager.GetResourceGroupById(id);
+            using (ResourceManager rManager = new ResourceManager())
+            {
+                ResourceGroup rc = rManager.GetResourceGroupById(id);
 
-            return View("EditResourceGroup", new ResourceGroupModel(rc));
+                return View("EditResourceGroup", new ResourceGroupModel(rc));
+            }
         }
 
         [HttpPost]
         public ActionResult Edit(ResourceGroupModel model)
         {
-            ResourceManager rManager = new ResourceManager();
-            ResourceGroup rc = rManager.GetResourceGroupById(model.Id);
-            if (rc != null)
+            using (ResourceManager rManager = new ResourceManager())
             {
-                rc.Name = model.Name;
-                rc.GroupMode = model.ClassifierMode;
-                rManager.UpdateResourceGroup(rc);
-            }
-            else
-            {
-                //resource set does not exist!
+                ResourceGroup rc = rManager.GetResourceGroupById(model.Id);
+                if (rc != null)
+                {
+                    rc.Name = model.Name;
+                    rc.GroupMode = model.ClassifierMode;
+                    rManager.UpdateResourceGroup(rc);
+                }
+                else
+                {
+                    //resource set does not exist!
+                }  
             }
 
             return View("ResourceGroupManager");
@@ -69,9 +75,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult Delete(long id)
         {
-            ResourceManager rManager = new ResourceManager();
-            ResourceGroup rc = rManager.GetResourceGroupById(id);
-            rManager.DeleteResourceGroup(rc);
+            using (ResourceManager rManager = new ResourceManager())
+            {
+                ResourceGroup rc = rManager.GetResourceGroupById(id);
+                rManager.DeleteResourceGroup(rc);
+            }
 
             return RedirectToAction("ResourceGroup");
         }
@@ -80,99 +88,110 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             ResourceGroupModel model = new ResourceGroupModel();
             model.Id = id;
-            ResourceManager rManager = new ResourceManager();
-            IQueryable<SingleResource> resoures = rManager.GetAllResources();
-            List<ResourceModel> resourceMList = new List<ResourceModel>();
-            foreach (SingleResource r in resoures)
+            using (ResourceManager rManager = new ResourceManager())
             {
-                resourceMList.Add(new ResourceModel(r));
-            }
-            model.AllResources = resourceMList;
+                IQueryable<SingleResource> resoures = rManager.GetAllResources();
+                List<ResourceModel> resourceMList = new List<ResourceModel>();
+                foreach (SingleResource r in resoures)
+                {
+                    resourceMList.Add(new ResourceModel(r));
+                }
+                model.AllResources = resourceMList;
 
-            return PartialView("_chooseResources", model);
+                return PartialView("_chooseResources", model);
+            }
         }
 
         public ActionResult AddResourceToGroup(long setId, long resourceId)
         {
-            ResourceManager rManager = new ResourceManager();
-            ResourceGroup rc = rManager.GetResourceGroupById(setId);
-            SingleResource r = rManager.GetResourceById(resourceId);
-            rc.SingleResources.Add(r);
+            using (ResourceManager rManager = new ResourceManager())
+            {
+                ResourceGroup rc = rManager.GetResourceGroupById(setId);
+                SingleResource r = rManager.GetResourceById(resourceId);
+                rc.SingleResources.Add(r);
 
-            rManager.UpdateResourceGroup(rc);
-            ResourceGroupModel model = new ResourceGroupModel(rc);
+                rManager.UpdateResourceGroup(rc);
+                ResourceGroupModel model = new ResourceGroupModel(rc);
 
-            return View("EditResourceGroup", model);
+                return View("EditResourceGroup", model);
+            }      
         }
 
         public ActionResult AddResourcesToGroup(long setId, string resourceIds)
         {
-            ResourceManager rManager = new ResourceManager();
-            ResourceGroup rc = rManager.GetResourceGroupById(setId);
-
-            if (rc != null)
+            using (ResourceManager rManager = new ResourceManager())
             {
-                if (!string.IsNullOrEmpty(resourceIds))
+                ResourceGroup rc = rManager.GetResourceGroupById(setId);
+
+                if (rc != null)
                 {
-                    var selectedResources = resourceIds.Split(',').Select(n => int.Parse(n)).ToList();
-
-                    foreach (int i in selectedResources)
+                    if (!string.IsNullOrEmpty(resourceIds))
                     {
-                        SingleResource r = rManager.GetResourceById(i);
-                        rc.SingleResources.Add(r);
-                    }
+                        var selectedResources = resourceIds.Split(',').Select(n => int.Parse(n)).ToList();
 
-                    rManager.UpdateResourceGroup(rc);
+                        foreach (int i in selectedResources)
+                        {
+                            SingleResource r = rManager.GetResourceById(i);
+                            rc.SingleResources.Add(r);
+                        }
+
+                        rManager.UpdateResourceGroup(rc);
+                    }
+                    ResourceGroupModel model = new ResourceGroupModel(rc);
+                    return View("EditResourceSet", model);
                 }
-                ResourceGroupModel model = new ResourceGroupModel(rc);
-                return View("EditResourceSet", model);
-            }
-            else
-            {
-                //set not exsits
-                return View("EditResourceGroup");
-            }
+                else
+                {
+                    //set not exsits
+                    return View("EditResourceGroup");
+                }
+            }     
         }
 
         public ActionResult RemoveResourceFromGroup(long setId, long resourceId)
         {
-            ResourceManager rManager = new ResourceManager();
-            ResourceGroup rc = rManager.GetResourceGroupById(setId);
-            SingleResource r = rManager.GetResourceById(resourceId);
-            rc.SingleResources.Remove(r);
+            using (ResourceManager rManager = new ResourceManager())
+            {
+                ResourceGroup rc = rManager.GetResourceGroupById(setId);
+                SingleResource r = rManager.GetResourceById(resourceId);
+                rc.SingleResources.Remove(r);
 
-            rManager.UpdateResourceGroup(rc);
-            ResourceGroupModel model = new ResourceGroupModel(rc);
+                rManager.UpdateResourceGroup(rc);
+                ResourceGroupModel model = new ResourceGroupModel(rc);
 
-            return View("EditResourceGroup", model);
+                return View("EditResourceGroup", model);
+            }
+            
         }
 
         [GridAction]
         public ActionResult ResourceGroup_Select()
         {
-            ResourceManager rManager = new ResourceManager();
-            IQueryable<ResourceGroup> data = rManager.GetAllResourceGroups();
-            List<ResourceGroupManagerModel> model = new List<ResourceGroupManagerModel>();
+            using (ResourceManager rManager = new ResourceManager())
+            {
+                IQueryable<ResourceGroup> data = rManager.GetAllResourceGroups();
+                List<ResourceGroupManagerModel> model = new List<ResourceGroupManagerModel>();
 
-            ResourceGroupManagerModel temp = new ResourceGroupManagerModel();
-            data.ToList().ForEach(r => model.Add(new ResourceGroupManagerModel(r)));
+                ResourceGroupManagerModel temp = new ResourceGroupManagerModel();
+                data.ToList().ForEach(r => model.Add(new ResourceGroupManagerModel(r)));
 
-            return View("ResourceManager", new GridModel<ResourceGroupManagerModel> { Data = model });
+                return View("ResourceManager", new GridModel<ResourceGroupManagerModel> { Data = model });
+            } 
         }
 
         [GridAction]
         public ActionResult Resource_Select()
         {
-            ResourceManager rManager = new ResourceManager();
+           using( ResourceManager rManager = new ResourceManager()){
+                //Resource rsss = resourceManager.GetResourceById(1);
+                IQueryable<SingleResource> data = rManager.GetAllResources();
 
-            //Resource rsss = resourceManager.GetResourceById(1);
-            IQueryable<SingleResource> data = rManager.GetAllResources();
+                List<ResourceManagerModel> resources = new List<ResourceManagerModel>();
 
-            List<ResourceManagerModel> resources = new List<ResourceManagerModel>();
+                data.ToList().ForEach(r => resources.Add(new ResourceManagerModel(r)));
 
-            data.ToList().ForEach(r => resources.Add(new ResourceManagerModel(r)));
-
-            return View("ResourceManager", new GridModel<ResourceManagerModel> { Data = resources });
+                return View("ResourceManager", new GridModel<ResourceManagerModel> { Data = resources });
+            } 
         }
 
     }

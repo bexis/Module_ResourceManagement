@@ -350,16 +350,18 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             {
                 if (usage.IsFileDataType)
                 {
-                    ResourceStructureAttributeManager valueManager = new ResourceStructureAttributeManager();
-                    ResourceAttributeValue value = valueManager.GetValueByUsageAndResource(usage.Id, resource.Id);
-                    if (value is FileValue)
+                    using (ResourceStructureAttributeManager valueManager = new ResourceStructureAttributeManager())
                     {
-                        FileValue fileValue = (FileValue)value;
-                        FileValueModel fvm = new FileValueModel(fileValue);
-                        Files.Add(fvm);
-                        //if (!usage.IsValueOptional)
-                        if (fvm.Data != null)
-                            ResourceHasFiles = true;
+                        ResourceAttributeValue value = valueManager.GetValueByUsageAndResource(usage.Id, resource.Id);
+                        if (value is FileValue)
+                        {
+                            FileValue fileValue = (FileValue)value;
+                            FileValueModel fvm = new FileValueModel(fileValue);
+                            Files.Add(fvm);
+                            //if (!usage.IsValueOptional)
+                            if (fvm.Data != null)
+                                ResourceHasFiles = true;
+                        }
                     }
                 }
             }
@@ -380,16 +382,19 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             {
                 if (usage.IsFileDataType)
                 {
-                    ResourceStructureAttributeManager valueManager = new ResourceStructureAttributeManager();
-                    ResourceAttributeValue value = valueManager.GetValueByUsageAndResource(usage.Id, schedule.Resource.Id);
-                    if (value is FileValue)
+                    using (ResourceStructureAttributeManager valueManager = new ResourceStructureAttributeManager())
                     {
-                        FileValue fileValue = (FileValue)value;
-                        FileValueModel fvm = new FileValueModel(fileValue);
-                        Files.Add(fvm);
-                        if(!usage.IsValueOptional)
-                            ResourceHasFiles = true;
+                        ResourceAttributeValue value = valueManager.GetValueByUsageAndResource(usage.Id, schedule.Resource.Id);
+                        if (value is FileValue)
+                        {
+                            FileValue fileValue = (FileValue)value;
+                            FileValueModel fvm = new FileValueModel(fileValue);
+                            Files.Add(fvm);
+                            if (!usage.IsValueOptional)
+                                ResourceHasFiles = true;
+                        }
                     }
+                        
                 }
             }
 

@@ -3,6 +3,7 @@ using BExIS.Rbm.Entities.Booking;
 using BExIS.Rbm.Entities.BookingManagementTime;
 using BExIS.Rbm.Entities.Resource;
 using BExIS.Rbm.Entities.ResourceStructure;
+using BExIS.Rbm.Services.ResourceStructure;
 using BExIS.Rbm.Entities.Users;
 using BExIS.Rbm.Services.Booking;
 using BExIS.Rbm.Services.Resource;
@@ -11,11 +12,9 @@ using BExIS.Security.Services.Subjects;
 using BExIS.Web.Shell.Areas.RBM.Helpers;
 using BExIS.Web.Shell.Areas.RBM.Models.Booking;
 using BExIS.Web.Shell.Areas.RBM.Models.Resource;
-using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using System.Web.Services;
 using Vaiona.Persistence.Api;
@@ -96,7 +95,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             }
             else
             {
-                eventList = GetAllEventsFiltered(bool.Parse(myBookings), DateTime.Now.ToString()); // get list without historical events
+                eventList = GetAllEventsFiltered(bool.Parse(myBookings), DateTime.Now.AddDays(-1).ToString()); // get list without historical events
                 ViewBag.history = "false";
             }
 
@@ -105,13 +104,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
             // Remove dublicate booking events in resources list (without filter not dublicates, but with)
             eventList = eventList.GroupBy(x => x.Id).Select(x => x.First()).ToList();
 
+         
             foreach (BookingEvent e in eventList)
             {
-                model.Add(new BookingEventModel(e));
-            }
 
-            foreach (BookingEventModel m in model)
-            {
+                BookingEventModel m = new BookingEventModel(e);
+
                 m.startDate = m.Schedules.Select(a => a.ScheduleDurationModel.StartDate).ToList().Min();
                 m.endDate = m.Schedules.Select(a => a.ScheduleDurationModel.EndDate).ToList().Max();
                 m.ResourceName = string.Join<string>(",", (m.Schedules.Select(a => a.ResourceName)).ToList());
@@ -129,6 +127,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     }
                 }
                 m.ResourceAttributes = string.Join<string>(",", attributes.Distinct());
+
+                model.Add(m);
             }
 
             //model = model.OrderByDescending(a => a.startDate).ToList();
@@ -149,7 +149,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             }
             else
             {
-                scheduleList = GetAllScheduleFiltered(bool.Parse(myBookings), DateTime.Now.ToString()); // get list without historical events
+                scheduleList = GetAllScheduleFiltered(bool.Parse(myBookings), DateTime.Now.AddDays(-1).ToString()); // get list without historical events
                 ViewBag.history = "false";
             }
                         
@@ -187,26 +187,48 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult TreeFilterSchedules()
         {
             ResourceFilterModel model = new ResourceFilterModel();
-            ResourceManager rManager = new ResourceManager();
-            List<SingleResource> singleResources = rManager.GetAllResources().ToList();
-
-            List<ResourceModel> resources = new List<ResourceModel>();
-            singleResources.ForEach(r => resources.Add(new ResourceModel(r)));
-
-            foreach (ResourceModel r in resources)
+            
+            using (ResourceStructureManager rsManager = new ResourceStructureManager())
+         //   using(ResourceManager rManager = new ResourceManager())
             {
-                foreach (ResourceAttributeUsage usage in r.ResourceStructure.ResourceAttributeUsages)
-                {
-                    ResourceStructureAttribute attr = usage.ResourceStructureAttribute;
-                    AttributeDomainItemsModel item = new AttributeDomainItemsModel(attr);
-                    if (item.DomainItems.Count != 0)
-                    {
-                        if (!model.TreeItems.Any(a => a.AttrId == item.AttrId))
-                            model.TreeItems.Add(item);
-                    }
-                }
-            }
 
+               // List<SingleResource> singleResources = rManager.GetAllReesources().ToList();
+
+
+               // List<ResourceModel> resources = new List<ResourceModel>();
+               // singleResources.ForEach(r => resources.Add(new ResourceModel(r)));
+                List<ResourceStructure> resourceStructures = rsManager.GetAllResourceStructures().ToList();
+
+                foreach (ResourceStructure rs in resourceStructures)
+                {
+                    foreach (ResourceAttributeUsage usage in rs.ResourceAttributeUsages)
+                    {
+                        ResourceStructureAttribute attr = usage.ResourceStructureAttribute;
+                        AttributeDomainItemsModel item = new AttributeDomainItemsModel(attr);
+                        if (item.DomainItems.Count != 0)
+                        {
+                            if (!model.TreeItems.Any(a => a.AttrId == item.AttrId))
+                                model.TreeItems.Add(item);
+                        }
+                    }
+                
+                }
+
+                /*foreach (ResourceModel r in resources)
+                {
+                    foreach (ResourceAttributeUsage usage in r.ResourceStructure.ResourceAttributeUsages)
+                    {
+                        ResourceStructureAttribute attr = usage.ResourceStructureAttribute;
+                        AttributeDomainItemsModel item = new AttributeDomainItemsModel(attr);
+                        if (item.DomainItems.Count != 0)
+                        {
+                            if (!model.TreeItems.Any(a => a.AttrId == item.AttrId))
+                                model.TreeItems.Add(item);
+                        }
+                    }
+                }*/
+            }
+            
             return PartialView("_treeFilterSchedules", model);
         }
 
@@ -219,90 +241,93 @@ namespace BExIS.Modules.RBM.UI.Controllers
             }
             else
             {
-                //results after filtering
-                List<Schedule> resultScheduleList = new List<Schedule>();
-
-                //result resource list after filtering
-                List<long> resultResourceIDList = new List<long>();
-
-                //Filter is this format: AttrID_DomainItem, AttrID_Domain
-                List<string> items = selectedItems.Split(',').ToList();
-
-                //get all schedules
-                ScheduleManager schManager = new ScheduleManager();
-                List<Schedule> allSchedules = schManager.GetAllSchedules().ToList();
-
-                //get all scheduled resources
-                ResourceManager srManager = new ResourceManager();
-                List<SingleResource> resourcesList = srManager.GetAllResources().ToList();
-
-                List<ResourceFilterHelper.FilterTreeItem> filterList = new List<ResourceFilterHelper.FilterTreeItem>();
-                //split Id and DomainItem and add it to a FilterItem list
-                foreach (string item in items)
-                {
-                    //index 0 = attrbute id, index1 domainvalue
-                    List<string> i = item.Split('_').ToList();
-                    ResourceFilterHelper.FilterTreeItem filterItem = new ResourceFilterHelper.FilterTreeItem();
-                    try
+                    using (ScheduleManager schManager = new ScheduleManager())
+                    using (ResourceManager srManager = new ResourceManager())
                     {
-                        filterItem.Id = Convert.ToInt64(i[0]);
+                        //results after filtering
+                        List<Schedule> resultScheduleList = new List<Schedule>();
+
+                        //result resource list after filtering
+                        List<long> resultResourceIDList = new List<long>();
+
+                        //Filter is this format: AttrID_DomainItem, AttrID_Domain
+                        List<string> items = selectedItems.Split(',').ToList();
+
+                        //get all schedules
+                        List<Schedule> allSchedules = schManager.GetAllSchedules().ToList();
+
+                        //get all scheduled resources
+                        List<SingleResource> resourcesList = srManager.GetAllResources().ToList();
+
+                        List<ResourceFilterHelper.FilterTreeItem> filterList = new List<ResourceFilterHelper.FilterTreeItem>();
+                        //split Id and DomainItem and add it to a FilterItem list
+                        foreach (string item in items)
+                        {
+                            //index 0 = attrbute id, index1 domainvalue
+                            List<string> i = item.Split('_').ToList();
+                            ResourceFilterHelper.FilterTreeItem filterItem = new ResourceFilterHelper.FilterTreeItem();
+                            try
+                            {
+                                filterItem.Id = Convert.ToInt64(i[0]);
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e);
+                                throw;
+                            }
+
+                            try
+                            {
+                                filterItem.Value = i[1].ToString();
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e);
+                                throw;
+                            }
+
+                            filterList.Add(filterItem);
+                        }
+
+                        List<ResourceAttributeValueModel> treeDomainList = new List<ResourceAttributeValueModel>();
+
+                        //Create for each Resource TreeDomainModel witch includes all Attribute Ids and all values
+                        foreach (SingleResource r in resourcesList)
+                        {
+                            ResourceAttributeValueModel treeDomainModel = new ResourceAttributeValueModel(r);
+                            treeDomainList.Add(treeDomainModel);
+                        }
+
+                        //Dictionary to save every Filter (domain items) to one attr
+                        Dictionary<long, List<string>> filterDic = ResourceFilterHelper.GetFilterDic(filterList);
+
+                        List<ResourceAttributeValueModel> temp = new List<ResourceAttributeValueModel>();
+
+                        //check for every TreeDomainModel (resource) if fits the filter
+                        foreach (ResourceAttributeValueModel m in treeDomainList)
+                        {
+                            if (ResourceFilterHelper.CheckTreeDomainModel(m, filterDic))
+                            {
+                                resultResourceIDList.Add(m.Resource.Id);
+                            }
+                        }
+
+                        //create schedule resource list with selected resources
+                        foreach (Schedule s in allSchedules)
+                        {
+                            if (resultResourceIDList.Contains(s.Resource.Id))
+                            {
+                                resultScheduleList.Add(s);
+                            }
+                        }
+
+                        Session["FilterSchedules"] = resultScheduleList;
+
+                        //return Redirect(Request.UrlReferrer.ToString());
+                        return new EmptyResult();
+
                     }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        throw;
-                    }
-
-                    try
-                    {
-                        filterItem.Value = i[1].ToString();
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        throw;
-                    }
-                    
-                    filterList.Add(filterItem);
-                }
-
-                List<ResourceAttributeValueModel> treeDomainList = new List<ResourceAttributeValueModel>();
-
-                //Create for each Resource TreeDomainModel witch includes all Attribute Ids and all values
-                foreach (SingleResource r in resourcesList)
-                {
-                    ResourceAttributeValueModel treeDomainModel = new ResourceAttributeValueModel(r);
-                    treeDomainList.Add(treeDomainModel);
-                }
-
-                //Dictionary to save every Filter (domain items) to one attr
-                Dictionary<long, List<string>> filterDic = ResourceFilterHelper.GetFilterDic(filterList);
-
-                List<ResourceAttributeValueModel> temp = new List<ResourceAttributeValueModel>();
-
-                //check for every TreeDomainModel (resource) if fits the filter
-                foreach (ResourceAttributeValueModel m in treeDomainList)
-                {
-                    if (ResourceFilterHelper.CheckTreeDomainModel(m, filterDic))
-                    {
-                        resultResourceIDList.Add(m.Resource.Id);
-                    }
-                }
-
-                //create schedule resource list with selected resources
-                foreach (Schedule s in allSchedules)
-                {                   
-                    if (resultResourceIDList.Contains(s.Resource.Id))
-                    {
-                        resultScheduleList.Add(s);
-                    }
-                }
-
-                Session["FilterSchedules"] = resultScheduleList;
-
-                //return Redirect(Request.UrlReferrer.ToString());
-                return new EmptyResult();
-            }
+        }
         }
 
         #endregion
@@ -358,59 +383,104 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<BookingEvent> eventList = new List<BookingEvent>();
             List<BookingEvent> eventListTmp = new List<BookingEvent>();
 
-            if (Session["FilterSchedules"] == null)
+            using(BookingEventManager eManager = new BookingEventManager())
+            using(ScheduleManager schManager = new ScheduleManager())
+            using(SubjectManager subManager = new SubjectManager())
             {
-                BookingEventManager eManager = new BookingEventManager();
-                if (start_date != null && end_date != null)
+                if (Session["FilterSchedules"] == null)
                 {
-                    DateTime startDate = DateTime.Parse(start_date.ToString());
-                    DateTime endDate = DateTime.Parse(end_date.ToString());
-                    eventList = eManager.GetAllEventByTimePeriod(startDate, endDate);
-                }
-                else if (start_date != null && end_date == null)
-                {
-                    DateTime startDate = DateTime.Parse(start_date.ToString());
-                   
-                    eventList = eManager.GetAllEventByTimePeriod(startDate);
+
+                    if (start_date != null && end_date != null)
+                    {
+                        DateTime startDate = DateTime.Parse(start_date.ToString());
+                        DateTime endDate = DateTime.Parse(end_date.ToString());
+                        eventList = eManager.GetAllEventByTimePeriod(startDate, endDate);
+                    }
+                    else if (start_date != null && end_date == null)
+                    {
+                        DateTime startDate = DateTime.Parse(start_date.ToString());
+
+                        eventList = eManager.GetAllEventByTimePeriod(startDate);
+                    }
+                    else
+                    {
+                        eventList = eManager.GetAllBookingEvents().ToList();
+                    }
+
+
+                    if (byUser == true)
+                    {
+
+                        User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
+
+                        foreach (BookingEvent e in eventList)
+                        {
+                            List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
+                            var s = FilterSchedulesByUser(schedules, user.Id).Concat(FilterSchedulesForUser(schedules, user.Id)).ToList();
+                            if (s.Count > 0)
+                                eventListTmp.Add(e);
+                        }
+
+                        eventList = eventListTmp;
+                    }
                 }
                 else
                 {
-                    eventList = eManager.GetAllBookingEvents().ToList();
-                }
 
-
-                if (byUser == true)
-                {
-                    ScheduleManager schManager = new ScheduleManager();
-
-                    SubjectManager subManager = new SubjectManager();
-                    User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-                    foreach (BookingEvent e in eventList)
+                    List<Schedule> scheduleList = new List<Schedule>();
+                    scheduleList = Session["FilterSchedules"] as List<Schedule>;
+  
+                    // filter list by user
+                    if (byUser == true)
                     {
-                        List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
-                        var s = FilterSchedulesByUser(schedules, user.Id).Concat(FilterSchedulesForUser(schedules, user.Id)).ToList();
-                        if (s.Count > 0)
-                            eventListTmp.Add(e);
+                        User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
+
+                        var scheduleListNew = FilterSchedulesByUser(scheduleList, user.Id).Concat(FilterSchedulesForUser(scheduleList, user.Id)).ToList();
+                        scheduleList = scheduleListNew.Distinct().ToList();
                     }
 
-                    eventList = eventListTmp;
+                    // filter by start and end date
+                    if (start_date != null && end_date != null)
+                    {
+                        DateTime startDate = DateTime.Parse(start_date.ToString());
+                        DateTime endDate = DateTime.Parse(end_date.ToString());
+                        scheduleList = scheduleList.Where(a => ((DateTime)a.StartDate >= startDate && (DateTime)a.EndDate <= endDate) || ((DateTime)a.EndDate >= startDate && (DateTime)a.EndDate <= endDate) || (DateTime)a.StartDate <= startDate && (DateTime)a.EndDate >= endDate).ToList();
+                    }
+                    else if (start_date != null && end_date == null)
+                    {
+                        DateTime startDate = DateTime.Parse(start_date.ToString());
+
+                        scheduleList = scheduleList.Where(a => ((DateTime)a.EndDate >= startDate)).ToList();
+                    }
+
+                    foreach (Schedule s in scheduleList)
+                    {
+                        if (!eventList.Select(a => a.Id).ToList().Contains(s.BookingEvent.Id))
+                        {
+                            eventList.Add(eManager.GetBookingEventById(s.BookingEvent.Id));
+                        }
+                    }
+
                 }
+                return eventList;
             }
-            else
+        }
+
+        private List<Schedule> GetAllScheduleFiltered(bool byUser, string start_date = null, string end_date = null)
+        {
+
+            List<Schedule> scheduleList = new List<Schedule>();
+            scheduleList = Session["FilterSchedules"] as List<Schedule>;
+            Session["FilterSchedules"] = scheduleList; // Set again to renew Session 
+
+            using (ScheduleManager schManager = new ScheduleManager())
+            using (SubjectManager subManager = new SubjectManager())
             {
-                BookingEventManager eManager = new BookingEventManager();
-                List<Schedule> scheduleList = new List<Schedule>();
-                scheduleList = Session["FilterSchedules"] as List<Schedule>;
-
-                // filter list by user
-                if (byUser == true)
+                if (scheduleList == null)
                 {
-                    SubjectManager subManager = new SubjectManager();
-                    User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-                    var scheduleListNew = FilterSchedulesByUser(scheduleList, user.Id).Concat(FilterSchedulesForUser(scheduleList, user.Id)).ToList();
-                    scheduleList = scheduleListNew.Distinct().ToList();
+                    scheduleList = schManager.GetAllSchedules().ToList();
+                    // Set filtered list to full list
+                    Session["FilterSchedules"] = scheduleList;
                 }
 
                 // filter by start and end date
@@ -418,6 +488,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 {
                     DateTime startDate = DateTime.Parse(start_date.ToString());
                     DateTime endDate = DateTime.Parse(end_date.ToString());
+
                     scheduleList = scheduleList.Where(a => ((DateTime)a.StartDate >= startDate && (DateTime)a.EndDate <= endDate) || ((DateTime)a.EndDate >= startDate && (DateTime)a.EndDate <= endDate) || (DateTime)a.StartDate <= startDate && (DateTime)a.EndDate >= endDate).ToList();
                 }
                 else if (start_date != null && end_date == null)
@@ -427,57 +498,17 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     scheduleList = scheduleList.Where(a => ((DateTime)a.EndDate >= startDate)).ToList();
                 }
 
-                foreach (Schedule s in scheduleList)
+                if (byUser == true)
                 {
-                    if (!eventList.Select(a => a.Id).ToList().Contains(s.BookingEvent.Id))
-                    {
-                        eventList.Add(eManager.GetBookingEventById(s.BookingEvent.Id));
-                    }
+                    User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
+
+                    var scheduleListNew = FilterSchedulesByUser(scheduleList, user.Id).Concat(FilterSchedulesForUser(scheduleList, user.Id)).ToList();
+                    scheduleList = scheduleListNew.Distinct().ToList();
                 }
 
+                return scheduleList;
             }
-            return eventList;
-        }
-
-        private List<Schedule> GetAllScheduleFiltered(bool byUser, string start_date = null, string end_date = null)
-        {
-
-            List<Schedule> scheduleList = new List<Schedule>();
-            scheduleList = Session["FilterSchedules"] as List<Schedule>;
-
-            if (scheduleList == null)
-            {
-                ScheduleManager schManager = new ScheduleManager();
-                scheduleList = schManager.GetAllSchedules().ToList();
-                // Set filtered list to full list
-                Session["FilterSchedules"] = scheduleList;
-            }
-
-            // filter by start and end date
-            if (start_date != null && end_date != null)
-            {
-                DateTime startDate = DateTime.Parse(start_date.ToString());
-                DateTime endDate = DateTime.Parse(end_date.ToString());
-
-                scheduleList = scheduleList.Where(a => ((DateTime)a.StartDate >= startDate && (DateTime)a.EndDate <= endDate) || ((DateTime)a.EndDate >= startDate && (DateTime)a.EndDate <= endDate) || (DateTime)a.StartDate <= startDate && (DateTime)a.EndDate >= endDate).ToList();
-            }
-            else if (start_date != null && end_date == null)
-            {
-                DateTime startDate = DateTime.Parse(start_date.ToString());
-
-                scheduleList = scheduleList.Where(a => ((DateTime)a.EndDate >= startDate)).ToList();
-            }
-
-            if (byUser == true)
-            {
-                SubjectManager subManager = new SubjectManager();
-                User user = subManager.Subjects.Where(a => a.Name == HttpContext.User.Identity.Name).FirstOrDefault() as User;
-
-                var scheduleListNew = FilterSchedulesByUser(scheduleList, user.Id).Concat(FilterSchedulesForUser(scheduleList, user.Id)).ToList();
-                scheduleList = scheduleListNew.Distinct().ToList();
-            }
-
-            return scheduleList;
+            
         }
 
         #endregion
