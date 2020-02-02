@@ -149,24 +149,25 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Resource
             TextValues = new List<Models.ResourceStructure.TextValueModel>();
             FileValues = new List<Models.ResourceStructure.FileValueModel>();
 
-            ResourceStructureManager manager = new ResourceStructureManager();
-            Parent = new ResourceModel();
-            foreach (RS.ResourceStructure rs in manager.GetAllResourceStructures().ToList())
-            {
-                ResourceStructures.Add(new ResourceStructureModel(rs));
+            using (ResourceStructureManager manager = new ResourceStructureManager()){
+                Parent = new ResourceModel();
+                foreach (RS.ResourceStructure rs in manager.GetAllResourceStructures().ToList())
+                {
+                    ResourceStructures.Add(new ResourceStructureModel(rs));
+                }
+
+                //BookingTimeGranularity
+                Duration = new TimeDuration();
+                Duration.Value = 1;
+                TimeUnits = Enum.GetValues(typeof(SystemDefinedUnit)).Cast<SystemDefinedUnit>().ToList();
+
+
+                ResourceConstraintModel = new ResourceConstraintModel();
+                ResourceConstraints = new List<ResourceConstraintModel>();
+                DependencyConstraints = new List<DependencyConstraintModel>();
+                BlockingConstraints = new List<BlockingConstraintModel>();
+                QuantityConstraints = new List<QuantityConstraintModel>();
             }
-
-            //BookingTimeGranularity
-            Duration = new TimeDuration();
-            Duration.Value = 1;
-            TimeUnits = Enum.GetValues(typeof(SystemDefinedUnit)).Cast<SystemDefinedUnit>().ToList();
-
-
-            ResourceConstraintModel = new ResourceConstraintModel();
-            ResourceConstraints = new List<ResourceConstraintModel>();
-            DependencyConstraints = new List<DependencyConstraintModel>();
-            BlockingConstraints = new List<BlockingConstraintModel>();
-            QuantityConstraints = new List<QuantityConstraintModel>();
         }
 
         public EditResourceModel(R.SingleResource resource, List<ResourceStructureAttributeValueModel> valuesModel, List<TextValueModel> textValues, List<FileValueModel> fileValues)
@@ -195,13 +196,13 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Resource
             Duration = resource.Duration.Self;
             TimeUnits = Enum.GetValues(typeof(SystemDefinedUnit)).Cast<SystemDefinedUnit>().ToList();
 
-            ResourceStructureManager manager = new ResourceStructureManager();
-
-            foreach (RS.ResourceStructure rs in manager.GetAllResourceStructures().ToList())
+            using (ResourceStructureManager manager = new ResourceStructureManager())
             {
-                ResourceStructures.Add(new ResourceStructureModel(rs));
+                foreach (RS.ResourceStructure rs in manager.GetAllResourceStructures().ToList())
+                {
+                    ResourceStructures.Add(new ResourceStructureModel(rs));
+                }
             }
-
             //BookingTimeGranularity = resource.BookingTimeGranularity;
 
             ResourceConstraintModel = new ResourceConstraintModel();
@@ -307,33 +308,34 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Resource
             }
         }
 
-        /// <summary>
-        /// Model gives you from a Resource their resource attribute (from resource structure) Ids and their values. Needed for Filtering Resource by Domain contrains
-        /// </summary>
-        public class ResourceAttributeValueModel
-        {
-            public List<long> AttributeIds { get; set; }
-            public List<string> Values { get; set; }
-            public R.SingleResource Resource { get; set; }
+    /// <summary>
+    /// Model gives you from a Resource their resource attribute (from resource structure) Ids and their values. Needed for Filtering Resource by Domain contrains
+    /// </summary>
+    public class ResourceAttributeValueModel
+    {
+        public List<long> AttributeIds { get; set; }
+        public List<string> Values { get; set; }
+        public R.SingleResource Resource { get; set; }
 
-            public ResourceAttributeValueModel(R.SingleResource resource)
+        public ResourceAttributeValueModel(R.SingleResource resource)
+        {
+            AttributeIds = new List<long>();
+            //get only Id if attr has domain constraint
+            foreach (ResourceAttributeUsage u in resource.ResourceStructure.ResourceAttributeUsages)
             {
-                AttributeIds = new List<long>();
-                //get only Id if attr has domain constraint
-                foreach (ResourceAttributeUsage u in resource.ResourceStructure.ResourceAttributeUsages)
+                if (u.IsFileDataType == false)
                 {
-                    if (u.IsFileDataType == false)
+                    if (u.ResourceStructureAttribute.Constraints.Count > 0)
                     {
-                        if (u.ResourceStructureAttribute.Constraints.Count > 0)
-                        {
-                            AttributeIds.Add(u.ResourceStructureAttribute.Id);
-                        }
+                        AttributeIds.Add(u.ResourceStructureAttribute.Id);
                     }
                 }
-                //AttributeIds = resource.ResourceStructure.ResourceAttributeUsages.Select(a => a.ResourceStructureAttribute.Id).ToList();
+            }
+            //AttributeIds = resource.ResourceStructure.ResourceAttributeUsages.Select(a => a.ResourceStructureAttribute.Id).ToList();
 
-                Values = new List<string>();
-                ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
+            Values = new List<string>();
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
+            {
                 List<RS.ResourceAttributeValue> valueList = rsaManager.GetValuesByResource(resource);
                 foreach (RS.ResourceAttributeValue v in valueList)
                 {
@@ -346,6 +348,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Resource
                     Resource = resource;
                 }
             }
+        }
         }
     }
 

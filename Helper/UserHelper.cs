@@ -12,8 +12,10 @@ namespace BExIS.Modules.RBM.UI.Helper
     {
         public static long GetUserId(string userName)
         {
-            UserManager userManager = new UserManager();
-            return userManager.FindByNameAsync(userName).Result.Id;
+            using (UserManager userManager = new UserManager())
+            {
+                return userManager.FindByNameAsync(userName).Result.Id;
+            }
         }
 
         public static Party GetPartyByUserId(long userId)

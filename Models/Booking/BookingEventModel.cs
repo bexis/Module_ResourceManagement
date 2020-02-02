@@ -105,10 +105,11 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             EditAccess = false;
             DeleteAccess = false;
 
-            using (BookingEventManager em = new BookingEventManager())
-            {
+            BookingEventManager em = new BookingEventManager();
+            
                 //Get event again as not everything needed already fetched
                 var event_ =  em.GetBookingEventById(e.Id);
+                
            
                 foreach (Schedule s in event_.Schedules)
                 {
@@ -120,7 +121,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                     s.Activities.ToList().ForEach(r => seM.Activities.Add(new ActivityEventModel(r)));
                     Schedules.Add(seM);
                 }
-            }
+            
         }
     }
 

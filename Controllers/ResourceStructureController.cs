@@ -42,22 +42,21 @@ namespace BExIS.Modules.RBM.UI.Controllers
         [HttpPost]
         public ActionResult Create(CreateResourceStructureModel model)
         {
-            ResourceStructureManager rsManager = new ResourceStructureManager();
-            //check name
-            ResourceStructure temp = rsManager.GetResourceStructureByName(StringHelper.CutSpaces(model.Name));
-            if (temp != null)
-                ModelState.AddModelError("NameExist", "Name already exist");
-
-            if (ModelState.IsValid)
+            using (ResourceStructureManager rsManager = new ResourceStructureManager())
+            using (var pManager = new EntityPermissionManager())
+            using (var entityTypeManager = new EntityManager())
+            using (UserManager userManager = new UserManager())
             {
-                ResourceStructure rS = rsManager.Create(model.Name, model.Description, null, null);
+                //check name
+                ResourceStructure temp = rsManager.GetResourceStructureByName(StringHelper.CutSpaces(model.Name));
+                if (temp != null)
+                    ModelState.AddModelError("NameExist", "Name already exist");
 
-                //Start -> add security ----------------------------------------
-
-                using (var pManager = new EntityPermissionManager())
-                using (var entityTypeManager = new EntityManager())
+                if (ModelState.IsValid)
                 {
-                    UserManager userManager = new UserManager();
+                    ResourceStructure rS = rsManager.Create(model.Name, model.Description, null, null);
+
+                    //Start -> add security ----------------------------------------
                     var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     userTask.Wait();
                     var user = userTask.Result;
@@ -66,19 +65,20 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                     //31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
                     pManager.Create(user, entityType, rS.Id, 31);
+
+
+                    //End -> add security ------------------------------------------
+
+
+                    ResourceStructureModel rSmodel = new ResourceStructureModel(rS);
+                    rSmodel.FirstCreated = true;
+                    return View("_editResourceStructure", rSmodel);
                 }
 
-                //End -> add security ------------------------------------------
-
-
-                ResourceStructureModel rSmodel = new ResourceStructureModel(rS);
-                rSmodel.FirstCreated = true;
-                  return View("_editResourceStructure", rSmodel);
-            }
-            
-            else
-            {
-                return View("_createResourceStructure", model);
+                else
+                {
+                    return View("_createResourceStructure", model);
+                }
             }
         }
 
@@ -86,32 +86,34 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Edit Resource Structures", this.Session.GetTenant());
 
-            ResourceStructureManager rsManager = new ResourceStructureManager();
-            ResourceStructure resourceStructure = rsManager.GetResourceStructureById(id);
-            ViewData["RSID"] = id;
-            //ResourceStructureModel tem = new ResourceStructureModel();
-            return View("_editResourceStructure", new ResourceStructureModel(resourceStructure));
+            using (ResourceStructureManager rsManager = new ResourceStructureManager())
+            {
+                ResourceStructure resourceStructure = rsManager.GetResourceStructureById(id);
+                ViewData["RSID"] = id;
+                //ResourceStructureModel tem = new ResourceStructureModel();
+                return View("_editResourceStructure", new ResourceStructureModel(resourceStructure));
+            }
         }
 
         [HttpPost]
         public ActionResult EditResourceStructure(ResourceStructureModel model)
         {
-            ResourceStructureManager rsManager = new ResourceStructureManager();
+            using (ResourceStructureManager rsManager = new ResourceStructureManager())
+            {
+                //check name
+                ResourceStructure temp = rsManager.GetResourceStructureByName(StringHelper.CutSpaces(model.Name));
+                if (temp != null && temp.Id != model.Id)
+                    ModelState.AddModelError("NameExist", "Name already exist");
 
-            //check name
-            ResourceStructure temp = rsManager.GetResourceStructureByName(StringHelper.CutSpaces(model.Name));
-            if (temp != null && temp.Id != model.Id)
-                ModelState.AddModelError("NameExist", "Name already exist");
 
+                ResourceStructure rs = rsManager.GetResourceStructureById(model.Id);
+                if (rs == null)
+                    ModelState.AddModelError("Errors", "ResourceStructure does not exist.");
 
-            ResourceStructure rs = rsManager.GetResourceStructureById(model.Id);
-            if (rs == null)
-                ModelState.AddModelError("Errors", "ResourceStructure does not exist.");
-
-            if (rs.ResourceAttributeUsages.Select(a => a.ResourceStructureAttribute).ToList().Count() < 1)
+                if (rs.ResourceAttributeUsages.Select(a => a.ResourceStructureAttribute).ToList().Count() < 1)
                     ModelState.AddModelError("Errors", "Resource Structure has no attributes.");
 
-                if(rs.Parent != null)
+                if (rs.Parent != null)
                 {
                     if (rs.Parent.Id == rs.Id)
                     {
@@ -133,44 +135,51 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 }
                 else
                     return View("_editResourceStructure", model);
+            }
         }
 
         public ActionResult EditIsOptionalUsage(long usageId, string isOptional)
         {
-            ResourceStructureAttributeManager rsaManger = new ResourceStructureAttributeManager();
-            ResourceAttributeUsage usage = rsaManger.GetResourceAttributeUsageById(usageId);
-            usage.IsValueOptional = Convert.ToBoolean(isOptional);
-            rsaManger.UpdateResourceAttributeUsage(usage);
+            using (ResourceStructureAttributeManager rsaManger = new ResourceStructureAttributeManager())
+            using (ResourceStructureManager rsManager = new ResourceStructureManager())
+            {
+                ResourceAttributeUsage usage = rsaManger.GetResourceAttributeUsageById(usageId);
+                usage.IsValueOptional = Convert.ToBoolean(isOptional);
+                rsaManger.UpdateResourceAttributeUsage(usage);
 
-            ResourceStructureManager rsManager = new ResourceStructureManager();
-            ResourceStructure resourceStructure = rsManager.GetResourceStructureById(usage.ResourceStructure.Id);
+                ResourceStructure resourceStructure = rsManager.GetResourceStructureById(usage.ResourceStructure.Id);
 
-            return View("_editResourceStructure", new ResourceStructureModel(resourceStructure));
+                return View("_editResourceStructure", new ResourceStructureModel(resourceStructure));
+            }
 
         }
 
         public ActionResult EditIsFileUsage(long usageId, string isFile)
         {
-            ResourceStructureAttributeManager rsaManger = new ResourceStructureAttributeManager();
-            ResourceAttributeUsage usage = rsaManger.GetResourceAttributeUsageById(usageId);
-            usage.IsFileDataType = Convert.ToBoolean(isFile);
-            rsaManger.UpdateResourceAttributeUsage(usage);
+            using (ResourceStructureAttributeManager rsaManger = new ResourceStructureAttributeManager())
+            using (ResourceStructureManager rsManager = new ResourceStructureManager())
+            {
+                ResourceAttributeUsage usage = rsaManger.GetResourceAttributeUsageById(usageId);
+                usage.IsFileDataType = Convert.ToBoolean(isFile);
+                rsaManger.UpdateResourceAttributeUsage(usage);
 
-            ResourceStructureManager rsManager = new ResourceStructureManager();
-            ResourceStructure resourceStructure = rsManager.GetResourceStructureById(usage.ResourceStructure.Id);
+                ResourceStructure resourceStructure = rsManager.GetResourceStructureById(usage.ResourceStructure.Id);
 
-            return View("_editResourceStructure", new ResourceStructureModel(resourceStructure));
+                return View("_editResourceStructure", new ResourceStructureModel(resourceStructure));
+            }
 
         }
 
         public ActionResult RemoveParent(long id)
         {
-            ResourceStructureManager rsManager = new ResourceStructureManager();
-            ResourceStructure resourceStructure = rsManager.GetResourceStructureById(id);
-            resourceStructure.Parent = null;
-            rsManager.Update(resourceStructure);
+            using (ResourceStructureManager rsManager = new ResourceStructureManager())
+            {
+                ResourceStructure resourceStructure = rsManager.GetResourceStructureById(id);
+                resourceStructure.Parent = null;
+                rsManager.Update(resourceStructure);
 
-            return RedirectToAction("Edit", new { id = resourceStructure.Id });
+                return RedirectToAction("Edit", new { id = resourceStructure.Id });
+            }
         }
 
         public ActionResult Delete(long id)
@@ -243,59 +252,63 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult AddParent(long id, long parentId)
         {
-            ResourceStructureManager rsManager = new ResourceStructureManager();
-           
+            using (ResourceStructureManager rsManager = new ResourceStructureManager())
+            {
                 ResourceStructure parentResourceStructure = rsManager.GetResourceStructureById(parentId);
                 ResourceStructure resourceStructure = rsManager.GetResourceStructureById(id);
 
                 resourceStructure.Parent = parentResourceStructure;
                 rsManager.Update(resourceStructure);
 
-            return RedirectToAction("Edit", new {id = resourceStructure.Id });
-               // return View("_editResourceStructure", new ResourceStructureModel(resourceStructure));
+                return RedirectToAction("Edit", new { id = resourceStructure.Id });
+                // return View("_editResourceStructure", new ResourceStructureModel(resourceStructure));
+            }
         }
 
         [GridAction]
         public ActionResult ResourceStructureParent_Select(long rsId)
         {
-            ResourceStructureManager rsManager = new ResourceStructureManager();
-            IQueryable<ResourceStructure> data = rsManager.GetAllResourceStructures();
-
-            //List<ResourceStructureModel> resourceStructures = new List<ResourceStructureModel>();
-            List<ResourceStructureParentChoosingModel> resourceStructures = new List<ResourceStructureParentChoosingModel>();
-
-            foreach (ResourceStructure rs in data)
+            using (ResourceStructureManager rsManager = new ResourceStructureManager())
             {
-                if (rs.Id != rsId)
-                {
-                    ResourceStructureParentChoosingModel temp = new ResourceStructureParentChoosingModel(rs);
-                    temp.Locked = this.CheckParentPossibility(rsId, rs.Id);
-                    temp.RsId = rsId;
-                    temp.ParentId = rs.Id;
-                    resourceStructures.Add(temp);
-                }
-            }
+                IQueryable<ResourceStructure> data = rsManager.GetAllResourceStructures();
 
-            return View("_chooseResourceStructure", new GridModel<ResourceStructureParentChoosingModel> { Data = resourceStructures });
+                //List<ResourceStructureModel> resourceStructures = new List<ResourceStructureModel>();
+                List<ResourceStructureParentChoosingModel> resourceStructures = new List<ResourceStructureParentChoosingModel>();
+
+                foreach (ResourceStructure rs in data)
+                {
+                    if (rs.Id != rsId)
+                    {
+                        ResourceStructureParentChoosingModel temp = new ResourceStructureParentChoosingModel(rs);
+                        temp.Locked = this.CheckParentPossibility(rsId, rs.Id);
+                        temp.RsId = rsId;
+                        temp.ParentId = rs.Id;
+                        resourceStructures.Add(temp);
+                    }
+                }
+
+                return View("_chooseResourceStructure", new GridModel<ResourceStructureParentChoosingModel> { Data = resourceStructures });
+            }
         }
 
         //prevents circulation in parents
         private bool CheckParentPossibility(long rsId,long parentId)
         {
-            ResourceStructureManager rsManager = new ResourceStructureManager();
-            ResourceStructure rsParent = rsManager.GetResourceStructureById(parentId);
-            if (rsParent.Parent != null)
+            using (ResourceStructureManager rsManager = new ResourceStructureManager())
             {
-                if (rsParent.Parent.Id != rsId)
+                ResourceStructure rsParent = rsManager.GetResourceStructureById(parentId);
+                if (rsParent.Parent != null)
                 {
-                    CheckParentPossibility(rsId, rsParent.Parent.Id);
-                }
-                else
-                    return true;
+                    if (rsParent.Parent.Id != rsId)
+                    {
+                        CheckParentPossibility(rsId, rsParent.Parent.Id);
+                    }
+                    else
+                        return true;
 
+                }
+                return false;
             }
-            return false;
-            
         }
 
 
@@ -437,30 +450,31 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult OpenEditResourceStructureAttribute(long id)
         {
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-            ResourceStructureAttribute rsa = rsaManager.GetResourceStructureAttributesById(id);
-
-            EditResourceStructureAttributeModel model = new EditResourceStructureAttributeModel();
-            model.Id = id;
-            model.AttributeName = rsa.Name;
-            model.AttributeDescription = rsa.Description;
-
-            if (rsa.Constraints != null)
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
             {
-                foreach (Constraint c in rsa.Constraints)
+                ResourceStructureAttribute rsa = rsaManager.GetResourceStructureAttributesById(id);
+                EditResourceStructureAttributeModel model = new EditResourceStructureAttributeModel();
+                model.Id = id;
+                model.AttributeName = rsa.Name;
+                model.AttributeDescription = rsa.Description;
+
+                if (rsa.Constraints != null)
                 {
-                    if (c is DomainConstraint)
+                    foreach (Constraint c in rsa.Constraints)
                     {
-                        DomainConstraint dc = (DomainConstraint)c;
-                        dc.Materialize();
-                        List<DomainItemModel> domainItemModelList = new List<DomainItemModel>();
-                        dc.Items.ToList().ForEach(r => domainItemModelList.Add(new DomainItemModel(r)));
-                        model.DomainItems = domainItemModelList;
+                        if (c is DomainConstraint)
+                        {
+                            DomainConstraint dc = (DomainConstraint)c;
+                            dc.Materialize();
+                            List<DomainItemModel> domainItemModelList = new List<DomainItemModel>();
+                            dc.Items.ToList().ForEach(r => domainItemModelList.Add(new DomainItemModel(r)));
+                            model.DomainItems = domainItemModelList;
+                        }
                     }
                 }
-            }
 
-            return PartialView("_createResourceStructureAttribute", model);
+                return PartialView("_createResourceStructureAttribute", model);
+            }
         }
 
         //Create a list of domain items from a string array
@@ -516,18 +530,20 @@ namespace BExIS.Modules.RBM.UI.Controllers
         [GridAction]
         public ActionResult ResourceStructureAttributesAll_Select(long id)
         {
-            ResourceStructureManager rsManager = new ResourceStructureManager();
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-            IQueryable<ResourceStructureAttribute> rsaList = rsaManager.GetAllResourceStructureAttributes();
-            List<ResourceStructureAttributeModel> list = new List<ResourceStructureAttributeModel>();
-
-            foreach (ResourceStructureAttribute a in rsaList)
+            using (ResourceStructureManager rsManager = new ResourceStructureManager())
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
             {
-                ResourceStructureAttributeModel rsaModel = new ResourceStructureAttributeModel(a);
-                rsaModel.rsID = id;
-                list.Add(rsaModel);
+                IQueryable<ResourceStructureAttribute> rsaList = rsaManager.GetAllResourceStructureAttributes();
+                List<ResourceStructureAttributeModel> list = new List<ResourceStructureAttributeModel>();
+
+                foreach (ResourceStructureAttribute a in rsaList)
+                {
+                    ResourceStructureAttributeModel rsaModel = new ResourceStructureAttributeModel(a);
+                    rsaModel.rsID = id;
+                    list.Add(rsaModel);
+                }
+                return View("_chooseResourceStructureAttributes", new GridModel<ResourceStructureAttributeModel> { Data = list });
             }
-            return View("_chooseResourceStructureAttributes", new GridModel<ResourceStructureAttributeModel> { Data = list });
         }
 
         [GridAction]
@@ -568,75 +584,84 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult RemoveUsageFromResourceStructure(long usageId, long rsId)
         {
 
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-            ResourceAttributeUsage usage = rsaManager.GetResourceAttributeUsageById(usageId);
-            rsaManager.DeleteResourceAttributeUsage(usage);
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
+            {
+                ResourceAttributeUsage usage = rsaManager.GetResourceAttributeUsageById(usageId);
+                rsaManager.DeleteResourceAttributeUsage(usage);
 
-            return RedirectToAction("Edit", new { id = rsId });
+                return RedirectToAction("Edit", new { id = rsId });
+            }
         }
 
         [GridAction]
         public ActionResult ResourceStructureUsages_Select(long id)
         {
-            ResourceStructureManager rsm = new ResourceStructureManager();
-            ResourceStructure resourceStructure = rsm.GetResourceStructureById(id);
-
-            List<ResourceStructureAttributeUsageModel> list = new List<ResourceStructureAttributeUsageModel>();
-            foreach (ResourceAttributeUsage usage in resourceStructure.ResourceAttributeUsages)
+            using (ResourceStructureManager rsm = new ResourceStructureManager())
             {
-                list.Add(new ResourceStructureAttributeUsageModel(usage.Id));
+                ResourceStructure resourceStructure = rsm.GetResourceStructureById(id);
+
+                List<ResourceStructureAttributeUsageModel> list = new List<ResourceStructureAttributeUsageModel>();
+                foreach (ResourceAttributeUsage usage in resourceStructure.ResourceAttributeUsages)
+                {
+                    list.Add(new ResourceStructureAttributeUsageModel(usage.Id));
+                }
+                return View("_showResourceStructureAttributes", new GridModel<ResourceStructureAttributeUsageModel> { Data = list });
             }
-            return View("_showResourceStructureAttributes", new GridModel<ResourceStructureAttributeUsageModel> { Data = list });
         }
 
         public ActionResult AddResourceAttributeUsages(string rsId, string rsaIds)
         {
-            ResourceStructureManager rsManger = new ResourceStructureManager();
-            ResourceStructure rs = rsManger.GetResourceStructureById(Convert.ToInt64(rsId));
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-            string message = "";
-            if (rs != null)
+            using (ResourceStructureManager rsManger = new ResourceStructureManager())
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
             {
-                if (!string.IsNullOrEmpty(rsaIds))
-                {
-                    var selectedRsa = rsaIds.Split(',').Select(n => int.Parse(n)).ToList();
-                    foreach (int i in selectedRsa)
-                    {
-                        ResourceStructureAttribute rsa = rsaManager.GetResourceStructureAttributesById(i);
-                        if (!IsAttributeInStructure(rs, rsa))
-                            rsaManager.CreateResourceAttributeUsage(rsa, rs, false, false);
-                        else
-                            message += "Resource Structure Attribute " + rsa.Name + "is allready in the structure.";
-                    }
-                }
+                ResourceStructure rs = rsManger.GetResourceStructureById(Convert.ToInt64(rsId));
 
-                ResourceStructureModel model = new ResourceStructureModel(rs);
-                model.Message = message;
-                return View("_editResourceStructure", model);
-            }
-            else
-            {
-                //rs don't exsits ??
-                return View("_editResourceStructure");
+                string message = "";
+                if (rs != null)
+                {
+                    if (!string.IsNullOrEmpty(rsaIds))
+                    {
+                        var selectedRsa = rsaIds.Split(',').Select(n => int.Parse(n)).ToList();
+                        foreach (int i in selectedRsa)
+                        {
+                            ResourceStructureAttribute rsa = rsaManager.GetResourceStructureAttributesById(i);
+                            if (!IsAttributeInStructure(rs, rsa))
+                                rsaManager.CreateResourceAttributeUsage(rsa, rs, false, false);
+                            else
+                                message += "Resource Structure Attribute " + rsa.Name + "is allready in the structure.";
+                        }
+                    }
+
+                    ResourceStructureModel model = new ResourceStructureModel(rs);
+                    model.Message = message;
+                    return View("_editResourceStructure", model);
+                }
+                else
+                {
+                    //rs don't exsits ??
+                    return View("_editResourceStructure");
+                }
             }
         }
 
         public ActionResult AddResourceAttributeUsage(long rsId, long rsaId)
         {
-            ResourceStructureManager rsManger = new ResourceStructureManager();
-            ResourceStructure rs = rsManger.GetResourceStructureById(rsId);
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-            ResourceStructureAttribute rsa = rsaManager.GetResourceStructureAttributesById(rsaId);
-            string message = "";
+            using (ResourceStructureManager rsManger = new ResourceStructureManager())
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
+            {
+                ResourceStructure rs = rsManger.GetResourceStructureById(rsId);
+                ResourceStructureAttribute rsa = rsaManager.GetResourceStructureAttributesById(rsaId);
+                string message = "";
 
-            if (!IsAttributeInStructure(rs, rsa))
-                rsaManager.CreateResourceAttributeUsage(rsa, rs, false, false);
-            else
-                message += "Resource Structure Attribute " + rsa.Name + "is allready in the structure.";
+                if (!IsAttributeInStructure(rs, rsa))
+                    rsaManager.CreateResourceAttributeUsage(rsa, rs, false, false);
+                else
+                    message += "Resource Structure Attribute " + rsa.Name + "is allready in the structure.";
 
-            ResourceStructureModel model = new ResourceStructureModel(rs);
-            model.Message = message;
-            return View("_editResourceStructure", model);
+                ResourceStructureModel model = new ResourceStructureModel(rs);
+                model.Message = message;
+                return View("_editResourceStructure", model);
+            }
         }
 
         private bool IsAttributeInStructure(ResourceStructure rs, ResourceStructureAttribute rsa)

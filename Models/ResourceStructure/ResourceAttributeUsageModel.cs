@@ -53,37 +53,41 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure
             else
                 ParentAttributeName = "";
 
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-            ResourceAttributeUsage usage = rsaManager.GetResourceAttributeUsageById(usageId);
-
-            IsValueOptional = usage.IsValueOptional;
-            IsFileDataType = usage.IsFileDataType;
-
-            RS.ResourceStructureAttribute attr = rsaManager.GetResourceStructureAttributesById(resourceAttributeId);
-
-            foreach (Constraint constraint in attr.Constraints)
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
             {
-                if (constraint is DomainConstraint)
-                {
-                    DomainConstraint dc = (DomainConstraint)constraint;
-                    dc.Materialize();
-                    DomainConstraint = new DomainConstraintModel(dc);
-                }
-            }
+                ResourceAttributeUsage usage = rsaManager.GetResourceAttributeUsageById(usageId);
 
-            ResourceAttributeName = attr.Name;
-            ResourceAttributeDescription = attr.Description;
+                IsValueOptional = usage.IsValueOptional;
+                IsFileDataType = usage.IsFileDataType;
+
+                RS.ResourceStructureAttribute attr = rsaManager.GetResourceStructureAttributesById(resourceAttributeId);
+
+                foreach (Constraint constraint in attr.Constraints)
+                {
+                    if (constraint is DomainConstraint)
+                    {
+                        DomainConstraint dc = (DomainConstraint)constraint;
+                        dc.Materialize();
+                        DomainConstraint = new DomainConstraintModel(dc);
+                    }
+                }
+
+                ResourceAttributeName = attr.Name;
+                ResourceAttributeDescription = attr.Description;
+            }
         }
 
         public ResourceStructureAttributeUsageModel(long usageId)
         {
             UsageId = usageId;
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-            ResourceAttributeUsage usage = rsaManager.GetResourceAttributeUsageById(usageId);
-            IsValueOptional = usage.IsValueOptional;
-            ResourceAttributeId = usage.ResourceStructureAttribute.Id;
-            ResourceAttributeName = usage.ResourceStructureAttribute.Name;
-            ResourceAttributeDescription = usage.ResourceStructureAttribute.Description;
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
+            {
+                ResourceAttributeUsage usage = rsaManager.GetResourceAttributeUsageById(usageId);
+                IsValueOptional = usage.IsValueOptional;
+                ResourceAttributeId = usage.ResourceStructureAttribute.Id;
+                ResourceAttributeName = usage.ResourceStructureAttribute.Name;
+                ResourceAttributeDescription = usage.ResourceStructureAttribute.Description;
+            }
         }
 
     }

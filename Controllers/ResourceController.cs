@@ -227,91 +227,94 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         private void ValidateResource(EditResourceModel model)
         {
-            ResourceManager rManager = new ResourceManager();
-            ResourceStructureManager rsManager = new ResourceStructureManager();
-            ResourceStructureAttributeManager valueManager = new ResourceStructureAttributeManager();
-
-            //check name is filled
-            if (model.Name == null)
-                ModelState.AddModelError("Errors", "Name is required.");
-            else {
-                //check length of the 
-                if (model.Name.Length < 3)
-                    ModelState.AddModelError("Errors", "The resource name must be 3 characters long.");
-
-                //check name is unique
-                SingleResource temp = rManager.GetResourceByName(StringHelper.CutSpaces(model.Name));
-                if (temp != null && model.Id == 0)
-                    ModelState.AddModelError("Errors", "Name already exist.");
-            }
-
-            //check duration cant not be 0
-            if (model.Duration.Value == 0)
-                ModelState.AddModelError("Errors", "Duration can not be 0.");
-
-            //check color can not be empty
-            if (model.Color == null)
-                ModelState.AddModelError("Errors", "Color is required.");
-
-            //check if resource struture is selected
-            if (model.ResourceStructure == null)
-                ModelState.AddModelError("Errors", "Resource Structure is required, please choose one.");
-
-            //check rsource structure attribute values
-            if (model.TextValues.Count > 0)
+            using (ResourceManager rManager = new ResourceManager())
+            using (ResourceStructureManager rsManager = new ResourceStructureManager())
+            using (ResourceStructureAttributeManager valueManager = new ResourceStructureAttributeManager())
             {
-                foreach (TextValueModel tvm in model.TextValues)
+
+                //check name is filled
+                if (model.Name == null)
+                    ModelState.AddModelError("Errors", "Name is required.");
+                else
                 {
-                    ResourceAttributeUsage usage = valueManager.GetResourceAttributeUsageById(tvm.ResourceAttributeUsageId);
-                    if (usage.IsValueOptional == false && (tvm.Value == null || tvm.Value == ""))
-                    {
-                        ModelState.AddModelError("Errors", "Set a value to " + usage.ResourceStructureAttribute.Name + " is required.");
-                    }
-                    else if (usage.IsValueOptional == true && tvm.Value == null)
-                    {
-                        continue;
-                    }
+                    //check length of the 
+                    if (model.Name.Length < 3)
+                        ModelState.AddModelError("Errors", "The resource name must be 3 characters long.");
+
+                    //check name is unique
+                    SingleResource temp = rManager.GetResourceByName(StringHelper.CutSpaces(model.Name));
+                    if (temp != null && model.Id == 0)
+                        ModelState.AddModelError("Errors", "Name already exist.");
                 }
-            }
 
-            if (model.FileValues.Count > 0)
-            {
-                foreach (FileValueModel fvm in model.FileValues)
+                //check duration cant not be 0
+                if (model.Duration.Value == 0)
+                    ModelState.AddModelError("Errors", "Duration can not be 0.");
+
+                //check color can not be empty
+                if (model.Color == null)
+                    ModelState.AddModelError("Errors", "Color is required.");
+
+                //check if resource struture is selected
+                if (model.ResourceStructure == null)
+                    ModelState.AddModelError("Errors", "Resource Structure is required, please choose one.");
+
+                //check rsource structure attribute values
+                if (model.TextValues.Count > 0)
                 {
-                    ResourceAttributeUsage usage = valueManager.GetResourceAttributeUsageById(fvm.ResourceAttributeUsageId);
-                    if (usage.IsValueOptional == false && fvm.Name == null)
+                    foreach (TextValueModel tvm in model.TextValues)
                     {
-                        ModelState.AddModelError("Errors", "Upload a file to " + usage.ResourceStructureAttribute.Name + " is required");
-                    }
-                    else if (usage.IsValueOptional == true && fvm.Name == "")
-                    {
-                        continue;
+                        ResourceAttributeUsage usage = valueManager.GetResourceAttributeUsageById(tvm.ResourceAttributeUsageId);
+                        if (usage.IsValueOptional == false && (tvm.Value == null || tvm.Value == ""))
+                        {
+                            ModelState.AddModelError("Errors", "Set a value to " + usage.ResourceStructureAttribute.Name + " is required.");
+                        }
+                        else if (usage.IsValueOptional == true && tvm.Value == null)
+                        {
+                            continue;
+                        }
                     }
                 }
-            }
 
-            //check resource constraints
-            if (model.DependencyConstraints != null && model.DependencyConstraints.Count > 0)
-            {
-                foreach (DependencyConstraintModel dcM in model.DependencyConstraints)
+                if (model.FileValues.Count > 0)
                 {
-                    ValidateConstraint(dcM);
+                    foreach (FileValueModel fvm in model.FileValues)
+                    {
+                        ResourceAttributeUsage usage = valueManager.GetResourceAttributeUsageById(fvm.ResourceAttributeUsageId);
+                        if (usage.IsValueOptional == false && fvm.Name == null)
+                        {
+                            ModelState.AddModelError("Errors", "Upload a file to " + usage.ResourceStructureAttribute.Name + " is required");
+                        }
+                        else if (usage.IsValueOptional == true && fvm.Name == "")
+                        {
+                            continue;
+                        }
+                    }
                 }
-            }
 
-            if (model.BlockingConstraints != null && model.BlockingConstraints.Count > 0)
-            {
-                foreach (BlockingConstraintModel bcM in model.BlockingConstraints)
+                //check resource constraints
+                if (model.DependencyConstraints != null && model.DependencyConstraints.Count > 0)
                 {
-                    ValidateConstraint(bcM);
+                    foreach (DependencyConstraintModel dcM in model.DependencyConstraints)
+                    {
+                        ValidateConstraint(dcM);
+                    }
                 }
-            }
 
-            if (model.QuantityConstraints != null && model.QuantityConstraints.Count > 0)
-            {
-                foreach (QuantityConstraintModel qcM in model.QuantityConstraints)
+                if (model.BlockingConstraints != null && model.BlockingConstraints.Count > 0)
                 {
-                    ValidateConstraint(qcM);
+                    foreach (BlockingConstraintModel bcM in model.BlockingConstraints)
+                    {
+                        ValidateConstraint(bcM);
+                    }
+                }
+
+                if (model.QuantityConstraints != null && model.QuantityConstraints.Count > 0)
+                {
+                    foreach (QuantityConstraintModel qcM in model.QuantityConstraints)
+                    {
+                        ValidateConstraint(qcM);
+                    }
                 }
             }
         }
@@ -555,40 +558,40 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Edit Resource", this.Session.GetTenant());
 
-            ResourceManager rManager = new ResourceManager();
-            SingleResource resource = rManager.GetResourceById(id);
-
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-
-            List<ResourceStructureAttributeValueModel> valuesModel = new List<ResourceStructureAttributeValueModel>();
-            List<TextValueModel> textvalues = new List<TextValueModel>();
-            List<FileValueModel> fileValues = new List<FileValueModel>();
-
-            foreach (ResourceAttributeValue value in resource.ResourceAttributeValues)
+            using (ResourceManager rManager = new ResourceManager())
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
             {
-                if(value is TextValue)
+                SingleResource resource = rManager.GetResourceById(id);
+                List<ResourceStructureAttributeValueModel> valuesModel = new List<ResourceStructureAttributeValueModel>();
+                List<TextValueModel> textvalues = new List<TextValueModel>();
+                List<FileValueModel> fileValues = new List<FileValueModel>();
+
+                foreach (ResourceAttributeValue value in resource.ResourceAttributeValues)
                 {
-                    TextValue tv = (TextValue)value;
-                    TextValueModel tvm = new TextValueModel(tv);
-                    tvm.EditMode = true;
-                    textvalues.Add(tvm);
-                    valuesModel.Add(tvm);
+                    if (value is TextValue)
+                    {
+                        TextValue tv = (TextValue)value;
+                        TextValueModel tvm = new TextValueModel(tv);
+                        tvm.EditMode = true;
+                        textvalues.Add(tvm);
+                        valuesModel.Add(tvm);
+                    }
+                    else if (value is FileValue)
+                    {
+                        FileValue fv = (FileValue)value;
+                        FileValueModel fvm = new FileValueModel(fv);
+                        fvm.EditMode = true;
+                        fileValues.Add(fvm);
+                        valuesModel.Add(fvm);
+                    }
                 }
-                else if(value is FileValue)
-                {
-                    FileValue fv = (FileValue)value;
-                    FileValueModel fvm = new FileValueModel(fv);
-                    fvm.EditMode = true;
-                    fileValues.Add(fvm);
-                    valuesModel.Add(fvm);
-                }
+
+                EditResourceModel model = new EditResourceModel(resource, valuesModel, textvalues, fileValues);
+
+                Session["Resource"] = model;
+
+                return View("EditResource", model);
             }
-
-            EditResourceModel model = new EditResourceModel(resource, valuesModel, textvalues, fileValues);
-
-            Session["Resource"] = model;
-           
-            return View("EditResource", model);
         }
 
         #endregion
@@ -627,21 +630,24 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult ShowDetails(string id)
         {
-            ResourceManager rManager = new ResourceManager();
-            SingleResource r = rManager.GetResourceById(long.Parse(id));
-
-            List<ResourceStructureAttributeValueModel> valuesModel = new List<ResourceStructureAttributeValueModel>();
-
-            foreach (ResourceAttributeValue value in r.ResourceAttributeValues)
+            using (ResourceManager rManager = new ResourceManager())
             {
-                ResourceStructureAttributeValueModel temp = new ResourceStructureAttributeValueModel(value);
-                temp.EditMode = true;
-                valuesModel.Add(temp);
+                SingleResource r = rManager.GetResourceById(long.Parse(id));
+
+                List<ResourceStructureAttributeValueModel> valuesModel = new List<ResourceStructureAttributeValueModel>();
+
+                foreach (ResourceAttributeValue value in r.ResourceAttributeValues)
+                {
+                    ResourceStructureAttributeValueModel temp = new ResourceStructureAttributeValueModel(value);
+                    temp.EditMode = true;
+                    valuesModel.Add(temp);
+                }
+
+                ShowResourceModel model = new ShowResourceModel(r, valuesModel);
+
+                return PartialView("_showResource", model);
             }
-
-            ShowResourceModel model = new ShowResourceModel(r, valuesModel);
-
-            return PartialView("_showResource", model);
+                
         }
 
         #endregion
@@ -652,61 +658,26 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             EditResourceModel model = (EditResourceModel)Session["Resource"];
 
-            ResourceStructureManager rsManager = new ResourceStructureManager();
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-
-            if (selectedResourceStructureId != 0)
+            using (ResourceStructureManager rsManager = new ResourceStructureManager())
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
             {
-                model.TextValues.Clear();
-                model.FileValues.Clear();
-                model.ResourceStructureAttributeValues.Clear();
-
-                ResourceStructure rs = rsManager.GetResourceStructureById(selectedResourceStructureId);
-                model.ResourceStructure = new ResourceStructureModel(rs);
-
-                //get all attr also from the parent RS
-                List<ResourceAttributeUsage> temp = GetAllAttributes(rs);
-
-                // default values loading, default values needed????
-                foreach (ResourceAttributeUsage attrUsage in temp)
+                if (selectedResourceStructureId != 0)
                 {
-                    ResourceStructureAttributeValueModel rsav = new ResourceStructureAttributeValueModel();
-                    ResourceStructureAttributeUsageModel rsaUsage = new ResourceStructureAttributeUsageModel(attrUsage.Id, attrUsage.ResourceStructureAttribute.Id, null);
+                    model.TextValues.Clear();
+                    model.FileValues.Clear();
+                    model.ResourceStructureAttributeValues.Clear();
 
-                    if (rsaUsage.IsFileDataType == false)
-                    {
-                        TextValueModel tv = new TextValueModel();
-                        tv.AttributeName = rsaUsage.ResourceAttributeName;
-                        tv.ResourceAttributeUsageId = rsaUsage.UsageId;
-                        tv.DomainConstraint = rsaUsage.DomainConstraint;
-                        tv.ResourceAttributeUsage = new ResourceAttributeUsageModel(attrUsage);
-                        tv.EditMode = true;
-                        model.TextValues.Add(tv);
-                        model.ResourceStructureAttributeValues.Add(tv);
-                    }
-                    else
-                    {
-                        FileValueModel fv = new FileValueModel();
-                        fv.AttributeName = rsaUsage.ResourceAttributeName;
-                        fv.ResourceAttributeUsageId = rsaUsage.UsageId;
-                        fv.ResourceAttributeUsage = new ResourceAttributeUsageModel(attrUsage);
-                        fv.EditMode = true;
-                        model.FileValues.Add(fv);
-                        model.ResourceStructureAttributeValues.Add(fv);
-                    }
-                }
-            }
-            //Add Attribute without set values, eg. if value is optional 
-            else
-            {
-                ResourceStructure rs = rsManager.GetResourceStructureById(model.ResourceStructure.Id);
-                List<ResourceAttributeUsage> temp = GetAllAttributes(rs);
-                foreach (ResourceAttributeUsage u in temp)
-                {
-                    if(!model.ResourceStructureAttributeValues.Select(a=>a.ResourceAttributeUsageId).ToList().Contains(u.Id))
+                    ResourceStructure rs = rsManager.GetResourceStructureById(selectedResourceStructureId);
+                    model.ResourceStructure = new ResourceStructureModel(rs);
+
+                    //get all attr also from the parent RS
+                    List<ResourceAttributeUsage> temp = GetAllAttributes(rs);
+
+                    // default values loading, default values needed????
+                    foreach (ResourceAttributeUsage attrUsage in temp)
                     {
                         ResourceStructureAttributeValueModel rsav = new ResourceStructureAttributeValueModel();
-                        ResourceStructureAttributeUsageModel rsaUsage = new ResourceStructureAttributeUsageModel(u.Id, u.ResourceStructureAttribute.Id, null);
+                        ResourceStructureAttributeUsageModel rsaUsage = new ResourceStructureAttributeUsageModel(attrUsage.Id, attrUsage.ResourceStructureAttribute.Id, null);
 
                         if (rsaUsage.IsFileDataType == false)
                         {
@@ -714,6 +685,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                             tv.AttributeName = rsaUsage.ResourceAttributeName;
                             tv.ResourceAttributeUsageId = rsaUsage.UsageId;
                             tv.DomainConstraint = rsaUsage.DomainConstraint;
+                            tv.ResourceAttributeUsage = new ResourceAttributeUsageModel(attrUsage);
                             tv.EditMode = true;
                             model.TextValues.Add(tv);
                             model.ResourceStructureAttributeValues.Add(tv);
@@ -723,18 +695,53 @@ namespace BExIS.Modules.RBM.UI.Controllers
                             FileValueModel fv = new FileValueModel();
                             fv.AttributeName = rsaUsage.ResourceAttributeName;
                             fv.ResourceAttributeUsageId = rsaUsage.UsageId;
+                            fv.ResourceAttributeUsage = new ResourceAttributeUsageModel(attrUsage);
                             fv.EditMode = true;
                             model.FileValues.Add(fv);
                             model.ResourceStructureAttributeValues.Add(fv);
                         }
                     }
                 }
+                //Add Attribute without set values, eg. if value is optional 
+                else
+                {
+                    ResourceStructure rs = rsManager.GetResourceStructureById(model.ResourceStructure.Id);
+                    List<ResourceAttributeUsage> temp = GetAllAttributes(rs);
+                    foreach (ResourceAttributeUsage u in temp)
+                    {
+                        if (!model.ResourceStructureAttributeValues.Select(a => a.ResourceAttributeUsageId).ToList().Contains(u.Id))
+                        {
+                            ResourceStructureAttributeValueModel rsav = new ResourceStructureAttributeValueModel();
+                            ResourceStructureAttributeUsageModel rsaUsage = new ResourceStructureAttributeUsageModel(u.Id, u.ResourceStructureAttribute.Id, null);
 
+                            if (rsaUsage.IsFileDataType == false)
+                            {
+                                TextValueModel tv = new TextValueModel();
+                                tv.AttributeName = rsaUsage.ResourceAttributeName;
+                                tv.ResourceAttributeUsageId = rsaUsage.UsageId;
+                                tv.DomainConstraint = rsaUsage.DomainConstraint;
+                                tv.EditMode = true;
+                                model.TextValues.Add(tv);
+                                model.ResourceStructureAttributeValues.Add(tv);
+                            }
+                            else
+                            {
+                                FileValueModel fv = new FileValueModel();
+                                fv.AttributeName = rsaUsage.ResourceAttributeName;
+                                fv.ResourceAttributeUsageId = rsaUsage.UsageId;
+                                fv.EditMode = true;
+                                model.FileValues.Add(fv);
+                                model.ResourceStructureAttributeValues.Add(fv);
+                            }
+                        }
+                    }
+
+                }
+
+                Session["Resource"] = model;
+
+                return PartialView("_fillResourceStructure", model.ResourceStructureAttributeValues);
             }
-           
-            Session["Resource"] = model;
-
-            return PartialView("_fillResourceStructure", model.ResourceStructureAttributeValues);
         }
         
         private List<ResourceAttributeUsage> GetAllAttributes(ResourceStructure rs)
@@ -887,160 +894,160 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 }
             }
 
-            ResourceConstraintManager rcManager = new ResourceConstraintManager();
-            ResourceManager srManager = new ResourceManager();
-
-            if (rcm is DependencyConstraintModel)
+            using (ResourceConstraintManager rcManager = new ResourceConstraintManager())
+            using (ResourceManager srManager = new ResourceManager())
             {
-                DependencyConstraintModel dcm = model.DependencyConstraints.Where(p=>p.Index == index).FirstOrDefault();
+                if (rcm is DependencyConstraintModel)
+                {
+                    DependencyConstraintModel dcm = model.DependencyConstraints.Where(p => p.Index == index).FirstOrDefault();
 
-                DependencyConstraint dc = new DependencyConstraint();
-                if (dcm.Id != 0)
-                    dc = rcManager.GetDependencyConstraintById(dcm.Id);
+                    DependencyConstraint dc = new DependencyConstraint();
+                    if (dcm.Id != 0)
+                        dc = rcManager.GetDependencyConstraintById(dcm.Id);
 
-                //if (dcm.SelectedType == "Single Resource")
-                //{
+                    //if (dcm.SelectedType == "Single Resource")
+                    //{
                     SingleResource singleResource = srManager.GetResourceById(Convert.ToInt64(dcm.ObjectId));
                     dc.ForResource = singleResource;
-                //}
-                //else if (dcm.SelectedType == "Resource Group")
-                //{
-                //    ResourceGroup resourceGroup = srManager.GetResourceGroupById(Convert.ToInt64(dcm.ObjectId));
-                //    dc.ForResource = resourceGroup;
-                //}
-
-                dc.Implicit = dcm.Implicit;
-                dc.Quantity = dcm.Quantity;
-                dc.Index = dcm.Index;
-
-                dc.Negated = rcm.Negated;
-                dc.Description = rcm.Description;
-                dc.Mode = rcm.SelectedMode;
-
-             
-                if (dcm.Id == 0)
-                {
-                    dc.Resource = resource;
-                    rcManager.SaveConstraint(dc);
-                }
-                else
-                    rcManager.UpdateConstraint(dc);
-            }
-            else if (rcm is BlockingConstraintModel)
-            {
-                BlockingConstraintModel bcm = model.BlockingConstraints.Where(a => a.Index == index).FirstOrDefault();
-
-                BlockingConstraint bc = new BlockingConstraint();
-                if (bcm.Id != 0)
-                    bc = rcManager.GetBlockingConstraintById(bcm.Id);
-                //needed for delete later after update constraint
-                PeriodicTimeInterval tempPeriodicTimeInterval = bc.ForPeriodicTimeInterval;
-
-                bc.Negated = rcm.Negated;
-                bc.Description = rcm.Description;
-                bc.Mode = rcm.SelectedMode;
-                bc.Index = bcm.Index;
-
-                bc.ForEver = bcm.ForEver;
-                bc.AllUsers = bcm.AllUsers;
-
-                //create TimeIntervall and Person before save constraint
-                if (bcm.Id == 0)
-                {
-                    bc.Resource = resource;
-                    if (rcm.ForTimeInterval.StartTime.Instant != null)
-                        bc.ForTimeInterval = this.CreateTimeInterval(rcm.ForTimeInterval);
-
-                    //if (bcm.ForPersons.Count() > 0)
+                    //}
+                    //else if (dcm.SelectedType == "Resource Group")
                     //{
-                        if (rcm.ForTimeInterval.StartTime.Instant != null)
-                            bc.ForTimeInterval = this.CreateTimeInterval(rcm.ForTimeInterval);
+                    //    ResourceGroup resourceGroup = srManager.GetResourceGroupById(Convert.ToInt64(dcm.ObjectId));
+                    //    dc.ForResource = resourceGroup;
                     //}
 
-                    if (bcm.ForPersons.Count() != 0)
-                        bc.ForPerson = CreatePerson(bcm.ForPersons);
+                    dc.Implicit = dcm.Implicit;
+                    dc.Quantity = dcm.Quantity;
+                    dc.Index = dcm.Index;
 
-                    if (rcm.ForPeriodicTimeInterval != null)
-                        if (rcm.ForPeriodicTimeInterval.IsSet)
-                            bc.ForPeriodicTimeInterval = ptInterval;
+                    dc.Negated = rcm.Negated;
+                    dc.Description = rcm.Description;
+                    dc.Mode = rcm.SelectedMode;
 
-                    rcManager.SaveConstraint(bc);
-                }
-                else
-                {
-                    if(bc.ForTimeInterval != null)
-                        bc.ForTimeInterval = timeManager.UpdateTimeInterval(bcm.ForTimeInterval);
 
-                    if (rcm.ForPeriodicTimeInterval != null)
+                    if (dcm.Id == 0)
                     {
-                        if (rcm.ForPeriodicTimeInterval.IsSet)
-                            bc.ForPeriodicTimeInterval = ptInterval;
+                        dc.Resource = resource;
+                        rcManager.SaveConstraint(dc);
                     }
                     else
-                        bc.ForPeriodicTimeInterval = null;
+                        rcManager.UpdateConstraint(dc);
+                }
+                else if (rcm is BlockingConstraintModel)
+                {
+                    BlockingConstraintModel bcm = model.BlockingConstraints.Where(a => a.Index == index).FirstOrDefault();
 
-                    //if person exstists and the persons form the UI is grater then 0 then update person
-                    if (bcm.ForPersons.Count() > 0)
-                        bc.ForPerson = UpdatePerson(bcm.ForPersons);
+                    BlockingConstraint bc = new BlockingConstraint();
+                    if (bcm.Id != 0)
+                        bc = rcManager.GetBlockingConstraintById(bcm.Id);
+                    //needed for delete later after update constraint
+                    PeriodicTimeInterval tempPeriodicTimeInterval = bc.ForPeriodicTimeInterval;
 
-                    //if person exsist and count auf Persons from UI is 0 then delete the Person
-                    else if (bc.ForPerson != null && bcm.ForPersons.Count() == 0)
+                    bc.Negated = rcm.Negated;
+                    bc.Description = rcm.Description;
+                    bc.Mode = rcm.SelectedMode;
+                    bc.Index = bcm.Index;
+
+                    bc.ForEver = bcm.ForEver;
+                    bc.AllUsers = bcm.AllUsers;
+
+                    //create TimeIntervall and Person before save constraint
+                    if (bcm.Id == 0)
                     {
-                        PersonManager pManager = new PersonManager();
-                        if (bc.ForPerson is IndividualPerson)
-                            pManager.DeleteIndividualPerson((IndividualPerson)bc.ForPerson.Self);
-                        else
-                            pManager.DeletePersonGroup((PersonGroup)bc.ForPerson.Self);
+                        bc.Resource = resource;
+                        if (rcm.ForTimeInterval.StartTime.Instant != null)
+                            bc.ForTimeInterval = this.CreateTimeInterval(rcm.ForTimeInterval);
 
-                        bc.ForPerson = null;
+                        //if (bcm.ForPersons.Count() > 0)
+                        //{
+                        if (rcm.ForTimeInterval.StartTime.Instant != null)
+                            bc.ForTimeInterval = this.CreateTimeInterval(rcm.ForTimeInterval);
+                        //}
+
+                        if (bcm.ForPersons.Count() != 0)
+                            bc.ForPerson = CreatePerson(bcm.ForPersons);
+
+                        if (rcm.ForPeriodicTimeInterval != null)
+                            if (rcm.ForPeriodicTimeInterval.IsSet)
+                                bc.ForPeriodicTimeInterval = ptInterval;
+
+                        rcManager.SaveConstraint(bc);
                     }
-                    rcManager.UpdateConstraint(bc);
-
-                    //delete PeriodicTimeInterval if exsist bevor and where deleted
-                    if (bc.ForPeriodicTimeInterval == null && tempPeriodicTimeInterval != null)
+                    else
                     {
-                        timeManager.DeletePeriodicTimeInterval(tempPeriodicTimeInterval);
+                        if (bc.ForTimeInterval != null)
+                            bc.ForTimeInterval = timeManager.UpdateTimeInterval(bcm.ForTimeInterval);
+
+                        if (rcm.ForPeriodicTimeInterval != null)
+                        {
+                            if (rcm.ForPeriodicTimeInterval.IsSet)
+                                bc.ForPeriodicTimeInterval = ptInterval;
+                        }
+                        else
+                            bc.ForPeriodicTimeInterval = null;
+
+                        //if person exstists and the persons form the UI is grater then 0 then update person
+                        if (bcm.ForPersons.Count() > 0)
+                            bc.ForPerson = UpdatePerson(bcm.ForPersons);
+
+                        //if person exsist and count auf Persons from UI is 0 then delete the Person
+                        else if (bc.ForPerson != null && bcm.ForPersons.Count() == 0)
+                        {
+                            PersonManager pManager = new PersonManager();
+                            if (bc.ForPerson is IndividualPerson)
+                                pManager.DeleteIndividualPerson((IndividualPerson)bc.ForPerson.Self);
+                            else
+                                pManager.DeletePersonGroup((PersonGroup)bc.ForPerson.Self);
+
+                            bc.ForPerson = null;
+                        }
+                        rcManager.UpdateConstraint(bc);
+
+                        //delete PeriodicTimeInterval if exsist bevor and where deleted
+                        if (bc.ForPeriodicTimeInterval == null && tempPeriodicTimeInterval != null)
+                        {
+                            timeManager.DeletePeriodicTimeInterval(tempPeriodicTimeInterval);
+                        }
                     }
                 }
-            }
-            else if (rcm is QuantityConstraintModel)
-            {
-                QuantityConstraintModel qcm = model.QuantityConstraints.Where(e => e.Index == index).FirstOrDefault();
+                else if (rcm is QuantityConstraintModel)
+                {
+                    QuantityConstraintModel qcm = model.QuantityConstraints.Where(e => e.Index == index).FirstOrDefault();
 
-                QuantityConstraint qc = new QuantityConstraint();
-                if (qcm.Id != 0)
-                    qc = rcManager.GetQuantityConstraintById(qcm.Id);
+                    QuantityConstraint qc = new QuantityConstraint();
+                    if (qcm.Id != 0)
+                        qc = rcManager.GetQuantityConstraintById(qcm.Id);
 
-                //needed for delete later after update constraint
-                PeriodicTimeInterval tempPeriodicTimeInterval = qc.ForPeriodicTimeInterval;
+                    //needed for delete later after update constraint
+                    PeriodicTimeInterval tempPeriodicTimeInterval = qc.ForPeriodicTimeInterval;
 
-                qc.Quantity = qcm.Quantity;
-                qc.Index = qcm.Index;
+                    qc.Quantity = qcm.Quantity;
+                    qc.Index = qcm.Index;
 
-                qc.Negated = rcm.Negated;
-                qc.Description = rcm.Description;
-                qc.Mode = rcm.SelectedMode;
+                    qc.Negated = rcm.Negated;
+                    qc.Description = rcm.Description;
+                    qc.Mode = rcm.SelectedMode;
 
-                qc.ForEver = qcm.ForEver;
-                qc.AllUsers = qcm.AllUsers;
-
-
-                if (rcm.ForPeriodicTimeInterval.IsSet)
-                    qc.ForPeriodicTimeInterval = ptInterval;
+                    qc.ForEver = qcm.ForEver;
+                    qc.AllUsers = qcm.AllUsers;
 
 
-                //create TimeIntervall and Person before save constraint
-                if (qcm.Id == 0)
+                    if (rcm.ForPeriodicTimeInterval.IsSet)
+                        qc.ForPeriodicTimeInterval = ptInterval;
+
+
+                    //create TimeIntervall and Person before save constraint
+                    if (qcm.Id == 0)
                     {
                         qc.Resource = resource;
-                    if (qcm.ForTimeInterval.StartTime.Instant != null)
-                        qc.ForTimeInterval = this.CreateTimeInterval(qcm.ForTimeInterval);
+                        if (qcm.ForTimeInterval.StartTime.Instant != null)
+                            qc.ForTimeInterval = this.CreateTimeInterval(qcm.ForTimeInterval);
 
-                    //if (qcm.ForPersons.Count() > 0)
-                    //    {
-                    //        if (qcm.ForTimeInterval != null)
-                    //            qc.ForTimeInterval = this.CreateTimeInterval(qcm.ForTimeInterval);
-                    //    }
+                        //if (qcm.ForPersons.Count() > 0)
+                        //    {
+                        //        if (qcm.ForTimeInterval != null)
+                        //            qc.ForTimeInterval = this.CreateTimeInterval(qcm.ForTimeInterval);
+                        //    }
 
                         if (qcm.ForPersons.Count() != 0)
                             qc.ForPerson = this.CreatePerson(qcm.ForPersons);
@@ -1052,10 +1059,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         qc.ForTimeInterval = timeManager.UpdateTimeInterval(qcm.ForTimeInterval);
 
                         //if person exstists and the persons form the UI is grater then 0 then update person
-                        if(qcm.ForPersons.Count() > 0)
+                        if (qcm.ForPersons.Count() > 0)
                             qc.ForPerson = UpdatePerson(qcm.ForPersons);
                         //if person exsist and count auf Persons from UI is 0 then delete the Person
-                        else if(qc.ForPerson !=null && qcm.ForPersons.Count() == 0)
+                        else if (qc.ForPerson != null && qcm.ForPersons.Count() == 0)
                         {
                             PersonManager pManager = new PersonManager();
                             pManager.DeletePerson(qc.ForPerson);
@@ -1063,10 +1070,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         }
                         rcManager.UpdateConstraint(qc);
 
-                    //delete PeriodicTimeInterval if exsist bevor and where deleted
-                    if (qc.ForPeriodicTimeInterval == null && tempPeriodicTimeInterval != null)
-                    {
-                        timeManager.DeletePeriodicTimeInterval(tempPeriodicTimeInterval);
+                        //delete PeriodicTimeInterval if exsist bevor and where deleted
+                        if (qc.ForPeriodicTimeInterval == null && tempPeriodicTimeInterval != null)
+                        {
+                            timeManager.DeletePeriodicTimeInterval(tempPeriodicTimeInterval);
+                        }
                     }
                 }
             }
@@ -1074,39 +1082,41 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         private TimeInterval CreateTimeInterval(TimeInterval timeIntervall)
         {
-            TimeManager timeManager = new TimeManager();
-            TimeInstant start = timeManager.CreateTimeInstant(timeIntervall.StartTime.Precision, (DateTime)timeIntervall.StartTime.Instant);
-            TimeInstant end = timeManager.CreateTimeInstant(timeIntervall.EndTime.Precision, timeIntervall.EndTime.Instant);
+            using (TimeManager timeManager = new TimeManager())
+            {
+                TimeInstant start = timeManager.CreateTimeInstant(timeIntervall.StartTime.Precision, (DateTime)timeIntervall.StartTime.Instant);
+                TimeInstant end = timeManager.CreateTimeInstant(timeIntervall.EndTime.Precision, timeIntervall.EndTime.Instant);
 
-            return timeManager.CreateTimeInterval(start, end);
+                return timeManager.CreateTimeInterval(start, end);
+            }  
         }
 
         private Person CreatePerson(List<PersonInConstraint> forPersons)
         {
-            SubjectManager subManager = new SubjectManager();
-            PersonManager pManager = new PersonManager();
-
-            if (forPersons.Count() > 1)
+            using (SubjectManager subManager = new SubjectManager())
+            using (PersonManager pManager = new PersonManager())
             {
-                List<User> users = new List<User>();
-                foreach (PersonInConstraint user in forPersons)
+                if (forPersons.Count() > 1)
                 {
-                    User u = subManager.Subjects.Where(a => a.Id == user.UserId).FirstOrDefault() as User;
-                    users.Add(u);
+                    List<User> users = new List<User>();
+                    foreach (PersonInConstraint user in forPersons)
+                    {
+                        User u = subManager.Subjects.Where(a => a.Id == user.UserId).FirstOrDefault() as User;
+                        users.Add(u);
+                    }
+                    return pManager.CreatePersonGroup(users);
                 }
-                return pManager.CreatePersonGroup(users);
-            }
-            else
-            {
-                User u = subManager.Subjects.Where(a => a.Id == forPersons[0].UserId).FirstOrDefault() as User;
-                return pManager.CreateIndividualPerson(u);
+                else
+                {
+                    User u = subManager.Subjects.Where(a => a.Id == forPersons[0].UserId).FirstOrDefault() as User;
+                    return pManager.CreateIndividualPerson(u);
+                }
             }
         }
 
         private Person UpdatePerson(List<PersonInConstraint> forPersons)
         {
-            UserManager userManager = new UserManager();
-
+            using (UserManager userManager = new UserManager())
             using (var pManager = new PersonManager())
             {
                 Person newPerson = new Person();
@@ -1460,30 +1470,32 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult ChooseDependencyObject(string selectedObject, int index)
         {
-            switch (selectedObject)
+            using (ResourceManager rManager = new ResourceManager())
             {
-                case "Single Resource":
-                    ResourceManager rManager = new ResourceManager();
-                    List<SingleResource> resources = rManager.GetAllResources().ToList();
-                    List<ResourceManagerModel> listSingleResources = new List<ResourceManagerModel>();
+                switch (selectedObject)
+                {
+                    case "Single Resource":
 
-                    foreach(SingleResource sr in resources)
-                    {
-                        ResourceManagerModel rmm = new ResourceManagerModel(sr);
-                        rmm.Index = index;
-                        listSingleResources.Add(rmm);
-                    }
+                        List<SingleResource> resources = rManager.GetAllResources().ToList();
+                        List<ResourceManagerModel> listSingleResources = new List<ResourceManagerModel>();
 
-                    //resources.ToList().ForEach(r => listSingleResources.Add(new ResourceManagerModel(r)));
-                    return PartialView("_chooseSingleResource", listSingleResources);
-                case "Resource Group":
-                    ResourceManager rgManager = new ResourceManager();
-                    List<ResourceGroup> resourceGroups = rgManager.GetAllResourceGroups().ToList();
-                    List<ResourceGroupManagerModel> listResourceGroups = new List<ResourceGroupManagerModel>();
-                    resourceGroups.ToList().ForEach(r => listResourceGroups.Add(new ResourceGroupManagerModel(r)));
-                    return PartialView("_chooseResourceGroup", listResourceGroups);
-                default:
-                   return PartialView("");                    
+                        foreach (SingleResource sr in resources)
+                        {
+                            ResourceManagerModel rmm = new ResourceManagerModel(sr);
+                            rmm.Index = index;
+                            listSingleResources.Add(rmm);
+                        }
+
+                        //resources.ToList().ForEach(r => listSingleResources.Add(new ResourceManagerModel(r)));
+                        return PartialView("_chooseSingleResource", listSingleResources);
+                    case "Resource Group":
+                        List<ResourceGroup> resourceGroups = rManager.GetAllResourceGroups().ToList();
+                        List<ResourceGroupManagerModel> listResourceGroups = new List<ResourceGroupManagerModel>();
+                        resourceGroups.ToList().ForEach(r => listResourceGroups.Add(new ResourceGroupManagerModel(r)));
+                        return PartialView("_chooseResourceGroup", listResourceGroups);
+                    default:
+                        return PartialView("");
+                }
             }
         }
 

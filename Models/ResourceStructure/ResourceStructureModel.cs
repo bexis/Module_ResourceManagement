@@ -60,38 +60,40 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure
             AllResourceStructures = new List<ResourceStructureModel>();
             ResourceStructureAttributeUsages = new List<ResourceStructureAttributeUsageModel>();
 
-            ResourceStructureManager rManager = new ResourceStructureManager();
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-
-            if (resourceStructure.Parent != null)
+            using (ResourceStructureManager rManager = new ResourceStructureManager())
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
             {
-                RSE.ResourceStructure parent = rManager.GetResourceStructureById(resourceStructure.Parent.Id);
-                Parent = Convert(parent);
-                //Get Parent attributes(usages) and add it to ResourceStructureAttributeUsages List
-                List<ResourceAttributeUsage> parentUsages = rsaManager.GetResourceStructureAttributeUsagesByRSId(Parent.Id);
-                if (parentUsages.Count > 0)
+
+                if (resourceStructure.Parent != null)
                 {
-                    foreach (ResourceAttributeUsage usage in parentUsages)
+                    RSE.ResourceStructure parent = rManager.GetResourceStructureById(resourceStructure.Parent.Id);
+                    Parent = Convert(parent);
+                    //Get Parent attributes(usages) and add it to ResourceStructureAttributeUsages List
+                    List<ResourceAttributeUsage> parentUsages = rsaManager.GetResourceStructureAttributeUsagesByRSId(Parent.Id);
+                    if (parentUsages.Count > 0)
                     {
-                        ResourceStructureAttributeUsages.Add(new ResourceStructureAttributeUsageModel(usage.Id, usage.ResourceStructureAttribute.Id, Parent.Name));
+                        foreach (ResourceAttributeUsage usage in parentUsages)
+                        {
+                            ResourceStructureAttributeUsages.Add(new ResourceStructureAttributeUsageModel(usage.Id, usage.ResourceStructureAttribute.Id, Parent.Name));
+                        }
                     }
                 }
-            }
-            else
-                Parent = null;
+                else
+                    Parent = null;
 
-            
-            List<ResourceAttributeUsage> usages = rsaManager.GetResourceStructureAttributeUsagesByRSId(resourceStructure.Id);
 
-            if(usages.Count > 0)
-            {
-                foreach (ResourceAttributeUsage usage in usages)
+                List<ResourceAttributeUsage> usages = rsaManager.GetResourceStructureAttributeUsagesByRSId(resourceStructure.Id);
+
+                if (usages.Count > 0)
                 {
-                    ResourceStructureAttributeUsages.Add(new ResourceStructureAttributeUsageModel(usage.Id, usage.ResourceStructureAttribute.Id, null));
+                    foreach (ResourceAttributeUsage usage in usages)
+                    {
+                        ResourceStructureAttributeUsages.Add(new ResourceStructureAttributeUsageModel(usage.Id, usage.ResourceStructureAttribute.Id, null));
+                    }
                 }
+
+                SelectedItem = new ResourceStructureAttributeModel();
             }
-           
-            SelectedItem = new ResourceStructureAttributeModel();
         }
 
 
@@ -99,40 +101,44 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure
 
         public void FillRSM()
         {
-            ResourceStructureManager m = new ResourceStructureManager();
-            List<RSE.ResourceStructure> list = m.GetAllResourceStructures().ToList();
-            foreach (RSE.ResourceStructure r in list)
+            using (ResourceStructureManager m = new ResourceStructureManager())
             {
-               this.AllResourceStructures.Add(Convert(r));
+                List<RSE.ResourceStructure> list = m.GetAllResourceStructures().ToList();
+                foreach (RSE.ResourceStructure r in list)
+                {
+                    this.AllResourceStructures.Add(Convert(r));
+                }
             }
         }
 
         public ResourceStructureModel Convert(RSE.ResourceStructure resourceStructure)
         {
-           
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-            List<ResourceAttributeUsage> usages = rsaManager.GetResourceStructureAttributeUsagesByRSId(resourceStructure.Id);
-            List<ResourceStructureAttributeUsageModel> list = new List<ResourceStructureAttributeUsageModel>();
 
-            if (usages != null)
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
             {
-                foreach (ResourceAttributeUsage usage in usages)
-                {
-                    list.Add(new ResourceStructureAttributeUsageModel(usage.Id));
-                }
-            }
+                List<ResourceAttributeUsage> usages = rsaManager.GetResourceStructureAttributeUsagesByRSId(resourceStructure.Id);
+                List<ResourceStructureAttributeUsageModel> list = new List<ResourceStructureAttributeUsageModel>();
 
-            return new ResourceStructureModel()
-             {
-                 Id = resourceStructure.Id,
-                 Name = resourceStructure.Name,
-                 Description = resourceStructure.Description,
-                 ResourceStructureAttributeUsages = list,
-                 //Children = resourceStructure.Children.ToList()
-                 //Parent = new ResourceStructureModel(resourceStructure.Parent),
-                 SelectedItem = new ResourceStructureAttributeModel(),
-                 AllResourceStructures = new List<ResourceStructureModel>()
-             };
+                if (usages != null)
+                {
+                    foreach (ResourceAttributeUsage usage in usages)
+                    {
+                        list.Add(new ResourceStructureAttributeUsageModel(usage.Id));
+                    }
+                }
+
+                return new ResourceStructureModel()
+                {
+                    Id = resourceStructure.Id,
+                    Name = resourceStructure.Name,
+                    Description = resourceStructure.Description,
+                    ResourceStructureAttributeUsages = list,
+                    //Children = resourceStructure.Children.ToList()
+                    //Parent = new ResourceStructureModel(resourceStructure.Parent),
+                    SelectedItem = new ResourceStructureAttributeModel(),
+                    AllResourceStructures = new List<ResourceStructureModel>()
+                };
+            }
         }
     }
 
@@ -178,34 +184,36 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure
             EditAccess = false;
             DeleteAccess = false;
 
-            ResourceStructureManager rManager = new ResourceStructureManager();
-
-            if (resourceStructure.Parent != null)
+            using (ResourceStructureManager rManager = new ResourceStructureManager())
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
             {
-                RSE.ResourceStructure parent = rManager.GetResourceStructureById(resourceStructure.Parent.Id);
-                Parent = parent.Name;
-            }
-            else
-                Parent = "";
 
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-            List<ResourceAttributeUsage> usages = rsaManager.GetResourceStructureAttributeUsagesByRSId(resourceStructure.Id);
-            List<ResourceAttributeUsageModel> list = new List<ResourceAttributeUsageModel>();
-            List<string> listNames = new List<string>();
-            if (usages != null)
-            {
-                foreach (ResourceAttributeUsage usage in usages)
+                if (resourceStructure.Parent != null)
                 {
-                    list.Add(new ResourceAttributeUsageModel(usage));
+                    RSE.ResourceStructure parent = rManager.GetResourceStructureById(resourceStructure.Parent.Id);
+                    Parent = parent.Name;
                 }
+                else
+                    Parent = "";
+
+                List<ResourceAttributeUsage> usages = rsaManager.GetResourceStructureAttributeUsagesByRSId(resourceStructure.Id);
+                List<ResourceAttributeUsageModel> list = new List<ResourceAttributeUsageModel>();
+                List<string> listNames = new List<string>();
+                if (usages != null)
+                {
+                    foreach (ResourceAttributeUsage usage in usages)
+                    {
+                        list.Add(new ResourceAttributeUsageModel(usage));
+                    }
+                }
+
+
+                if (list != null)
+                    listNames = list.Select(e => e.ResourceStructureAttribute.Name).ToList();
+
+                ResourceStructureAttributesNames = listNames;
+
             }
-
-          
-          if(list != null)
-              listNames = list.Select(e => e.ResourceStructureAttribute.Name).ToList();
-
-            ResourceStructureAttributesNames = listNames;
-
         }
     }
 
@@ -234,23 +242,25 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure
             Description = resourceStructure.Description;
             Locked = false;
 
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-            List<ResourceAttributeUsage> usages = rsaManager.GetResourceStructureAttributeUsagesByRSId(resourceStructure.Id);
-            List<ResourceStructureAttributeModel> list = new List<ResourceStructureAttributeModel>();
-            List<string> listNames = new List<string>();
-            if (usages != null)
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
             {
-                foreach (ResourceAttributeUsage usage in usages)
+                List<ResourceAttributeUsage> usages = rsaManager.GetResourceStructureAttributeUsagesByRSId(resourceStructure.Id);
+                List<ResourceStructureAttributeModel> list = new List<ResourceStructureAttributeModel>();
+                List<string> listNames = new List<string>();
+                if (usages != null)
                 {
-                    list.Add(new ResourceStructureAttributeModel(usage.ResourceStructureAttribute));
+                    foreach (ResourceAttributeUsage usage in usages)
+                    {
+                        list.Add(new ResourceStructureAttributeModel(usage.ResourceStructureAttribute));
+                    }
                 }
+
+
+                if (list != null)
+                    listNames = list.Select(e => e.AttributeName).ToList();
+
+                ResourceStructureAttributesNames = listNames;
             }
-
-
-            if (list != null)
-                listNames = list.Select(e => e.AttributeName).ToList();
-
-            ResourceStructureAttributesNames = listNames;
         }
     }
 }

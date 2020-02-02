@@ -104,32 +104,40 @@ namespace BExIS.Modules.RBM.UI.Controllers
             // Remove dublicate booking events in resources list (without filter not dublicates, but with)
             eventList = eventList.GroupBy(x => x.Id).Select(x => x.First()).ToList();
 
-         
+
             foreach (BookingEvent e in eventList)
             {
 
-                BookingEventModel m = new BookingEventModel(e);
 
-                m.startDate = m.Schedules.Select(a => a.ScheduleDurationModel.StartDate).ToList().Min();
-                m.endDate = m.Schedules.Select(a => a.ScheduleDurationModel.EndDate).ToList().Max();
-                m.ResourceName = string.Join<string>(",", (m.Schedules.Select(a => a.ResourceName)).ToList());
-                List<string> attributes = new List<string>();
+      
+         
+                    BookingEventModel m = new BookingEventModel(e);
 
-                foreach (var c in m.Schedules.Select(a => a.ResourceAttributeValues).ToList())
-                {
+                    m.startDate = m.Schedules.Select(a => a.ScheduleDurationModel.StartDate).ToList().Min();
+                    m.endDate = m.Schedules.Select(a => a.ScheduleDurationModel.EndDate).ToList().Max();
+                    m.ResourceName = string.Join<string>(",", (m.Schedules.Select(a => a.ResourceName)).ToList());
+                    List<string> attributes = new List<string>();
 
-                    // Assumption the first attribute (domain value) is of importance -> show it in the list
-                    ResourceAttributeValue value = c.First();
-                    if (value is TextValue)
+
+
+
+
+                    foreach (var c in m.Schedules.Select(a => a.ResourceAttributeValues).ToList())
                     {
-                        TextValue tv = (TextValue)value;
-                        attributes.Add(tv.Value.ToString());
-                    }
-                }
-                m.ResourceAttributes = string.Join<string>(",", attributes.Distinct());
 
-                model.Add(m);
-            }
+                        // Assumption the first attribute (domain value) is of importance -> show it in the list
+                        ResourceAttributeValue value = c.First();
+                        if (value is TextValue)
+                        {
+                            TextValue tv = (TextValue)value;
+                            attributes.Add(tv.Value.ToString());
+                        }
+                    }
+                    m.ResourceAttributes = string.Join<string>(",", attributes.Distinct());
+
+                    model.Add(m);
+                }
+            
 
             //model = model.OrderByDescending(a => a.startDate).ToList();
 
@@ -257,7 +265,17 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         List<Schedule> allSchedules = schManager.GetAllSchedules().ToList();
 
                         //get all scheduled resources
-                        List<SingleResource> resourcesList = srManager.GetAllResources().ToList();
+                        List<SingleResource> resourcesList;
+                        if (Session["resourcesList"] == null)
+                        {
+                            resourcesList = srManager.GetAllResources().ToList();
+                            Session["resourcesList"] = resourcesList;
+                        }
+                        else
+                        {
+                            resourcesList = (List<SingleResource>)Session["resourcesList"];
+                        }
+                       
 
                         List<ResourceFilterHelper.FilterTreeItem> filterList = new List<ResourceFilterHelper.FilterTreeItem>();
                         //split Id and DomainItem and add it to a FilterItem list
@@ -291,12 +309,20 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                         List<ResourceAttributeValueModel> treeDomainList = new List<ResourceAttributeValueModel>();
 
-                        //Create for each Resource TreeDomainModel witch includes all Attribute Ids and all values
-                        foreach (SingleResource r in resourcesList)
-                        {
-                            ResourceAttributeValueModel treeDomainModel = new ResourceAttributeValueModel(r);
-                            treeDomainList.Add(treeDomainModel);
+                        if (Session["treeDomainModel"] == null) {
+                            //Create for each Resource TreeDomainModel witch includes all Attribute Ids and all values
+                            foreach (SingleResource r in resourcesList)
+                            {
+                                ResourceAttributeValueModel treeDomainModel = new ResourceAttributeValueModel(r);
+                                treeDomainList.Add(treeDomainModel);
+                            }
+                            Session["treeDomainModel"] = treeDomainList;
                         }
+                        else
+                        {
+                            treeDomainList = (List<ResourceAttributeValueModel>)Session["treeDomainModel"];
+                        }
+                        
 
                         //Dictionary to save every Filter (domain items) to one attr
                         Dictionary<long, List<string>> filterDic = ResourceFilterHelper.GetFilterDic(filterList);

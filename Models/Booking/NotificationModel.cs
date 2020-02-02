@@ -167,9 +167,11 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
             //Get all dependencies for the notification
             NotificationDependencies = new List<NotificationDependencyModel>();
-            NotificationManager nManager = new NotificationManager();
-            List<NotificationDependency> ndList = nManager.GetNotificationDependenciesByNotification(notification.Id);
-            ndList.ToList().ForEach(r => NotificationDependencies.Add(new NotificationDependencyModel(r)));
+            using (NotificationManager nManager = new NotificationManager())
+            {
+                List<NotificationDependency> ndList = nManager.GetNotificationDependenciesByNotification(notification.Id);
+                ndList.ToList().ForEach(r => NotificationDependencies.Add(new NotificationDependencyModel(r)));
+            }
         }
     }
 

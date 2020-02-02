@@ -75,105 +75,132 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<ResourceAttributeValueModel> treeDomainList = new List<ResourceAttributeValueModel>();
             List<SelectResourceForEventModel> resultFromTreeFilter = new List<SelectResourceForEventModel>();
 
-            ResourceManager rManager = new ResourceManager();
-
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-            List<SingleResource> resources = rManager.GetAllResources().ToList();
-
-            //Create for each Resource TreeDomainModel witch includes all Attribute Ids and all values
-            foreach (SingleResource r in resources)
+            using (ResourceManager rManager = new ResourceManager())
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
             {
-                ResourceAttributeValueModel treeDomainModel = new ResourceAttributeValueModel(r);
-                treeDomainList.Add(treeDomainModel);
-            }
 
-            //else
-            //{
-            //    List<SelectResourceForEventModel> tempResults = new List<SelectResourceForEventModel>();
-            //    tempResults = (List<SelectResourceForEventModel>)Session["FilterResults"];
-            //    foreach (SelectResourceForEventModel tempResult in tempResults)
-            //    {
-            //        treeDomainList.Add(new ResourceAttributeValueModel(rManager.GetResourceById(tempResult.Id)));
-            //    }
-
-            //}
-
-            List<ResourceFilterHelper.FilterTreeItem> filterList = new List<ResourceFilterHelper.FilterTreeItem>();
-
-            //split Id and DomainItem and add it to a FilterItem list
-            foreach (string item in items)
-            {
-                //index 0 = attrbute id, index1 domainvalue
-                List<string> i = item.Split('_').ToList();
-                ResourceFilterHelper.FilterTreeItem filterItem = new ResourceFilterHelper.FilterTreeItem();
-                filterItem.Id = Convert.ToInt64(i[0]);
-                filterItem.Value = i[1].ToString();
-                filterList.Add(filterItem);
-            }
-
-
-            //Dictionary to save every Filter (domain items) to one attr
-            Dictionary<long, List<string>> filterDic = ResourceFilterHelper.GetFilterDic(filterList);
-
-            List<ResourceAttributeValueModel> temp = new List<ResourceAttributeValueModel>();
-
-            //check for every TreeDomainModel (resource) if fits the filter
-            foreach (ResourceAttributeValueModel m in treeDomainList)
-            {
-                if (ResourceFilterHelper.CheckTreeDomainModel(m, filterDic))
+                //List<SingleResource> resources = rManager.GetAllResources().ToList();
+                //get all scheduled resources
+                List<SingleResource> resources;
+                if (Session["resourcesList"] == null)
                 {
-                    resultFromTreeFilter.Add(new SelectResourceForEventModel(m.Resource));
+                    resources = rManager.GetAllResources().ToList();
+                    Session["resourcesList"] = resources;
                 }
+                else
+                {
+                    resources = (List<SingleResource>)Session["resourcesList"];
+                }
+
+                //Create for each Resource TreeDomainModel witch includes all Attribute Ids and all values
+                if (Session["treeDomainModel"] == null)
+                {
+                    //Create for each Resource TreeDomainModel witch includes all Attribute Ids and all values
+                    foreach (SingleResource r in resources)
+                    {
+                        ResourceAttributeValueModel treeDomainModel = new ResourceAttributeValueModel(r);
+                        treeDomainList.Add(treeDomainModel);
+                    }
+                    Session["treeDomainModel"] = treeDomainList;
+                }
+                else
+                {
+                    treeDomainList = (List<ResourceAttributeValueModel>)Session["treeDomainModel"];
+                }
+
+
+                //else
+                //{
+                //    List<SelectResourceForEventModel> tempResults = new List<SelectResourceForEventModel>();
+                //    tempResults = (List<SelectResourceForEventModel>)Session["FilterResults"];
+                //    foreach (SelectResourceForEventModel tempResult in tempResults)
+                //    {
+                //        treeDomainList.Add(new ResourceAttributeValueModel(rManager.GetResourceById(tempResult.Id)));
+                //    }
+
+                //}
+
+                List<ResourceFilterHelper.FilterTreeItem> filterList = new List<ResourceFilterHelper.FilterTreeItem>();
+
+                //split Id and DomainItem and add it to a FilterItem list
+                foreach (string item in items)
+                {
+                    //index 0 = attrbute id, index1 domainvalue
+                    List<string> i = item.Split('_').ToList();
+                    ResourceFilterHelper.FilterTreeItem filterItem = new ResourceFilterHelper.FilterTreeItem();
+                    filterItem.Id = Convert.ToInt64(i[0]);
+                    filterItem.Value = i[1].ToString();
+                    filterList.Add(filterItem);
+                }
+
+
+                //Dictionary to save every Filter (domain items) to one attr
+                Dictionary<long, List<string>> filterDic = ResourceFilterHelper.GetFilterDic(filterList);
+
+                List<ResourceAttributeValueModel> temp = new List<ResourceAttributeValueModel>();
+
+                //check for every TreeDomainModel (resource) if fits the filter
+                foreach (ResourceAttributeValueModel m in treeDomainList)
+                {
+                    if (ResourceFilterHelper.CheckTreeDomainModel(m, filterDic))
+                    {
+                        resultFromTreeFilter.Add(new SelectResourceForEventModel(m.Resource));
+                    }
+                }
+
+                List<SelectResourceForEventModel> endResultList = new List<SelectResourceForEventModel>();
+                ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
+                if (Session["Filter"] != null)
+                    filter = (ResourceFilterHelper.Filter)Session["Filter"];
+
+                //if filter is set apply it on the results
+                if (filter.IsSet == true)
+                {
+                    endResultList = ResourceFilterHelper.ApplyFilter(resultFromTreeFilter, filter);
+                }
+                else
+                    endResultList = resultFromTreeFilter;
+
+                Session["TreeFilterResults"] = endResultList;
+
+                return PartialView("_gridResources", endResultList);
             }
-
-            List<SelectResourceForEventModel> endResultList = new List<SelectResourceForEventModel>();
-            ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
-            if (Session["Filter"] != null)
-                filter = (ResourceFilterHelper.Filter)Session["Filter"];
-
-            //if filter is set apply it on the results
-            if (filter.IsSet == true)
-            {
-                endResultList = ResourceFilterHelper.ApplyFilter(resultFromTreeFilter, filter);
-            }
-            else
-                endResultList = resultFromTreeFilter;
-
-            Session["TreeFilterResults"] = endResultList;
-
-            return PartialView("_gridResources", endResultList);
         }
 
         public ActionResult ApplyFilter(string startdate, string enddate, string quantity)
-        {
-            Session["Filter"] = null;
-
-            ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
-            filter.StartDate = DateTime.Parse(startdate);
-            filter.EndDate = DateTime.Parse(enddate);
-            filter.Quantity = int.Parse(quantity);
-            filter.IsSet = true;
-
-            Session["Filter"] = filter;
-            List<SelectResourceForEventModel> resourcesEventList = new List<SelectResourceForEventModel>();
-
-            //if the user choose already a treefilter then the results in the session and apply filter on this results
-            if (Session["TreeFilterResults"] != null)
             {
-                resourcesEventList = (List<SelectResourceForEventModel>)Session["TreeFilterResults"];
-            }
-            else
+                Session["Filter"] = null;
+
+                ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
+                filter.StartDate = DateTime.Parse(startdate);
+                filter.EndDate = DateTime.Parse(enddate);
+                filter.Quantity = int.Parse(quantity);
+                filter.IsSet = true;
+
+                Session["Filter"] = filter;
+                List<SelectResourceForEventModel> resourcesEventList = new List<SelectResourceForEventModel>();
+
+            using (ResourceManager rManager = new ResourceManager())
             {
-                ResourceManager rManager = new ResourceManager();
-                List<SingleResource> resources = rManager.GetAllResources().ToList();
-                resources.ForEach(r => resourcesEventList.Add(new SelectResourceForEventModel(r)));
+                //if the user choose already a treefilter then the results in the session and apply filter on this results
+                if (Session["TreeFilterResults"] != null)
+                {
+                    resourcesEventList = (List<SelectResourceForEventModel>)Session["TreeFilterResults"];
+                }
+                else
+                {
+
+                    List<SingleResource> resources = rManager.GetAllResources().ToList();
+                    resources.ForEach(r => resourcesEventList.Add(new SelectResourceForEventModel(r)));
+                }
+
+                List<SelectResourceForEventModel> resultList = new List<SelectResourceForEventModel>();
+                resultList = ResourceFilterHelper.ApplyFilter(resourcesEventList, filter);
+                Session["FilterResults"] = resultList;
+
+                return PartialView("_gridResources", resultList);
             }
-
-            List<SelectResourceForEventModel> resultList = new List<SelectResourceForEventModel>();
-            resultList = ResourceFilterHelper.ApplyFilter(resourcesEventList, filter);
-            Session["FilterResults"] = resultList;
-
-            return PartialView("_gridResources", resultList);
+            
         }
 
 
@@ -1063,12 +1090,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult EditScheduleActivities(long id)
         {
-            BookingEventManager eManager = new BookingEventManager();
-            BookingEvent e = eManager.GetBookingEventById(id);
-            List<ActivityEventModel> model = new List<ActivityEventModel>();
-            //e.Activities.ToList().ForEach(r => model.Add(new ActivityEventModel(r)));
+            using (BookingEventManager eManager = new BookingEventManager())
+            {
+                BookingEvent e = eManager.GetBookingEventById(id);
+                List<ActivityEventModel> model = new List<ActivityEventModel>();
+                //e.Activities.ToList().ForEach(r => model.Add(new ActivityEventModel(r)));
 
-            return PartialView("_enterActivities", model);
+                return PartialView("_enterActivities", model);
+            }
         }
 
         #endregion
@@ -1126,9 +1155,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult LoadUsers(string index)
         {
             //Session["ScheduleUsers"] = null;
-
-
-
 
 
             // retreive list of all users 
@@ -1276,61 +1302,63 @@ namespace BExIS.Modules.RBM.UI.Controllers
             BookingEventModel eventM = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = eventM.Schedules.Where(a => a.Index == int.Parse(scheduleIndex)).FirstOrDefault();
 
-            SubjectManager subManager = new SubjectManager();
-
-            //List<PersonUser> personGroup = new List<PersonUser>();
-            var userIdsBefore = tempSchedule.ForPersons.Select(a => a.UserId).ToList();
-
-            if (tempSchedule.ForPersons != null)
+            using (SubjectManager subManager = new SubjectManager())
             {
-                foreach (PersonInSchedule pUser in tempSchedule.ForPersons)
+
+                //List<PersonUser> personGroup = new List<PersonUser>();
+                var userIdsBefore = tempSchedule.ForPersons.Select(a => a.UserId).ToList();
+
+                if (tempSchedule.ForPersons != null)
                 {
-                    if (pUser.IsContactPerson == true)
+                    foreach (PersonInSchedule pUser in tempSchedule.ForPersons)
                     {
-                        tempSchedule.Contact = pUser;
-                        tempSchedule.ContactName = UserHelper.GetPartyByUserId(pUser.UserId).Name;
-                    }
-                    //PersonUser pu = tempSchedule.ForPersons.Select(a=>a.UserId == userId).FirstOrDefault();
-                    if (!userIdsBefore.Contains(pUser.UserId))
-                    {
-                        tempSchedule.ForPersons.Add(pUser);
+                        if (pUser.IsContactPerson == true)
+                        {
+                            tempSchedule.Contact = pUser;
+                            tempSchedule.ContactName = UserHelper.GetPartyByUserId(pUser.UserId).Name;
+                        }
+                        //PersonUser pu = tempSchedule.ForPersons.Select(a=>a.UserId == userId).FirstOrDefault();
+                        if (!userIdsBefore.Contains(pUser.UserId))
+                        {
+                            tempSchedule.ForPersons.Add(pUser);
+                        }
                     }
                 }
-            }
-            //else
-            //{
-            //    if (!userIdsBefore.Contains(sEventUser[0].UserId))
-            //    {
-            //        if (sEventUser[0].IsContactPerson == true)
-            //        {
-            //            tempSchedule.Contact = sEventUser[0];
-            //            tempSchedule.ContactName = sEventUser[0].UserFullName;
-            //        }
-            //        tempSchedule.ForPersons.Add(sEventUser[0]);
-            //    }
-            //}
+                //else
+                //{
+                //    if (!userIdsBefore.Contains(sEventUser[0].UserId))
+                //    {
+                //        if (sEventUser[0].IsContactPerson == true)
+                //        {
+                //            tempSchedule.Contact = sEventUser[0];
+                //            tempSchedule.ContactName = sEventUser[0].UserFullName;
+                //        }
+                //        tempSchedule.ForPersons.Add(sEventUser[0]);
+                //    }
+                //}
 
-            if (tempSchedule.ForPersons != null)
-            {
-                tempSchedule.ForPersons.ForEach(a =>
+                if (tempSchedule.ForPersons != null)
                 {
-                    a.EditAccess = tempSchedule.EditAccess;
-                    a.EditMode = tempSchedule.EditMode;
-                    Party partyPerson = UserHelper.GetPartyByUserId(a.UserId);
-                    a.UserFullName = partyPerson.Name;
+                    tempSchedule.ForPersons.ForEach(a =>
+                    {
+                        a.EditAccess = tempSchedule.EditAccess;
+                        a.EditMode = tempSchedule.EditMode;
+                        Party partyPerson = UserHelper.GetPartyByUserId(a.UserId);
+                        a.UserFullName = partyPerson.Name;
                     //get party type attribute value
                     a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
-                });
-            }
+                    });
+                }
 
 
 
                 //get index of modify schedule and update it in the session list
                 var i = eventM.Schedules.FindIndex(p => p.Index == tempSchedule.Index);
-            eventM.Schedules[i] = tempSchedule;
-            Session["Event"] = eventM;
+                eventM.Schedules[i] = tempSchedule;
+                Session["Event"] = eventM;
 
-            return PartialView("_scheduleUsers", tempSchedule.ForPersons);
+                return PartialView("_scheduleUsers", tempSchedule.ForPersons);
+            }
         }
 
         //open widow to show all users wich are related to one schedule
@@ -1400,30 +1428,26 @@ namespace BExIS.Modules.RBM.UI.Controllers
             Session["ScheduleActivities"] = null;
 
             List<ActivityEventModel> model = new List<ActivityEventModel>();
-            ActivityManager aManager = new ActivityManager();
-            List<Activity> activities = aManager.GetAllAvailableActivityById().ToList();
-
-            
-
-            BookingEventModel sEventM = (BookingEventModel)Session["Event"];
-
-            ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
-            Session["ScheduleActivities"] = tempSchedule.Activities;
-            List<long> tempActivityIds = tempSchedule.Activities.Select(c => c.Id).ToList();
-            foreach (Activity a in activities)
+            using (ActivityManager aManager = new ActivityManager())
             {
-                ActivityEventModel ae = new ActivityEventModel(a);
-                ae.Index = int.Parse(index);
-                if (tempActivityIds.Contains(a.Id))
+                List<Activity> activities = aManager.GetAllAvailableActivityById().ToList();
+                BookingEventModel sEventM = (BookingEventModel)Session["Event"];
+
+                ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
+                Session["ScheduleActivities"] = tempSchedule.Activities;
+                List<long> tempActivityIds = tempSchedule.Activities.Select(c => c.Id).ToList();
+                foreach (Activity a in activities)
                 {
-                    ae.IsSelected = true;
+                    ActivityEventModel ae = new ActivityEventModel(a);
+                    ae.Index = int.Parse(index);
+                    if (tempActivityIds.Contains(a.Id))
+                    {
+                        ae.IsSelected = true;
+                    }
+                    model.Add(ae);
                 }
-                model.Add(ae);
+                return PartialView("_chooseActivities", model);
             }
-
-           
-
-            return PartialView("_chooseActivities", model);
         }
 
         public ActionResult ChangeSelectedActivity(string activityId, string selected, string index)
@@ -1432,23 +1456,25 @@ namespace BExIS.Modules.RBM.UI.Controllers
             if (model == null)
                 model = new List<ActivityEventModel>();
 
-            ActivityManager aManager = new ActivityManager();
-            ActivityEventModel activity = new ActivityEventModel(aManager.GetActivityById(long.Parse(activityId)));
-
-            if (selected == "true")
+            using (ActivityManager aManager = new ActivityManager())
             {
-                activity.Index = int.Parse(index);
-                model.Add(activity);
-            }
-            else
-            {
-                int i = model.FindIndex(a => a.Id == long.Parse(activityId));
-                model.RemoveAt(i);
-            }
+                ActivityEventModel activity = new ActivityEventModel(aManager.GetActivityById(long.Parse(activityId)));
 
-            Session["ScheduleActivities"] = model;
+                if (selected == "true")
+                {
+                    activity.Index = int.Parse(index);
+                    model.Add(activity);
+                }
+                else
+                {
+                    int i = model.FindIndex(a => a.Id == long.Parse(activityId));
+                    model.RemoveAt(i);
+                }
 
-            return new EmptyResult();
+                Session["ScheduleActivities"] = model;
+
+                return new EmptyResult();
+            }
         }
 
         //Temp adding user to schedule
@@ -1462,16 +1488,18 @@ namespace BExIS.Modules.RBM.UI.Controllers
             BookingEventModel eventM = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = eventM.Schedules.Where(a => a.Index == int.Parse(scheduleIndex)).FirstOrDefault();
 
-            ActivityManager aManager = new ActivityManager();
+            using (ActivityManager aManager = new ActivityManager())
+            {
 
-            if (sScheduleActivities != null && sScheduleActivities.Any()) tempSchedule.Activities = sScheduleActivities;
-        
-            //get index of modify schedule and update it in the session list
-            var i = eventM.Schedules.FindIndex(p => p.Index == tempSchedule.Index);
-            eventM.Schedules[i] = tempSchedule;
-            Session["Event"] = eventM;
+                if (sScheduleActivities != null && sScheduleActivities.Any()) tempSchedule.Activities = sScheduleActivities;
 
-            return PartialView("_showActivities", tempSchedule.Activities);
+                //get index of modify schedule and update it in the session list
+                var i = eventM.Schedules.FindIndex(p => p.Index == tempSchedule.Index);
+                eventM.Schedules[i] = tempSchedule;
+                Session["Event"] = eventM;
+
+                return PartialView("_showActivities", tempSchedule.Activities);
+            }
         }
 
         //open window to show all activities wich are related to one schedule
@@ -1588,23 +1616,24 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         private int GetQuantityLeftOnTime(long resourceId, DateTime startDate, DateTime endDate)
         {
-            ResourceManager rManger = new ResourceManager();
-            ScheduleManager schManager = new ScheduleManager();
-
-            int quantityLeft = 0;
-            SingleResource sr = rManger.GetResourceById(resourceId);
-            List<Schedule> schedules = schManager.GetAllSchedulesByResource(resourceId);
-
-            //count quantity which is used in schedules
-            int countQinSchedules = 0;
-            foreach (Schedule s in schedules)
+            using (ResourceManager rManger = new ResourceManager())
+            using (ScheduleManager schManager = new ScheduleManager())
             {
-                countQinSchedules = countQinSchedules + s.Quantity;
+                int quantityLeft = 0;
+                SingleResource sr = rManger.GetResourceById(resourceId);
+                List<Schedule> schedules = schManager.GetAllSchedulesByResource(resourceId);
+
+                //count quantity which is used in schedules
+                int countQinSchedules = 0;
+                foreach (Schedule s in schedules)
+                {
+                    countQinSchedules = countQinSchedules + s.Quantity;
+                }
+
+                quantityLeft = sr.Quantity - countQinSchedules;
+
+                return quantityLeft;
             }
-
-            quantityLeft = sr.Quantity - countQinSchedules;
-
-            return quantityLeft;
         }
 
         public bool CheckResourceAvailability(long id, string startDate, string endDate)
@@ -1615,51 +1644,51 @@ namespace BExIS.Modules.RBM.UI.Controllers
             DateTime.TryParse(endDate, out inputEnd);
 
             bool available = false;
-            ResourceManager rManger = new ResourceManager();
-            ScheduleManager schManager = new ScheduleManager();
-
-            SingleResource resource = rManger.GetResourceById(id);
-            List<Schedule> resourceSchedules = schManager.GetAllSchedulesByResource(id);
-            List<Schedule> temp = new List<Rbm.Entities.Booking.Schedule>();
-            foreach (Schedule sch in resourceSchedules)
+            using (ResourceManager rManger = new ResourceManager())
+            using (ScheduleManager schManager = new ScheduleManager())
             {
-                //if ((inputStart >= sch.StartDate && inputStart <= sch.EndDate) || (inputEnd >= sch.StartDate && inputEnd <= sch.EndDate))
-                if ((DateTime.Compare(inputStart.Date, sch.StartDate.Date) >= 0 && DateTime.Compare(inputStart.Date, sch.EndDate.Date) <= 0) || (DateTime.Compare(inputEnd.Date, sch.StartDate.Date) >= 0 && DateTime.Compare(inputEnd.Date, sch.EndDate.Date) <= 0))
+
+                SingleResource resource = rManger.GetResourceById(id);
+                List<Schedule> resourceSchedules = schManager.GetAllSchedulesByResource(id);
+                List<Schedule> temp = new List<Rbm.Entities.Booking.Schedule>();
+                foreach (Schedule sch in resourceSchedules)
                 {
-                    temp.Add(sch);
-                    //if (resourceSchedules.Count() >= resource.Quantity)
-                    //{
-                    //    available = false;
-                    //    break;
-                    //}
+                    //if ((inputStart >= sch.StartDate && inputStart <= sch.EndDate) || (inputEnd >= sch.StartDate && inputEnd <= sch.EndDate))
+                    if ((DateTime.Compare(inputStart.Date, sch.StartDate.Date) >= 0 && DateTime.Compare(inputStart.Date, sch.EndDate.Date) <= 0) || (DateTime.Compare(inputEnd.Date, sch.StartDate.Date) >= 0 && DateTime.Compare(inputEnd.Date, sch.EndDate.Date) <= 0))
+                    {
+                        temp.Add(sch);
+                        //if (resourceSchedules.Count() >= resource.Quantity)
+                        //{
+                        //    available = false;
+                        //    break;
+                        //}
+                        //else
+                        //    available = true;
+                    }
                     //else
                     //    available = true;
                 }
-                //else
-                //    available = true;
-            }
 
-            if (temp.Count() > 0)
-            {
-                int bookedQuantity = 0;
-                foreach (Schedule s in temp)
+                if (temp.Count() > 0)
                 {
-                    bookedQuantity = bookedQuantity + s.Quantity;
-                }
+                    int bookedQuantity = 0;
+                    foreach (Schedule s in temp)
+                    {
+                        bookedQuantity = bookedQuantity + s.Quantity;
+                    }
 
-                if (bookedQuantity >= resource.Quantity)
-                {
-                    available = false;
+                    if (bookedQuantity >= resource.Quantity)
+                    {
+                        available = false;
+                    }
+                    else
+                        available = true;
                 }
                 else
                     available = true;
+
+                return available;
             }
-            else
-                available = true;
-
-
-
-            return available;
         }
 
         //if resource not avaiable then open widow with alternatives
@@ -1685,35 +1714,37 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<SingleResource> similarResources = new List<SingleResource>();
             List<string> DomainItems = new List<string>();
 
-            ResourceManager srManager = new ResourceManager();
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-            SingleResource sr = srManager.GetResourceById(resourceId);
-
-            //first get all DomainItem values from this resource
-            foreach (ResourceAttributeUsage usage in sr.ResourceStructure.ResourceAttributeUsages)
+            using (ResourceManager srManager = new ResourceManager())
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
             {
-                ResourceStructureAttribute a = usage.ResourceStructureAttribute;
-                if (a.Constraints.Count() > 0)
+                SingleResource sr = srManager.GetResourceById(resourceId);
+
+                //first get all DomainItem values from this resource
+                foreach (ResourceAttributeUsage usage in sr.ResourceStructure.ResourceAttributeUsages)
                 {
-                    foreach (Dlm.Entities.DataStructure.Constraint c in a.Constraints)
+                    ResourceStructureAttribute a = usage.ResourceStructureAttribute;
+                    if (a.Constraints.Count() > 0)
                     {
-                        if (c is DomainConstraint)
+                        foreach (Dlm.Entities.DataStructure.Constraint c in a.Constraints)
                         {
-                            TextValue value = rsaManager.GetTextValueByUsageAndResource(usage.Id, resourceId);
-                            
-                            if(value!=null)DomainItems.Add(value.Value);
+                            if (c is DomainConstraint)
+                            {
+                                TextValue value = rsaManager.GetTextValueByUsageAndResource(usage.Id, resourceId);
+
+                                if (value != null) DomainItems.Add(value.Value);
+                            }
                         }
                     }
                 }
-            }
 
-            List<long> resources = rsaManager.GetResourcesByValues(DomainItems);
-            foreach (long r in resources)
-            {
-                similarResources.Add(srManager.GetResourceById(r));
-            }
+                List<long> resources = rsaManager.GetResourcesByValues(DomainItems);
+                foreach (long r in resources)
+                {
+                    similarResources.Add(srManager.GetResourceById(r));
+                }
 
-            return similarResources;
+                return similarResources;
+            }
         }
 
         public ActionResult LoadSimilarResources(string index, string id)
@@ -1736,24 +1767,24 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult UseSimilarResources(List<AlternateEventResource> model)
         {
             BookingEventModel sEventM = (BookingEventModel)Session["Event"];
-            ResourceManager srManager = new ResourceManager();
-
-            foreach (AlternateEventResource r in model)
+            using (ResourceManager srManager = new ResourceManager())
             {
-                if (r.isChoosen == true)
+                foreach (AlternateEventResource r in model)
                 {
-                    SingleResource sr = srManager.GetResourceById(r.ResourceId);
-                    ScheduleEventModel tempSchedule = new ScheduleEventModel(sr);
-                    tempSchedule.ScheduleDurationModel.StartDate = r.StartDate;
-                    tempSchedule.ScheduleDurationModel.EndDate = r.EndDate;
-                    tempSchedule.Index = sEventM.Schedules.Count() + 1;
-                    sEventM.Schedules.Add(tempSchedule);
+                    if (r.isChoosen == true)
+                    {
+                        SingleResource sr = srManager.GetResourceById(r.ResourceId);
+                        ScheduleEventModel tempSchedule = new ScheduleEventModel(sr);
+                        tempSchedule.ScheduleDurationModel.StartDate = r.StartDate;
+                        tempSchedule.ScheduleDurationModel.EndDate = r.EndDate;
+                        tempSchedule.Index = sEventM.Schedules.Count() + 1;
+                        sEventM.Schedules.Add(tempSchedule);
+                    }
                 }
+
+                Session["Event"] = sEventM;
+                return Json(new { success = true });
             }
-
-
-            Session["Event"] = sEventM;
-            return Json(new { success = true });
         }
 
 
@@ -1766,22 +1797,24 @@ namespace BExIS.Modules.RBM.UI.Controllers
             try
             {
                 AlternateEventResource a = model.AlternateResources.Where(d => d.ResourceId == long.Parse(chooseAlternateResource)).FirstOrDefault();
-                ResourceManager srManager = new ResourceManager();
-                SingleResource sr = srManager.GetResourceById(long.Parse(chooseAlternateResource));
 
-                ScheduleEventModel tempSchedule = new ScheduleEventModel(sr);
-                tempSchedule.ScheduleDurationModel.StartDate = a.StartDate;
-                tempSchedule.ScheduleDurationModel.EndDate = a.EndDate;
+                using (ResourceManager srManager = new ResourceManager())
+                {
+                    SingleResource sr = srManager.GetResourceById(long.Parse(chooseAlternateResource));
+                    ScheduleEventModel tempSchedule = new ScheduleEventModel(sr);
+                    tempSchedule.ScheduleDurationModel.StartDate = a.StartDate;
+                    tempSchedule.ScheduleDurationModel.EndDate = a.EndDate;
 
-                //Remove currentResource
-                var i = sEventM.Schedules.FindIndex(p => p.Index == Convert.ToInt64(model.Index));
-                sEventM.Schedules.RemoveAt(i);
+                    //Remove currentResource
+                    var i = sEventM.Schedules.FindIndex(p => p.Index == Convert.ToInt64(model.Index));
+                    sEventM.Schedules.RemoveAt(i);
 
-                //give new event schedule a index
-                tempSchedule.Index = sEventM.Schedules.Count() + 1;
+                    //give new event schedule a index
+                    tempSchedule.Index = sEventM.Schedules.Count() + 1;
 
-                //Add alternative to event schedules
-                sEventM.Schedules.Add(tempSchedule);
+                    //Add alternative to event schedules
+                    sEventM.Schedules.Add(tempSchedule);
+                }
             }
             catch (Exception e)
             {
@@ -1811,73 +1844,75 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         private List<Notification> CheckNotificationForSchedule(ScheduleEventModel schedule)
         {
-            NotificationManager nManager = new NotificationManager();
-            ResourceManager rManager = new ResourceManager();
-            ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager();
-
-            List<Notification> notificationList = nManager.GetNotificationsByTimePeriod(schedule.ScheduleDurationModel.StartDate, schedule.ScheduleDurationModel.EndDate);
-            List<Notification> resultList = new List<Notification>();
-
-            if (notificationList.Count() > 0)
+            using (NotificationManager nManager = new NotificationManager())
+            using (ResourceManager rManager = new ResourceManager())
+            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
             {
-                SingleResource resource = rManager.GetResourceById(schedule.ResourceId);
 
-                List<long> attributeIds = new List<long>();
-                List<TextValue> values = new List<TextValue>();
-                foreach (ResourceAttributeUsage u in resource.ResourceStructure.ResourceAttributeUsages)
+
+
+                List<Notification> notificationList = nManager.GetNotificationsByTimePeriod(schedule.ScheduleDurationModel.StartDate, schedule.ScheduleDurationModel.EndDate);
+                List<Notification> resultList = new List<Notification>();
+
+                if (notificationList.Count() > 0)
                 {
-                    if (u.IsFileDataType == false)
+                    SingleResource resource = rManager.GetResourceById(schedule.ResourceId);
+
+                    List<long> attributeIds = new List<long>();
+                    List<TextValue> values = new List<TextValue>();
+                    foreach (ResourceAttributeUsage u in resource.ResourceStructure.ResourceAttributeUsages)
                     {
-                        if (u.ResourceStructureAttribute.Constraints.Count > 0)
+                        if (u.IsFileDataType == false)
                         {
-                            TextValue v = rsaManager.GetTextValueByUsageAndResource(u.Id, schedule.ResourceId);
-                            values.Add(v);
+                            if (u.ResourceStructureAttribute.Constraints.Count > 0)
+                            {
+                                TextValue v = rsaManager.GetTextValueByUsageAndResource(u.Id, schedule.ResourceId);
+                                values.Add(v);
+                            }
                         }
                     }
-                }
-                List<NotificationDependency> deps = new List<NotificationDependency>();
-                foreach (Notification n in notificationList)
-                {
-                    List<NotificationDependency> depList = nManager.GetNotificationDependenciesByNotification(n.Id);
-
-
-                    var param1 = Expression.Parameter(typeof(NotificationDependency), "p");
-                    Expression exp1 = null;
-
-                    foreach (TextValue tv in values)
+                    List<NotificationDependency> deps = new List<NotificationDependency>();
+                    foreach (Notification n in notificationList)
                     {
-                        if (tv == null) break;
+                        List<NotificationDependency> depList = nManager.GetNotificationDependenciesByNotification(n.Id);
 
-                        //query += string.Format("tmp.AttributeId == {0} && tmp.DomainItem == {1}", tv.ResourceAttributeUsage.ResourceStructureAttribute.Id, tv.Value);
-                        var exp = Expression.AndAlso(
 
-                            Expression.Equal(
-                              Expression.Property(param1, "AttributeId"),
-                              Expression.Constant(tv.ResourceAttributeUsage.ResourceStructureAttribute.Id)
-                              ),
-                            Expression.Equal(
-                              Expression.Property(param1, "DomainItem"),
-                              Expression.Constant(tv.Value)
-                              )
+                        var param1 = Expression.Parameter(typeof(NotificationDependency), "p");
+                        Expression exp1 = null;
 
-                            );
-                        if (exp1 == null)
-                            exp1 = exp;
-                        else
-                            exp1 = Expression.Or(exp1, exp);
+                        foreach (TextValue tv in values)
+                        {
+                            if (tv == null) break;
+
+                            //query += string.Format("tmp.AttributeId == {0} && tmp.DomainItem == {1}", tv.ResourceAttributeUsage.ResourceStructureAttribute.Id, tv.Value);
+                            var exp = Expression.AndAlso(
+
+                                Expression.Equal(
+                                  Expression.Property(param1, "AttributeId"),
+                                  Expression.Constant(tv.ResourceAttributeUsage.ResourceStructureAttribute.Id)
+                                  ),
+                                Expression.Equal(
+                                  Expression.Property(param1, "DomainItem"),
+                                  Expression.Constant(tv.Value)
+                                  )
+
+                                );
+                            if (exp1 == null)
+                                exp1 = exp;
+                            else
+                                exp1 = Expression.Or(exp1, exp);
+                        }
+
+                        var typedExpression = Expression.Lambda<Func<NotificationDependency, bool>>(exp1, new ParameterExpression[] { param1 });
+                        deps = depList.AsQueryable().Where(typedExpression).ToList();
+
+                        if (deps.Count() == values.Count())
+                            resultList.Add(n);
                     }
-
-                    var typedExpression = Expression.Lambda<Func<NotificationDependency, bool>>(exp1, new ParameterExpression[] { param1 });
-                    deps = depList.AsQueryable().Where(typedExpression).ToList();
-
-                    if (deps.Count() == values.Count())
-                        resultList.Add(n);
                 }
+
+                return resultList;
             }
-
-
-            return resultList;
-
         }
 
         Expression<Func<NotificationDependency, bool>> MakePredicate(int id)
@@ -1925,14 +1960,16 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult DownloadFile(string id)
         {
-            ResourceStructureAttributeManager valueManager = new ResourceStructureAttributeManager();
-            FileValue value = valueManager.GetFileValueById(long.Parse(id));
+            using (ResourceStructureAttributeManager valueManager = new ResourceStructureAttributeManager())
+            {
+                FileValue value = valueManager.GetFileValueById(long.Parse(id));
 
-            FileValue fv = (FileValue)value;
-            byte[] contents = fv.Data;
+                FileValue fv = (FileValue)value;
+                byte[] contents = fv.Data;
 
 
-            return File(contents, fv.Minmetype);
+                return File(contents, fv.Minmetype);
+            }
         }
 
         public ActionResult OnChangeFileConfirmation(string resourceId)
@@ -2009,17 +2046,21 @@ namespace BExIS.Modules.RBM.UI.Controllers
         //in show event view
         public ActionResult ShowActivities(long Id)
         {
-            BookingEventManager eManager = new BookingEventManager();
-            BookingEvent e = eManager.GetBookingEventById(Id);
-            return PartialView("_showActivities", new ShowEventModel(e));
+            using (BookingEventManager eManager = new BookingEventManager())
+            {
+                BookingEvent e = eManager.GetBookingEventById(Id);
+                return PartialView("_showActivities", new ShowEventModel(e));
+            }
         }
 
         //in show event view
         public ActionResult ShowSchedules(long Id)
         {
-            BookingEventManager eManager = new BookingEventManager();
-            BookingEvent e = eManager.GetBookingEventById(Id);
-            return PartialView("_showSchedules", new ShowEventModel(e));
+            using (BookingEventManager eManager = new BookingEventManager())
+            {
+                BookingEvent e = eManager.GetBookingEventById(Id);
+                return PartialView("_showSchedules", new ShowEventModel(e));
+            }
         }
 
 
@@ -2029,13 +2070,15 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult Delete(long id)
         {
-            BookingEventManager eManager = new BookingEventManager();
-            BookingEvent e = eManager.GetBookingEventById(id);
+            using (BookingEventManager eManager = new BookingEventManager())
+            {
+                BookingEvent e = eManager.GetBookingEventById(id);
 
-            SendNotificationHelper.SendBookingNotification(SendNotificationHelper.BookingAction.deleted, new BookingEventModel(e));
-            eManager.DeleteBookingEvent(e);
-            
-            return RedirectToAction("Calendar", "Calendar");
+                SendNotificationHelper.SendBookingNotification(SendNotificationHelper.BookingAction.deleted, new BookingEventModel(e));
+                eManager.DeleteBookingEvent(e);
+
+                return RedirectToAction("Calendar", "Calendar");
+            }
         }
 
         #endregion
@@ -2149,45 +2192,47 @@ namespace BExIS.Modules.RBM.UI.Controllers
         private int GetAvailableQuantity(long resourceId, int resourceQuantity, DateTime startDate, DateTime endDate, int requestQuantity, long scheduleId)
         {
             int availableQuantity = 0;
-            ScheduleManager schManager = new ScheduleManager();
-            List<Schedule> allSchedules = schManager.GetAllSchedulesByResource(resourceId);
-            int schedulesQuantity = 0;
-
-            foreach (Schedule s in allSchedules)
+            using (ScheduleManager schManager = new ScheduleManager())
             {
-                if (s.Id != scheduleId)
+                List<Schedule> allSchedules = schManager.GetAllSchedulesByResource(resourceId);
+                int schedulesQuantity = 0;
+
+                foreach (Schedule s in allSchedules)
                 {
-                    //get all schedule in the given time period
-                    if ((DateTime.Compare(startDate, s.StartDate) >= 0 && DateTime.Compare(endDate, s.EndDate) <= 0) || (DateTime.Compare(endDate, s.StartDate) >= 0 && DateTime.Compare(startDate, s.EndDate) <= 0))
+                    if (s.Id != scheduleId)
                     {
-                        //Count all quantities in in time schedules to get schedulesQuantity
-                        schedulesQuantity = schedulesQuantity + s.Quantity;
+                        //get all schedule in the given time period
+                        if ((DateTime.Compare(startDate, s.StartDate) >= 0 && DateTime.Compare(endDate, s.EndDate) <= 0) || (DateTime.Compare(endDate, s.StartDate) >= 0 && DateTime.Compare(startDate, s.EndDate) <= 0))
+                        {
+                            //Count all quantities in in time schedules to get schedulesQuantity
+                            schedulesQuantity = schedulesQuantity + s.Quantity;
+                        }
                     }
                 }
-            }
 
-            availableQuantity = resourceQuantity - schedulesQuantity;
+                availableQuantity = resourceQuantity - schedulesQuantity;
 
-            //check schedules which are temporary in den Event
-            BookingEventModel eventM = (BookingEventModel)Session["Event"];
-            List<ScheduleEventModel> tempSchedules = eventM.Schedules.Where(a => a.ResourceId == resourceId).ToList();
-            if (tempSchedules.Count > 1)
-            {
-                int tempScheduleQuantity = 0;
-                foreach (ScheduleEventModel t in tempSchedules)
+                //check schedules which are temporary in den Event
+                BookingEventModel eventM = (BookingEventModel)Session["Event"];
+                List<ScheduleEventModel> tempSchedules = eventM.Schedules.Where(a => a.ResourceId == resourceId).ToList();
+                if (tempSchedules.Count > 1)
                 {
-                    //if (t.ResourceId != resourceId)
-                    //{
-                    if ((DateTime.Compare(startDate, t.ScheduleDurationModel.StartDate) >= 0 && DateTime.Compare(endDate, t.ScheduleDurationModel.EndDate) <= 0) || (DateTime.Compare(endDate, t.ScheduleDurationModel.StartDate) >= 0 && DateTime.Compare(startDate, t.ScheduleDurationModel.EndDate) <= 0))
+                    int tempScheduleQuantity = 0;
+                    foreach (ScheduleEventModel t in tempSchedules)
                     {
-                        tempScheduleQuantity = tempScheduleQuantity + t.ScheduleQuantity;
+                        //if (t.ResourceId != resourceId)
+                        //{
+                        if ((DateTime.Compare(startDate, t.ScheduleDurationModel.StartDate) >= 0 && DateTime.Compare(endDate, t.ScheduleDurationModel.EndDate) <= 0) || (DateTime.Compare(endDate, t.ScheduleDurationModel.StartDate) >= 0 && DateTime.Compare(startDate, t.ScheduleDurationModel.EndDate) <= 0))
+                        {
+                            tempScheduleQuantity = tempScheduleQuantity + t.ScheduleQuantity;
+                        }
+                        //}
                     }
-                    //}
+                    availableQuantity = availableQuantity - tempScheduleQuantity;
                 }
-                availableQuantity = availableQuantity - tempScheduleQuantity;
-            }
 
-            return availableQuantity;
+                return availableQuantity;
+            }
         }
 
         #endregion
