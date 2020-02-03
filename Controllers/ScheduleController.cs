@@ -266,9 +266,13 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
                     filter = (ResourceFilterHelper.Filter)Session["Filter"];
                     results = ResourceFilterHelper.ApplyFilter(allResourceList, filter);
+                    Session["TreeFilterResults"] = results;
                 }
                 else
+                {
                     results = allResourceList;
+                    Session["TreeFilterResults"] = results;
+                 }
 
                 return PartialView("_gridResources", results);
             }
