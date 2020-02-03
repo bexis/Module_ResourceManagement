@@ -37,28 +37,28 @@
         )
 
             .BindTo<AttributeDomainItemsModel>(Model.TreeItems.Distinct(), (item, attribute) =>
+            {
+                item.Text = attribute.AttrName;
+                item.Value = attribute.AttrId.ToString();
+                item.Checkable = false;
+                item.Checked = false;
+                item.Expanded = true;
+
+                foreach (BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.DomainItemModel di in attribute.DomainItems)
                 {
-                    item.Text = attribute.AttrName;
-                    item.Value = attribute.AttrId.ToString();
-                    item.Checkable = false;
-                    item.Checked = false;
-                    item.Expanded = true;
+                    TreeViewItem subitem = new TreeViewItem();
+                    item.Items.Add(subitem);
 
-                    foreach (BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure.DomainItemModel di in attribute.DomainItems)
-                    {
-                        TreeViewItem subitem = new TreeViewItem();
-                        item.Items.Add(subitem);
+                    subitem.Text = di.Key;
+                    subitem.Value = di.Key;
+                    subitem.LinkHtmlAttributes["id"] = attribute.AttrId;
+                    subitem.LinkHtmlAttributes["class"] = "domainItem";
 
-                        subitem.Text = di.Key;
-                        subitem.Value = di.Key;
-                        subitem.LinkHtmlAttributes["id"] = attribute.AttrId;
-                        subitem.LinkHtmlAttributes["class"] = "domainItem";
-
-            //subitem.Action("OnSelectTreeViewItem", "Schedule", new RouteValueDictionary { { "area", "RBM" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
-        }
+                    //subitem.Action("OnSelectTreeViewItem", "Schedule", new RouteValueDictionary { { "area", "RBM" }, { "SelectedItem", subitem.Value }, { "Parent", item.Value } });
                 }
+            }
         )
-        .ExpandAll(true)
+        .ExpandAll(true);
     )
 
 </div>
@@ -239,7 +239,7 @@
         if ($('#MyBookings').is(':checked')) {
             myBooking = true;
         }
-
+      
 
         if ($('#TreeView>ul>li>ul>li>div :checked').length > 0) {
 
@@ -253,7 +253,7 @@
                 console.log(parentSelect.find("span.domainItem"));
                 var item = attrId + "_" + itemSelect.attr('value');
                 console.log(item);
-                checkedItems.push(item);
+                checkedItems.push(item);        
             });
 
             //convert to string to send it to sever
