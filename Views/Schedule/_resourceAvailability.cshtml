@@ -20,10 +20,10 @@
            <div id='miniCalendar' class="additonalCalendar"></div> 
         </td>
         <td>
-          @Html.Telerik().DateTimePickerFor(m=>m.AlternateStartDate).Value(DateTime.Now)
+          @Html.Telerik().DatePickerFor(m=>m.AlternateStartDate).Value(DateTime.Now)
         </td>
         <td>
-             @Html.Telerik().DateTimePickerFor(m=>m.AlternateEndDate).Value(DateTime.Now)
+             @Html.Telerik().DatePickerFor(m=>m.AlternateEndDate).Value(DateTime.Now)
         </td>
         <td>
             <button type="submit" class="bx-button action" name="changeTimePeriod" id="">OK</button>

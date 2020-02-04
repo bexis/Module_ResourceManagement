@@ -622,7 +622,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         break;
                     case "Start":
                         seModel = model.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
-                        seModel.ScheduleDurationModel.StartDate = DateTime.Parse(value);
+                        seModel.ScheduleDurationModel.StartDate = DateTime.ParseExact(value, "dd.MM.yyyy", null);
                         seModel.ScheduleDurationModel.EndDate = TimeHelper.GetEndDateOfDuration(seModel.ScheduleDurationModel.DurationValue, seModel.ScheduleDurationModel.TimeUnit, seModel.ScheduleDurationModel.StartDate);
                         //get index of modify schedule and update it in the session list
                         i = model.Schedules.FindIndex(p => p.Index == int.Parse(index));
@@ -632,7 +632,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         return PartialView("_showTimePeriod", seModel.ScheduleDurationModel);
                     case "End":
                         seModel = model.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
-                        seModel.ScheduleDurationModel.EndDate = DateTime.Parse(value);
+                        seModel.ScheduleDurationModel.EndDate = DateTime.ParseExact(value, "dd.MM.yyyy", null);
                         //get index of modify schedule and update it in the session list
                         i = model.Schedules.FindIndex(p => p.Index == int.Parse(index));
                         model.Schedules[i] = seModel;
@@ -1729,14 +1729,13 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     ResourceStructureAttribute a = usage.ResourceStructureAttribute;
                     if (a.Constraints.Count() > 0)
                     {
-                        foreach (Dlm.Entities.DataStructure.Constraint c in a.Constraints)
-                        {
+                       foreach (Dlm.Entities.DataStructure.Constraint c in a.Constraints)
+                         {
                             if (c is DomainConstraint)
                             {
                                 TextValue value = rsaManager.GetTextValueByUsageAndResource(usage.Id, resourceId);
-
                                 if (value != null) DomainItems.Add(value.Value);
-                            }
+                            }  
                         }
                     }
                 }

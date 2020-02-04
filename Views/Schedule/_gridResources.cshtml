@@ -21,7 +21,7 @@
         {
            
         columns.Bound(r => r.Name);
-        columns.Bound(r => r.ResourceQuantity).Width("10%").Filterable(false).Title("No.");
+        columns.Bound(r => r.ResourceQuantity).Width("10%").Filterable(false).Title("Max.");
         columns.Template(
                 @<text>
                                 <span title="Select resource"class="bx bx-next bx-button function small" onclick="addResourceToCart('' + @item.Id + '')"/>

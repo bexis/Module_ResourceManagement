@@ -3,17 +3,16 @@
 @using BExIS.Rbm.Entities.BookingManagementTime;
 
 @model ScheduleDurationModel
-<table>
-    <tr>
-    <td style="width:100px;">@Html.LabelFor(m => m.StartDate)</td>
-    <td style="width:250px;">
+<tr>
+    <td style="width:200px;">@Html.LabelFor(m => m.StartDate)</td>
+    <td>
         @if ((Model.EditMode && Model.EditAccess) || Model.EventId == 0)
         {
             if (Model.TimeUnit == SystemDefinedUnit.day || Model.TimeUnit == SystemDefinedUnit.month || Model.TimeUnit == SystemDefinedUnit.week || Model.TimeUnit == SystemDefinedUnit.year)
             {
-               @Html.Telerik().DatePickerFor(m => m.StartDate).Name("Start_" + @Model.Index.ToString()).Value(Model.StartDate).ClientEvents(events => events.OnChange("onChangeControl"))
-             }
-             else
+                @Html.Telerik().DatePickerFor(m => m.StartDate).Name("Start_" + @Model.Index.ToString()).Value(Model.StartDate).ClientEvents(events => events.OnChange("onChangeControl")).Format("dd.MM.yyyy").HtmlAttributes(new { @style = "width: 150px" })
+            }
+            else
             {
                 @Html.Telerik().DateTimePickerFor(m => m.StartDate).Name("Start_" + @Model.Index.ToString()).Value(Model.StartDate).ClientEvents(events => events.OnChange("onChangeControl"))
             }
@@ -22,7 +21,7 @@
         {
             if (Model.TimeUnit == SystemDefinedUnit.day || Model.TimeUnit == SystemDefinedUnit.month || Model.TimeUnit == SystemDefinedUnit.week || Model.TimeUnit == SystemDefinedUnit.year)
             {
-                @Html.Telerik().DatePickerFor(m => m.StartDate).Name("Start_" + @Model.Index.ToString()).Value(Model.StartDate).Enable(false)
+                @Html.Telerik().DatePickerFor(m => m.StartDate).Name("Start_" + @Model.Index.ToString()).Value(Model.StartDate).Enable(false).Format("dd.MM.yyyy").HtmlAttributes(new { @style = "width: 150px" })
 
             }
             else
@@ -32,37 +31,38 @@
         }
 
     </td>
-    <td style="width:100px;">@Html.LabelFor(m => m.EndDate)</td>
-    <td style="width:250px;">
-        @if ((Model.EditMode && Model.EditAccess) || Model.EventId == 0)
+</tr>
+<tr>
+    <td style="width:200px;">@Html.LabelFor(m => m.EndDate)</td>
+    <td>
+    @if ((Model.EditMode && Model.EditAccess) || Model.EventId == 0)
+    {
+        if (Model.TimeUnit == SystemDefinedUnit.day || Model.TimeUnit == SystemDefinedUnit.month || Model.TimeUnit == SystemDefinedUnit.week || Model.TimeUnit == SystemDefinedUnit.year)
         {
-            if (Model.TimeUnit == SystemDefinedUnit.day || Model.TimeUnit == SystemDefinedUnit.month || Model.TimeUnit == SystemDefinedUnit.week || Model.TimeUnit == SystemDefinedUnit.year)
-            {
-                @Html.Telerik().DatePickerFor(m => m.EndDate).Name("End_" + @Model.Index.ToString()).Value(Model.EndDate).ClientEvents(events => events.OnChange("onChangeControl"))
+            @Html.Telerik().DatePickerFor(m => m.EndDate).Name("End_" + @Model.Index.ToString()).Value(Model.EndDate).ClientEvents(events => events.OnChange("onChangeControl")).Format("dd.MM.yyyy").HtmlAttributes(new { @style = "width: 150px" })
 
-            }
-            else {
-
-                @Html.Telerik().DateTimePickerFor(m => m.EndDate).Name("End_" + @Model.Index.ToString()).Value(Model.EndDate).ClientEvents(events => events.OnChange("onChangeControl"))
-            }
         }
         else
         {
-            if (Model.TimeUnit == SystemDefinedUnit.day || Model.TimeUnit == SystemDefinedUnit.month || Model.TimeUnit == SystemDefinedUnit.week || Model.TimeUnit == SystemDefinedUnit.year)
-            {
-                @Html.Telerik().DatePickerFor(m => m.EndDate).Name("End_" + @Model.Index.ToString()).Value(Model.EndDate).Enable(false)
-            }
-            else
-            {
-                @Html.Telerik().DateTimePickerFor(m => m.EndDate).Name("End_" + @Model.Index.ToString()).Value(Model.EndDate).Enable(false)
-            }
 
+            @Html.Telerik().DateTimePickerFor(m => m.EndDate).Name("End_" + @Model.Index.ToString()).Value(Model.EndDate).ClientEvents(events => events.OnChange("onChangeControl"))
         }
+    }
+    else
+    {
+        if (Model.TimeUnit == SystemDefinedUnit.day || Model.TimeUnit == SystemDefinedUnit.month || Model.TimeUnit == SystemDefinedUnit.week || Model.TimeUnit == SystemDefinedUnit.year)
+        {
+            @Html.Telerik().DatePickerFor(m => m.EndDate).Name("End_" + @Model.Index.ToString()).Value(Model.EndDate).Enable(false).Format("dd.MM.yyyy").HtmlAttributes(new { @style = "width: 150px" })
+        }
+        else
+        {
+            @Html.Telerik().DateTimePickerFor(m => m.EndDate).Name("End_" + @Model.Index.ToString()).Value(Model.EndDate).Enable(false)
+        }
+
+    }
     </td>
+</tr>
 
-
-    </tr>
-</table>
 
 <script type="text/javascript">
 

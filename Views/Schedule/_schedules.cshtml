@@ -29,14 +29,27 @@
        
                 <b>@Html.DisplayFor(m => m[i].ResourceName)</b>
                 
-                <div style="float:right; padding-right:5px"><small>Number: @Html.DisplayFor(m => m[i].ResourceQuantity)</small></div>  
+                <div style="float:right; padding-right:15px">
+                   @* @if (Model[i].ResourceQuantity > 0)
+                    {
+                    <small>Max. Number: @Html.DisplayFor(m => m[i].ResourceQuantity)</small>
+                    } *@
+                    @if (Model[i].DeleteAccess || Model[i].EventId == 0)
+                    {
+                        <span class="bx bx-grid-function bx-trash" id="" onclick="RemoveScheduleFromEvent(@Model[i].Index)" title="Remove schedule from event"></span><br />
+                    }
+
+                </div>  
                
            
     </div>
     <div class="itemContent" id="scheduleDetails_@Model[i].Index" style="display: none; border-left:2px solid black; border-right:2px solid black; border-bottom:2px solid black;">
         <table style="width:100%;">
             <tr>
-                <td colspan="4" style="width:200px"><div id="timePeriod_@Model[i].Index"></div></td>
+                <td colspan="4" style="width:200px">
+                    <div id="timePeriod_@Model[i].Index"></div>
+
+                </td>
                 <td>
                     <small>@Html.ValidationMessage("DateMismatch_" + Model[i].Index.ToString())</small><br />
                     <small>@Html.ValidationMessage("DurationError_" + Model[i].Index.ToString())</small><br />
@@ -44,16 +57,13 @@
                 <td rowspan="6" style="text-align: right">
                     @if ((Model[i].EditMode && Model[i].EditAccess) || Model[i].EventId == 0)
                     {
-                        <div class="controlPanel">
-                            @if (Model[i].DeleteAccess || Model[i].EventId == 0)
-                            {
-                                <span class="bx bx-grid-function bx-trash" id="" onclick="RemoveScheduleFromEvent(@Model[i].Index)" title="Remove schedule from event"></span><br />
-                            }
-                            <span id="availability_@Model[i].ResourceId" class="bx bx-grid-function fa-calendar-o" onclick="OnClickCheckAvailability(@Model[i].Index,@Model[i].ResourceId)" title="Check availability for the defined time period and quantity"></span><br />
-                            <span id="@Model[i].ResourceId" class="bx bx-grid-function fa-copy" onclick="OnClickCopy(@Model[i].Index, @Model[i].EventId)" title="Copy the whole resource schedule"></span><br />
-                            <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-filter" onclick="OnClickShowSimilar(@Model[i].Index,@Model[i].ResourceId)" title="Show similar resources"></span><br />
-                            <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-reply-all" onclick="useValuesForAll(@Model[i].Index)" title="Use filled values for all other schedules"></span>
-                        </div>
+                    <div class="controlPanel">
+                      
+                        <span id="availability_@Model[i].ResourceId" class="bx bx-grid-function fa-calendar-o" onclick="OnClickCheckAvailability(@Model[i].Index,@Model[i].ResourceId)" title="Check availability for the defined time period and quantity"></span>
+                        <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-filter" onclick="OnClickShowSimilar(@Model[i].Index,@Model[i].ResourceId)" title="Show similar resources"></span><br />
+                        <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-reply-all" onclick="useValuesForAll(@Model[i].Index)" title="Use filled values for all other schedules"></span>
+                        <span id="@Model[i].ResourceId" class="bx bx-grid-function fa-copy" onclick="OnClickCopy(@Model[i].Index, @Model[i].EventId)" title="Copy the whole resource schedule"></span>
+                    </div>
                     }
                 </td>
             </tr>
@@ -87,23 +97,29 @@
                 </td>
             </tr>
             <tr>
-                <td>@Html.LabelFor(m => m[i].ScheduleQuantity)</td>
+                <td>@Html.LabelFor(m => m[i].ScheduleQuantity) 
+                        @if (Model[i].ResourceQuantity > 0)
+                        {
+                            <span>(max. @Model[i].ResourceQuantity )</span>
+                        }
+                </td>
                 <td>
                     @if (Model[i].ResourceQuantity != 0)
                     {
                         if ((Model[i].EditMode && Model[i].EditAccess) || Model[i].EventId == 0)
                         {
-                            @Html.TextBoxFor(m => m[i].ScheduleQuantity, new { OnChange = "onChangeControl(this)", @Name = "Quantity_" + @Model[i].Index.ToString() })
-                        }
-                        else
-                        {
-                            @Html.TextBoxFor(m => m[i].ScheduleQuantity, new { OnChange = "onChangeControl(this)", disabled = "disabled", @Name = "Quantity_" + @Model[i].Index.ToString() })
-                        }
-                    }
-                    else
-                    {
-                        <p>no limitation</p>
-                    }
+                            @Html.TextBoxFor(m => m[i].ScheduleQuantity, new { OnChange = "onChangeControl(this)", @Name = "Quantity_" + @Model[i].Index.ToString() , @style = "width: 30px" })
+                                                    }
+                                                else
+                                                {
+                                                    @Model[i].ScheduleQuantity;
+                                                    //@Html.TextBoxFor(m => m[i].ScheduleQuantity, new { OnChange = "onChangeControl(this)", disabled = "disabled", @Name = "Quantity_" + @Model[i].Index.ToString() })
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <p>no limitation</p>
+                                            }
                 </td>
                 <td></td>
                 <td></td>
@@ -111,6 +127,16 @@
                     <small>@Html.ValidationMessage("Quantity_" + Model[i].Index.ToString())</small>
                 </td>
             </tr>
+            <td colspan="3">
+            @if(Model[i].ResourceQuantity > 0  && Model[i].ResourceName.Contains("Sleeping")){ 
+                <span>Please note, that sleepling places should be booked separate (one by one) within a booking with a maximum number of 1. You can use  <span class="bx bx-grid-function fa-copy" onclick="OnClickCopy(@Model[i].Index, @Model[i].EventId)" title="Copy the whole resource schedule"></span> to copy this resource multiple times.</span> 
+                }
+            </td>
+            <tr>
+
+            </tr>
+
+
             @if (Model[i].WithActivity)
             {
                 <tr>
