@@ -2,7 +2,7 @@
 /*mini fullcalendar for schedules*/
 
 function loadCalendar(res_id, div_id) {
-    $.getScript('~/Areas/RBM/Scripts/fullcalendar/dist/fullcalendar.js', function () {
+    $.getScript('/Areas/RBM/Scripts/fullcalendar/dist/fullcalendar.js', function () {
         //script is loaded and executed put your dependent JS here
 
     var data = {
@@ -15,7 +15,7 @@ function loadCalendar(res_id, div_id) {
 
     var calendar = $(div_id).fullCalendar({
 
-        height: 200,
+        height: 100,
         theme: true,
         header:
        {
@@ -28,7 +28,7 @@ function loadCalendar(res_id, div_id) {
         selectHelper: false,
         editable: false,
 
-        events: function (start, end, timezone, callback) {
+      /*  events: function (start, end, timezone, callback) {
             $.ajax({
                 url: '/RBM/Schedule/GetAllSchedulesFromResource',
                 dataType: 'json',
@@ -53,7 +53,7 @@ function loadCalendar(res_id, div_id) {
                     callback(events);
                 }
             });
-        }
+        }*/
 
     })
     });
