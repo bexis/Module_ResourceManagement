@@ -270,7 +270,7 @@ namespace BExIS.Modules.RBM.UI.Helper
                     ResourceAttributeUsage usage = valueManager.GetResourceAttributeUsageById(1);
                     valueManager.CreateResourceAttributeValue(rs_item.explo, rManager.GetResourceById(resource.Id), usage);
                     ResourceAttributeUsage usage2 = valueManager.GetResourceAttributeUsageById(2);
-                    valueManager.CreateResourceAttributeValue(rs_item.type, rManager.GetResourceById(resource.Id), usage);
+                    valueManager.CreateResourceAttributeValue(rs_item.type, rManager.GetResourceById(resource.Id), usage2);
 
                 }
             }
