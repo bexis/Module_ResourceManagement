@@ -35,7 +35,7 @@
       <many-to-many column="ScheduleRef" class="Schedule"/>
     </set>-->
 
-    <set name="NotificationDependency" inverse="true" cascade="all-delete-orphan" lazy="true">
+    <set name="NotificationDependency" inverse="true" cascade="all-delete-orphan" lazy="false">
       <key column="NotificationRef"/>
       <one-to-many class="BExIS.Rbm.Entities.Booking.NotificationDependency, BExIS.Rbm.Entities.Booking" />
     </set>
