@@ -29,7 +29,7 @@
        
                 <b>@Html.DisplayFor(m => m[i].ResourceName)</b>
                 
-                <div style="float:right; padding-right:15px">
+                <div style="float:right; padding-right:15px; margin-top: -4px;">
                    @* @if (Model[i].ResourceQuantity > 0)
                     {
                     <small>Max. Number: @Html.DisplayFor(m => m[i].ResourceQuantity)</small>
@@ -58,11 +58,11 @@
                     @if ((Model[i].EditMode && Model[i].EditAccess) || Model[i].EventId == 0)
                     {
                     <div class="controlPanel">
-                      
-                        <span id="availability_@Model[i].ResourceId" class="bx bx-grid-function fa-calendar-o" onclick="OnClickCheckAvailability(@Model[i].Index,@Model[i].ResourceId)" title="Check availability for the defined time period and quantity"></span>
-                        <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-filter" onclick="OnClickShowSimilar(@Model[i].Index,@Model[i].ResourceId)" title="Show similar resources"></span><br />
-                        <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-reply-all" onclick="useValuesForAll(@Model[i].Index)" title="Use filled values for all other schedules"></span>
-                        <span id="@Model[i].ResourceId" class="bx bx-grid-function fa-copy" onclick="OnClickCopy(@Model[i].Index, @Model[i].EventId)" title="Copy the whole resource schedule"></span>
+
+                        <div> Check availability  <span id="availability_@Model[i].ResourceId" class="bx bx-grid-function fa-calendar-o" onclick="OnClickCheckAvailability(@Model[i].Index,@Model[i].ResourceId)" title="Check availability for the defined time period and quantity"></span> </div>
+                        <div> Show similar resources  <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-filter" onclick="OnClickShowSimilar(@Model[i].Index,@Model[i].ResourceId)" title="Show similar resources"></span></div>
+                        <div> Copy filled values to all other  <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-reply-all" onclick="useValuesForAll(@Model[i].Index)" title="Use filled values for all other schedules"></span></div>
+                        <div> Copy whole resource  <span id="@Model[i].ResourceId" class="bx bx-grid-function fa-copy" onclick="OnClickCopy(@Model[i].Index, @Model[i].EventId)" title="Copy the whole resource schedule"></span></div>
                     </div>
                     }
                 </td>
@@ -100,7 +100,7 @@
                 <td>@Html.LabelFor(m => m[i].ScheduleQuantity) 
                         @if (Model[i].ResourceQuantity > 0)
                         {
-                            <span>(max. @Model[i].ResourceQuantity )</span>
+                            <span>(max. @Model[i].ResourceQuantity)</span>
                         }
                 </td>
                 <td>
