@@ -1642,10 +1642,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public bool CheckResourceAvailability(long id, string startDate, string endDate)
         {
-            DateTime inputStart;
-            DateTime.TryParse(startDate, out inputStart);
-            DateTime inputEnd;
-            DateTime.TryParse(endDate, out inputEnd);
+            DateTime inputStart = DateTime.ParseExact(startDate, "dd.MM.yyyy", null);
+            DateTime inputEnd = DateTime.ParseExact(endDate, "dd.MM.yyyy", null);
 
             bool available = false;
             using (ResourceManager rManger = new ResourceManager())
@@ -1658,7 +1656,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 foreach (Schedule sch in resourceSchedules)
                 {
                     //if ((inputStart >= sch.StartDate && inputStart <= sch.EndDate) || (inputEnd >= sch.StartDate && inputEnd <= sch.EndDate))
-                    if ((DateTime.Compare(inputStart.Date, sch.StartDate.Date) >= 0 && DateTime.Compare(inputStart.Date, sch.EndDate.Date) <= 0) || (DateTime.Compare(inputEnd.Date, sch.StartDate.Date) >= 0 && DateTime.Compare(inputEnd.Date, sch.EndDate.Date) <= 0))
+       
+                    if ((DateTime.Compare(inputStart.Date, sch.StartDate.Date) >= 0 && DateTime.Compare(inputEnd.Date, sch.EndDate.Date) <= 0) || (DateTime.Compare(inputEnd.Date, sch.StartDate.Date) >= 0 && DateTime.Compare(inputStart.Date, sch.EndDate.Date) <= 0))
                     {
                         temp.Add(sch);
                         //if (resourceSchedules.Count() >= resource.Quantity)
@@ -2205,7 +2204,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     if (s.Id != scheduleId)
                     {
                         //get all schedule in the given time period
-                        if ((DateTime.Compare(startDate, s.StartDate) >= 0 && DateTime.Compare(endDate, s.EndDate) <= 0) || (DateTime.Compare(endDate, s.StartDate) >= 0 && DateTime.Compare(startDate, s.EndDate) <= 0))
+                        if ((DateTime.Compare(startDate.Date, s.StartDate.Date) >= 0 && DateTime.Compare(endDate.Date, s.EndDate.Date) <= 0) || (DateTime.Compare(endDate.Date, s.StartDate.Date) >= 0 && DateTime.Compare(startDate.Date, s.EndDate.Date) <= 0))
                         {
                             //Count all quantities in in time schedules to get schedulesQuantity
                             schedulesQuantity = schedulesQuantity + s.Quantity;
