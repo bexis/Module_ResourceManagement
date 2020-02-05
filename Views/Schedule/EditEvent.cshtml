@@ -12,6 +12,8 @@
 @model BookingEventModel
 
 <script language="javascript" type="text/javascript" src="~/Areas/RBM/Scripts/RBM/rbm.js"></script>
+<link rel='stylesheet' href="@Url.Content("~/Areas/RBM/Scripts/fullcalendar/dist/fullcalendar.css")" />
+<link rel='stylesheet' href="@Url.Content("~/Areas/RBM/Content/main.css")" />
 <div id="Content_Event">
 
 
@@ -110,82 +112,82 @@
 
 @*Windows*@
 
- @(Html.Telerik().Window()
-    .Name("Window_ChooseUsers")
-    .Title("Select user(s)")
-    .Draggable(true)
-    .Modal(true)
-    .Visible(false)
-    .Scrollable(true)
-    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:400px; min-width:800px" })
-    .Content(@<text>
-        <div id="Content_ChooseUsers"></div>
-    </text>)
+@(Html.Telerik().Window()
+        .Name("Window_ChooseUsers")
+        .Title("Select user(s)")
+        .Draggable(true)
+        .Modal(true)
+        .Visible(false)
+        .Scrollable(true)
+        .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:400px; min-width:800px" })
+        .Content(@<text>
+            <div id="Content_ChooseUsers"></div>
+        </text>)
 )
 
 @(Html.Telerik().Window()
-    .Name("Window_ShowUsers")
-    .Title("Selected users")
-    .Draggable(true)
-    .Modal(true)
-    .Visible(false)
-    .Scrollable(true)
-    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
-    .Content(@<text>
-        <div id="Content_ShowUsers"></div>
-    </text>)
+        .Name("Window_ShowUsers")
+        .Title("Selected users")
+        .Draggable(true)
+        .Modal(true)
+        .Visible(false)
+        .Scrollable(true)
+        .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+        .Content(@<text>
+            <div id="Content_ShowUsers"></div>
+        </text>)
 )
 
 @(Html.Telerik().Window()
-    .Name("Window_ShowActivities")
-    .Title("Selected activities")
-    .Draggable(true)
-    .Modal(true)
-    .Visible(false)
-    .Scrollable(true)
-    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
-    .Content(@<text>
-        <div id="Content_ShowActivities"></div>
-    </text>)
-)
-
- @(Html.Telerik().Window()
-    .Name("Window_ChooseActivities")
-    .Title("Select Activities")
-    .Draggable(true)
-    .Modal(true)
-    .Visible(false)
-    .Scrollable(true)
-    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
-    .Content(@<text>
-        <div id="Content_ChooseActivities"></div>
-    </text>)
+        .Name("Window_ShowActivities")
+        .Title("Selected activities")
+        .Draggable(true)
+        .Modal(true)
+        .Visible(false)
+        .Scrollable(true)
+        .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+        .Content(@<text>
+            <div id="Content_ShowActivities"></div>
+        </text>)
 )
 
 @(Html.Telerik().Window()
-    .Name("Window_Availability")
-    .Title("Availability")
-    .Draggable(true)
-    .Modal(true)
-    .Visible(false)
-    .Scrollable(true)
-    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
-    .Content(@<text>
-        <div id="Content_Availability"></div>
-    </text>)
+        .Name("Window_ChooseActivities")
+        .Title("Select Activities")
+        .Draggable(true)
+        .Modal(true)
+        .Visible(false)
+        .Scrollable(true)
+        .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+        .Content(@<text>
+            <div id="Content_ChooseActivities"></div>
+        </text>)
 )
 
 @(Html.Telerik().Window()
-    .Name("Window_Similar")
-    .Title("Similar")
-    .Draggable(true)
-    .Modal(true)
-    .Visible(false)
-    .Scrollable(true)
-    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
-    .Content(@<text>
-        <div id="Content_Similar"></div>
-    </text>)
+        .Name("Window_Availability")
+        .Title("Availability")
+        .Draggable(true)
+        .Modal(true)
+        .Visible(false)
+        .Scrollable(true)
+        .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+        .Content(@<text>
+            <div id="Content_Availability"></div>
+        </text>)
+)
+
+@(Html.Telerik().Window()
+        .Name("Window_Similar")
+        .Title("Similar")
+        .Draggable(true)
+        .Modal(true)
+        .Visible(false)
+        .Scrollable(true)
+        .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+        .Content(@<text>
+            <div id="Content_Similar"></div>
+        </text>)
 )
 
 

@@ -26,7 +26,7 @@
 
     <property name="InsertDate" type="DateTime" />
     
-    <property name="Message" type="String" length="2056" />
+    <property name="Message" type="String" length="2000" />
 
     <!-- Mapping Entity Associations -->
 
