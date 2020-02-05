@@ -10,20 +10,20 @@
       @Html.HiddenFor(m=>m.Index)
  <table class="bx-table-form" style="width: 900px;">
     <tr>
-        <th>Schedule</th>
+        <!--<th>Schedule</th>-->
         <th>Alternate Startdate</th>
         <th>Alternate Enddate</th>
         <th></th>
     </tr>
     <tr>
+        <!-- <td>
+    <div id='miniCalendar' class="additonalCalendar" ></div> deactivate calendar due to css issues
+      </td>-->
         <td>
-           <div id='miniCalendar' class="additonalCalendar"></div> 
+            @Html.Telerik().DatePickerFor(m => m.AlternateStartDate).Value(DateTime.Now)
         </td>
         <td>
-          @Html.Telerik().DatePickerFor(m=>m.AlternateStartDate).Value(DateTime.Now)
-        </td>
-        <td>
-             @Html.Telerik().DatePickerFor(m=>m.AlternateEndDate).Value(DateTime.Now)
+            @Html.Telerik().DatePickerFor(m => m.AlternateEndDate).Value(DateTime.Now)
         </td>
         <td>
             <button type="submit" class="bx-button action" name="changeTimePeriod" id="">OK</button>
@@ -40,7 +40,7 @@
     <hr />
      <table class="bx-table-form" style="width: 900px;">
         <tr>
-        <th>Schedule</th>
+        <th>Resource</th>
         <th>Alternate Startdate</th>
         <th>Alternate Enddate</th>
         <th></th>
@@ -90,7 +90,7 @@
         var array = $(".additonalCalendar");
         for (var i = 0; i < array.length ; i++) {
             var id = array[i].id.split("_")[1];
-            loadCalendar(id, "#miniCalendar_" + id);
+         //   loadCalendar(id, "#miniCalendar_" + id);
         }
 
     })
