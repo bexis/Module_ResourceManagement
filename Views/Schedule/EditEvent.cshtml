@@ -367,12 +367,12 @@
             if (data == "False") {
                 $('#availability_' + id).css('color', 'red');
                 //$("span[id$=" + id + "]").css('color', 'red');
-                window.setTimeout(clickToday, 200);
-                $.get('@Url.Action("LoadResourceAlternatives", "Schedule")', { scheduleIndex: index }, function (data) {
-                    $('#Content_Availability').html(data);
-                    var window = $('#Window_Availability').data('tWindow');
-                    window.center().open();
-                });
+                //window.setTimeout(clickToday, 200);
+                //$.get('@Url.Action("LoadResourceAlternatives", "Schedule")', { scheduleIndex: index }, function (data) {
+                //    $('#Content_Availability').html(data);
+                 //   var window = $('#Window_Availability').data('tWindow');
+                 //   window.center().open();
+               // });
             }
             else {
                 $('#availability_' + id).css('color', 'green');
