@@ -892,16 +892,19 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 scheduleManager.DeleteSchedule(scheduleManager.GetScheduleById(id));
                             }
 
-                            //get user who has created the event/schedule
-                            IndividualPerson createdBy = new IndividualPerson();
-                            User created = userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
-                            createdBy = personManager.CreateIndividualPerson(created);
+
 
                             List<Notification> notifications = new List<Notification>();
 
                             //Create or update all schedules for this event
                             foreach (ScheduleEventModel schedule in model.Schedules)
                             {
+
+                                //get user who has created the event/schedule
+                                IndividualPerson createdBy = new IndividualPerson();
+                                User created = userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
+                                createdBy = personManager.CreateIndividualPerson(created);
+
                                 Schedule newSchedule = new Schedule();
 
                                 int index = 0;
