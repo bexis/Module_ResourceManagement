@@ -6,7 +6,7 @@
     <!-- Mapping BaseEntity properties -->
 
     <id name="Id" type="Int64">
-      <column name="Id" />
+      <column name="Id" index="idx_RBM_ResourceAttributeValues_Id"/>
       <generator class="native" />
     </id>
 
@@ -24,9 +24,9 @@
 
     <!-- Mapping Entity Associations -->
 
-    <many-to-one name="Resource" class="BExIS.Rbm.Entities.Resource.Resource" not-null="true" column="ResourceRef"/>
+    <many-to-one name="Resource" class="BExIS.Rbm.Entities.Resource.Resource" not-null="true" column="ResourceRef" index="idx_RBM_ResourceAttributeValues_ResourceRef"/>
 
-    <many-to-one name="ResourceAttributeUsage" class="BExIS.Rbm.Entities.ResourceStructure.ResourceAttributeUsage" not-null="true" column="ResourceAttributeUsageRef"/>
+    <many-to-one name="ResourceAttributeUsage" class="BExIS.Rbm.Entities.ResourceStructure.ResourceAttributeUsage" not-null="true" column="ResourceAttributeUsageRef" index="idx_RBM_ResourceAttributeValues_ResourceAttributeUsageRef"/>
 
   </class>
 </hibernate-mapping>

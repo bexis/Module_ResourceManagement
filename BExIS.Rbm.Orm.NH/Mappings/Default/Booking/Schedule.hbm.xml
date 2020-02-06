@@ -4,7 +4,7 @@
 
     <!-- Mapping BaseEntity properties -->
     <id name="Id" type="Int64">
-      <column name="Id" />
+      <column name="Id" index="idx_RBM_Schedules_id" />
       <generator class="native" />
     </id>
 
@@ -26,16 +26,16 @@
     <property name="Index" type="Int32" />
 
 
-    <many-to-one name="Resource" class="BExIS.Rbm.Entities.Resource.SingleResource" not-null="true" column="ResourceRef" lazy="false"/>
+    <many-to-one name="Resource" class="BExIS.Rbm.Entities.Resource.SingleResource" not-null="true" column="ResourceRef" index="RBM_Schedules_" lazy="false"/>
 
-    <many-to-one name="BookingEvent" class="BExIS.Rbm.Entities.Booking.BookingEvent" not-null="true"  column="BookingEventRef"/>
+    <many-to-one name="BookingEvent" class="BExIS.Rbm.Entities.Booking.BookingEvent" not-null="true"   column="BookingEventRef" index="idx_RBM_Schedules_BookingEventRef"/>
 
-    <many-to-one name="ByPerson" class="BExIS.Rbm.Entities.Users.Person" not-null="true"  column="ByPerson" lazy="false"/>
+    <many-to-one name="ByPerson" class="BExIS.Rbm.Entities.Users.Person" not-null="true"  column="ByPerson" index="idx_RBM_Schedules_ByPerson" lazy="false"/>
 
-    <many-to-one name="ForPerson" class="BExIS.Rbm.Entities.Users.Person" not-null="true"  column="ForPerson" lazy="false"/>
+    <many-to-one name="ForPerson" class="BExIS.Rbm.Entities.Users.Person" not-null="true"  column="ForPerson" index="idx_RBM_Schedules_ForPerson" lazy="false"/>
 
-    <set name="Activities" table="Schedule_Activity"  cascade="save-update" lazy="false">
-      <key column="ScheduleRef"/>
+    <set name="Activities" table="Schedule_Activity"  cascade="save-update"  lazy="false">
+      <key column="ScheduleRef" />
       <many-to-many column="ActivityRef" class="BExIS.Rbm.Entities.Booking.Activity, BExIS.Rbm.Entities" lazy="false"/>
     </set>
 

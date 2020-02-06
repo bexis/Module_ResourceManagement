@@ -5,7 +5,7 @@
     <!-- Mapping BaseEntity properties -->
     
     <id name="Id" type="Int64">
-      <column name="Id" />
+      <column name="Id" index="idx_RBM_Resources_id"/>
       <generator class="native" />
     </id>
 
@@ -80,12 +80,12 @@
     <many-to-one name="Duration" class="BExIS.Rbm.Entities.BookingManagementTime.TimeDuration, BExIS.Rbm.Entities" column="Duration" unique="true" cascade="all-delete-orphan"/>
 
     <set name="ResourceConstraints" cascade="all-delete-orphan" lazy="true">
-      <key column="ResourceRef"/>
+      <key column="ResourceRef" />
       <one-to-many class="BExIS.Rbm.Entities.ResourceConstraint.ResourceConstraint, BExIS.Rbm.Entities" />
     </set>
 
     <set name="ResourceAttributeValues" cascade="all-delete-orphan" lazy="false">
-      <key column="ResourceRef"/>
+      <key column="ResourceRef" />
       <one-to-many class="BExIS.Rbm.Entities.ResourceStructure.ResourceAttributeValue, BExIS.Rbm.Entities" />
     </set>
 

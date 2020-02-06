@@ -4,7 +4,7 @@
     <!-- Mapping BaseEntity properties -->
 
     <id name="Id" type="Int64">
-      <column name="Id" />
+      <column name="Id" index="idx_RBM_ResourceConstraints_id"/>
       <generator class="native" />
     </id>
 
@@ -44,15 +44,15 @@
 
     <!-- Mapping Entity Associations -->
 
-    <many-to-one name="Resource" class="BExIS.Rbm.Entities.Resource.Resource" column="ResourceRef"/>
+    <many-to-one name="Resource" class="BExIS.Rbm.Entities.Resource.Resource" column="ResourceRef" index="idx_RBM_ResourceConstraints_ResourceRef"/>
 
     <many-to-one name="ForTimeInterval" class="BExIS.Rbm.Entities.BookingManagementTime.TimeInterval" column="ForTimeInterval" cascade="all-delete-orphan"/>
 
     <many-to-one name="ForPeriodicTimeInterval" class="BExIS.Rbm.Entities.BookingManagementTime.PeriodicTimeInterval, BExIS.Rbm.Entities" column="ForPeriodicTimeInterval" cascade="all-delete-orphan" unique="true"/>
 
-    <many-to-one name="ForResource" class="BExIS.Rbm.Entities.Resource.Resource" column="ForResource" cascade="all-delete-orphan"/>
+    <many-to-one name="ForResource" class="BExIS.Rbm.Entities.Resource.Resource" column="ForResource" cascade="all-delete-orphan" index="idx_RBM_ResourceConstraints_ForResource"/>
 
-    <many-to-one name="ForPerson" class="BExIS.Rbm.Entities.Users.Person" column="ForPerson"/>
+    <many-to-one name="ForPerson" class="BExIS.Rbm.Entities.Users.Person" column="ForPerson" index="idx_RBM_ResourceConstraints_ForPerson"/>
 
   </class>
 </hibernate-mapping>

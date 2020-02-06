@@ -4,7 +4,7 @@
 
     <!-- Mapping BaseEntity properties -->
     <id name="Id" type="Int64">
-      <column name="Id" />
+      <column name="Id" index="idy_RBM_BookingEvents_id" />
       <generator class="native" />
     </id>
 
@@ -27,7 +27,7 @@
     <property name="MaxDate" type="DateTime" />
 
     <set name="Schedules" inverse="true" cascade="all-delete-orphan" lazy="false">
-      <key column="BookingEventRef"/>
+      <key column="BookingEventRef" />
       <one-to-many class="BExIS.Rbm.Entities.Booking.Schedule, BExIS.Rbm.Entities.Booking" />
     </set>
 

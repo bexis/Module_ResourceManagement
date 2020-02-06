@@ -4,7 +4,7 @@
 
     <!-- Mapping BaseEntity properties -->
     <id name="Id" type="Int64">
-      <column name="Id" />
+      <column name="Id" index="idx_RBM_Notifications_id" />
       <generator class="native" />
     </id>
 
@@ -36,7 +36,7 @@
     </set>-->
 
     <set name="NotificationDependency" inverse="true" cascade="all-delete-orphan" lazy="false">
-      <key column="NotificationRef"/>
+      <key column="NotificationRef" />
       <one-to-many class="BExIS.Rbm.Entities.Booking.NotificationDependency, BExIS.Rbm.Entities.Booking" />
     </set>
 

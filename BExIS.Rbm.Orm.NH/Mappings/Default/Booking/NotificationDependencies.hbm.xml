@@ -5,7 +5,7 @@
     <!-- Mapping BaseEntity properties -->
 
     <id name="Id" type="Int64">
-      <column name="Id" />
+      <column name="Id" index="idx_RBM_NotificationDependencies_id"/>
       <generator class="native" />
     </id>
 
@@ -17,7 +17,7 @@
 
     <!-- Mapping Entity Associations -->
 
-    <many-to-one name="Notification" column="NotificationRef" class="BExIS.Rbm.Entities.Booking.Notification, BExIS.Rbm.Entities.Booking"/>
+    <many-to-one name="Notification" column="NotificationRef" index="idx_RBM_NotificationDependencies_NotificationRef" class="BExIS.Rbm.Entities.Booking.Notification, BExIS.Rbm.Entities.Booking"/>
 
 
 

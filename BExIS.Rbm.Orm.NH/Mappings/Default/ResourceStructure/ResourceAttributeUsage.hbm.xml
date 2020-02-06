@@ -7,7 +7,7 @@
       <column name="DefaultValue" />
     </property>-->
   <id name="Id" type="Int64">
-    <column name="Id" />
+    <column name="Id" index="idx_RBM_ResourceAttributeUsage_Id"/>
     <generator class="native" />
   </id>
 
@@ -24,10 +24,9 @@
 
 
   <!-- Mapping Entity Associations -->
-    <many-to-one name="ResourceStructureAttribute" class="BExIS.Rbm.Entities.ResourceStructure.ResourceStructureAttribute" not-null="true" column="ResourceStructureAttributeRef" not-found="ignore" />
-    <many-to-one name="ResourceStructure" class="BExIS.Rbm.Entities.ResourceStructure.ResourceStructure" not-null="true" column="ResourceStructureRef"/>
-
-  </class>
+    <many-to-one name="ResourceStructureAttribute" class="BExIS.Rbm.Entities.ResourceStructure.ResourceStructureAttribute" not-null="true" column="ResourceStructureAttributeRef" not-found="ignore" index="idx_RBM_ResourceAttributeUsage_ResourceStructureAttributeRef"/>
+    <many-to-one name="ResourceStructure" class="BExIS.Rbm.Entities.ResourceStructure.ResourceStructure" not-null="true" column="ResourceStructureRef" index="idx_RBM_ResourceAttributeUsage_ResourceStructureRef"/>
+</class>
   
   
   

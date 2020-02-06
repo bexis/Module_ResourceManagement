@@ -5,7 +5,7 @@
     <!-- Mapping BaseEntity properties -->
 
     <id name="Id" type="Int64">
-      <column name="Id" />
+      <column name="Id" index="RBM_ResourceFilterOperator_Id" />
       <generator class="native" />
     </id>
 

@@ -4,7 +4,7 @@
     <!-- Mapping BaseEntity properties -->
 
     <id name="Id" type="Int64">
-      <column name="Id" />
+      <column name="Id" index="idx_RBM_PeriodicTimeInterval_id" />
       <generator class="native" />
     </id>
 
@@ -18,9 +18,9 @@
 
     <!-- Mapping Entity properties -->
 
-    <many-to-one name="PeriodicTimeInstant" class="BExIS.Rbm.Entities.BookingManagementTime.PeriodicTimeInstant, BExIS.Rbm.Entities" column="PeriodicTimeInstant" unique="true" cascade="all-delete-orphan"/>
+    <many-to-one name="PeriodicTimeInstant" class="BExIS.Rbm.Entities.BookingManagementTime.PeriodicTimeInstant, BExIS.Rbm.Entities" column="PeriodicTimeInstant" unique="true" cascade="all-delete-orphan" index="RBM_PeriodicTimeInterval_PeriodicTimeInstant"/>
 
-    <many-to-one name="Duration" class="BExIS.Rbm.Entities.BookingManagementTime.TimeDuration, BExIS.Rbm.Entities" column="Duration" unique="true" cascade="all-delete-orphan"/>
+    <many-to-one name="Duration" class="BExIS.Rbm.Entities.BookingManagementTime.TimeDuration, BExIS.Rbm.Entities" column="Duration" unique="true" cascade="all-delete-orphan" index="RBM_PeriodicTimeInterval_Duration"/>
 
     <one-to-one name="ResourceConstraint" class="BExIS.Rbm.Entities.ResourceConstraint.ResourceConstraint, BExIS.Rbm.Entities" />
 

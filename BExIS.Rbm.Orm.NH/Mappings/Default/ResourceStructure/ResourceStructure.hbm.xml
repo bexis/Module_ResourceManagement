@@ -6,7 +6,7 @@
     <!-- Mapping BaseEntity properties -->
 
     <id name="Id" type="Int64">
-      <column name="Id" />
+      <column name="Id" index="idx_RBM_ResourceStructure_id"/>
       <generator class="native" />
     </id>
 
@@ -65,12 +65,12 @@
 
 
     <set name="ResourceAttributeUsages" lazy="true">
-      <key column="ResourceStructureRef"/>
+      <key column="ResourceStructureRef" />
       <one-to-many class="BExIS.Rbm.Entities.ResourceStructure.ResourceAttributeUsage, BExIS.Rbm.Entities" />
     </set>
 
 
-    <many-to-one name="Parent" class="ResourceStructure" not-null="false" column="ParentRef"/>
+    <many-to-one name="Parent" class="ResourceStructure" not-null="false" column="ParentRef" index="idx_RBM_ResourceStructure_ParentRef"/>
     
     <set name="Children" cascade="all-delete-orphan" inverse="true">
       <key column="ParentRef" not-null="false" foreign-key="fk_Classifier_ParentClassifier"/>
