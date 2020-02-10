@@ -133,6 +133,7 @@ namespace BExIS.Modules.RBM.UI.Helper
                 aManager.CreateActivity("Adding of material (litter, dead wood, chemicals ....)", "", false);
                 aManager.CreateActivity("Adding of organisms (seeds and others)", "", false);
                 aManager.CreateActivity("Conference", "", false);
+                aManager.CreateActivity("Contact stakeholder", "", false);
                 aManager.CreateActivity("Dismantling of experiments", "", false);
                 aManager.CreateActivity("Installation of equipment remaining for some time", "", false);
                 aManager.CreateActivity("Measuring and marking of subplots/experiments/study organisms", "", false);
