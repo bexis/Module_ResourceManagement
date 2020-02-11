@@ -167,8 +167,8 @@ namespace BExIS.Rbm.Services.ResourceStructure
                 Label = rsa.Name,
                 ResourceStructure = rs,
                 ResourceStructureAttribute = rsa,
-                IsValueOptional = isOptional
-             
+                IsValueOptional = isOptional,
+                IsFileDataType = isFileDataType
             };
 
             using (IUnitOfWork uow = this.GetUnitOfWork())
