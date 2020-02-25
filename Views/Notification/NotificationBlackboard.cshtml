@@ -30,9 +30,12 @@
 <div style="display:flex; flex-wrap:wrap">
     @foreach (KeyValuePair<string, List<object>> domianItem in DomainNotification)
     {
-        List<object> value = new List<object>();
+        bool inact = new string[] { "Schorfheide-Chorin", "Hainich-Dün", "Schwäbische Alb" }.Any(s => domianItem.Key.Contains(s)); // only show Explos
+        if (inact == true)
+        {
+            List<object> value = new List<object>();
 
-        DomainNotification.TryGetValue(domianItem.Key, out value);
+            DomainNotification.TryGetValue(domianItem.Key, out value);
 
     <div style="margin-right: 5px;">
         <fieldset style="min-width: 350px;" title="@domianItem.Key">
@@ -60,5 +63,6 @@
             }
         </fieldset>
         </div>
+        }
     }
     </div>
