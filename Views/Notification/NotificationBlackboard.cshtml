@@ -54,7 +54,7 @@
                     <div><b> @item.StartDate.ToString("dd.MM.yyyy") - @item.EndDate.ToString("dd.MM.yyyy")</b></div>
                 }
 
-                <div><p style="width:350px">@item.Message</p></div>
+                <div><p style="width:350px">@Html.Raw(item.Message.Replace("\r\n", "<br>")) </p></div>
                 <div style="float:right"><i>Date: @item.InsertDate.ToString("dd.MM.yyyy HH:mm") </i></div>
             </fieldset>
             }
