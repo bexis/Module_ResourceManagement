@@ -27,7 +27,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
     {
         public ActionResult Calendar()
         {
-            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Schedule Calendar", this.Session.GetTenant());
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Fieldwork Calendar", this.Session.GetTenant());
             Session["Filter"] = null;
             Session["FilterSchedules"] = null;
             return View("Calendar");

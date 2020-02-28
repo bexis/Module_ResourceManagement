@@ -6,10 +6,16 @@
 
 @section Information
 {
-    With this interface you are able to manage (e.g. create, edit, delete) resource bookings. In the calendar all made reservations are shown.
-    Reservations are displayed as Event per Default. You can also switch to Schedule View. You can choose to see only your own bookings.
+    The calendar helps you to plan your fieldwork, inform the LMTs about your planned work and, book sleeping places and equipment.
+    <br />
+    The calendar shows all reservations in the calendar or as a list. By using the filter (green section on the left) you can display (1) only our bookings, (2) bookings of a specific region, (3) instruments and sleeping places.
+    <br />
+    To add your planed fieldwork and book resources use the “Book Resources” button.
+    <br />
+    <br />
+    uptdate: 27.02.2020
     <p>
-        <a href="/RBM/Help/Index/#_Toc434570750" class="bx-informationLink" title="go to help" target="_blank">More</a>
+       <!-- <a href="/RBM/Help/Index/#_Toc434570750" class="bx-informationLink" title="go to help" target="_blank">More</a>-->
     </p>
 }
 
@@ -65,20 +71,20 @@
 
 
 @(Html.Telerik().Window()
-                .Name("Window_Show")
-                .Title("Show Event")
-                .Draggable(true)
-                .Modal(true)
-                .Visible(false)
-                .Scrollable(true)
-                .Width(900)
-                .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
-                .Content(@<text>
-                    <div id="Content_Creation2"></div>
-                </text>)
-                                        .ClientEvents(clientEvents => clientEvents
-                                            .OnClose("Window_Creation_OnClose")
-                                        ))
+                    .Name("Window_Show")
+                    .Title("Show Event")
+                    .Draggable(true)
+                    .Modal(true)
+                    .Visible(false)
+                    .Scrollable(true)
+                    .Width(900)
+                    .ContentHtmlAttributes(new { @style = "overflow:auto; width:auto; height:auto; min-height:225px; min-width:400px" })
+                    .Content(@<text>
+                        <div id="Content_Creation2"></div>
+                    </text>)
+                                                    .ClientEvents(clientEvents => clientEvents
+                                                        .OnClose("Window_Creation_OnClose")
+                                                    ))
 
 
 <script type="text/javascript">
@@ -89,7 +95,7 @@
         }
         else if (type == "schedulesource") {
             return '@Url.Content("~/RBM/Calendar/GetAllSchedules")';
-        }  
+        }
     }
 
     function getFunction(type, byUser = false) {
@@ -197,7 +203,7 @@
                     window.location.href = '../Schedule/Show/' + id;
                 })
             },
-  
+
         });
 
 
