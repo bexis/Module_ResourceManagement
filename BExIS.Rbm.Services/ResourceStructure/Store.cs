@@ -12,21 +12,30 @@ namespace BExIS.Rbm.Services.ResourceStructure
     {
         public List<EntityStoreItem> GetEntities()
         {
-            using (var uow = this.GetUnitOfWork())
-            {
-                ResourceStructureManager resourceStructureManager = new ResourceStructureManager();
+            return GetEntities(0, -1);
+        }
 
-                try
+        public int CountEntities()
+        {
+            return GetEntities().Count();
+        }
+
+        public List<EntityStoreItem> GetEntities(int skip, int take)
+        {
+            bool withPaging = (take >= 0);
+
+            using (var uow = this.GetUnitOfWork())
+            using (ResourceStructureManager resourceStructureManager = new ResourceStructureManager())
+            {
+                if (withPaging)
                 {
-                    var entities = resourceStructureManager.GetAllResourceStructures().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name });
-                    return entities.ToList();
+                    return resourceStructureManager.GetAllResourceStructures().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name }).Skip(skip).Take(take).ToList();
                 }
-                finally
+                else
                 {
-                    resourceStructureManager.Dispose();
+                    return resourceStructureManager.GetAllResourceStructures().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name }).ToList();
                 }
             }
-
         }
 
         public string GetTitleById(long id)
@@ -54,21 +63,30 @@ namespace BExIS.Rbm.Services.ResourceStructure
     {
         public List<EntityStoreItem> GetEntities()
         {
+            return GetEntities(0, -1);
+        }
+
+        public int CountEntities()
+        {
+            return GetEntities().Count();
+        }
+
+        public List<EntityStoreItem> GetEntities(int skip, int take)
+        {
+            bool withPaging = (take >= 0);
+
             using (var uow = this.GetUnitOfWork())
+            using (ResourceStructureAttributeManager resourceStructureAttributeManager = new ResourceStructureAttributeManager())
             {
-                ResourceStructureAttributeManager resourceStructureAttributeManager = new ResourceStructureAttributeManager();
-
-                try
+                if (withPaging)
                 {
-                    var entities = resourceStructureAttributeManager.GetAllResourceStructureAttributes().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name });
-                    return entities.ToList();
+                    return resourceStructureAttributeManager.GetAllResourceStructureAttributes().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name }).Skip(skip).Take(take).ToList();
                 }
-                finally
+                else
                 {
-                    resourceStructureAttributeManager.Dispose();
-                }
+                    return resourceStructureAttributeManager.GetAllResourceStructureAttributes().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name }).ToList();
+                } 
             }
-
         }
 
         public string GetTitleById(long id)

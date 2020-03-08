@@ -12,21 +12,30 @@ namespace BExIS.Rbm.Services.Booking
     {
         public List<EntityStoreItem> GetEntities()
         {
-            using (var uow = this.GetUnitOfWork())
-            {
-                ActivityManager activityManager = new ActivityManager();
+            return GetEntities(0, -1);
+        }
 
-                try
+        public List<EntityStoreItem> GetEntities(int skip, int take)
+        {
+            bool withPaging = (take >= 0);
+
+            using (var uow = this.GetUnitOfWork())
+            using (ActivityManager activityManager = new ActivityManager())
+            {
+                if (withPaging)
                 {
-                    var entities = activityManager.GetAllActivities().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name });
-                    return entities.ToList();
+                    return activityManager.GetAllActivities().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name }).Take(take).Skip(skip).ToList();
                 }
-                finally
+                else
                 {
-                    activityManager.Dispose();
+                    return activityManager.GetAllActivities().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name }).ToList();
                 }
             }
+        }
 
+        public int CountEntities()
+        {
+            return GetEntities(0, -1).Count();
         }
 
         public string GetTitleById(long id)
@@ -54,21 +63,30 @@ namespace BExIS.Rbm.Services.Booking
     {
         public List<EntityStoreItem> GetEntities()
         {
-            using (var uow = this.GetUnitOfWork())
-            {
-                BookingEventManager bookingEventManager  = new BookingEventManager();
+            return GetEntities(0, -1);
+        }
 
-                try
+        public List<EntityStoreItem> GetEntities(int skip, int take)
+        {
+            bool withPaging = (take >= 0);
+
+            using (var uow = this.GetUnitOfWork())
+            using( BookingEventManager bookingEventManager = new BookingEventManager())
+            {
+                if (withPaging)
                 {
-                    var entities = bookingEventManager.GetAllBookingEvents().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name });
-                    return entities.ToList();
+                    return bookingEventManager.GetAllBookingEvents().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name }).Take(take).Skip(skip).ToList();
                 }
-                finally
+                else
                 {
-                    bookingEventManager.Dispose();
+                    return bookingEventManager.GetAllBookingEvents().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name }).ToList();
                 }
             }
+        }
 
+        public int CountEntities()
+        {
+            return GetEntities(0, -1).Count();
         }
 
         public string GetTitleById(long id)
@@ -96,21 +114,31 @@ namespace BExIS.Rbm.Services.Booking
     {
         public List<EntityStoreItem> GetEntities()
         {
-            using (var uow = this.GetUnitOfWork())
-            {
-                NotificationManager notificationManager = new NotificationManager();
+            return GetEntities(0, -1);
+        }
 
-                try
+        public List<EntityStoreItem> GetEntities(int skip, int take)
+        {
+            bool withPaging = (take >= 0);
+
+            using (var uow = this.GetUnitOfWork())
+            using (NotificationManager notificationManager = new NotificationManager())
+            {
+                if (withPaging)
                 {
-                    var entities = notificationManager.GetAllNotifications().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Subject });
-                    return entities.ToList();
+                    return notificationManager.GetAllNotifications().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Subject }).Take(take).Skip(skip).ToList();
                 }
-                finally
+                else
                 {
-                    notificationManager.Dispose();
+                    return notificationManager.GetAllNotifications().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Subject }).ToList();
                 }
             }
 
+        }
+
+        public int CountEntities()
+        {
+            return GetEntities(0, -1).Count();
         }
 
         public string GetTitleById(long id)
@@ -138,21 +166,30 @@ namespace BExIS.Rbm.Services.Booking
     {
         public List<EntityStoreItem> GetEntities()
         {
+            return GetEntities(0, -1);
+        }
+
+        public List<EntityStoreItem> GetEntities(int skip, int take)
+        {
+            bool withPaging = (take >= 0);
+
             using (var uow = this.GetUnitOfWork())
+            using (ScheduleManager scheduleManager = new ScheduleManager())
             {
-                ScheduleManager scheduleManager = new ScheduleManager();
-
-                try
+                if (withPaging)
                 {
-                    var entities = scheduleManager.GetAllSchedules().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Id.ToString() });
-                    return entities.ToList();
+                    return scheduleManager.GetAllSchedules().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Id.ToString() }).Skip(skip).Take(take).ToList();
                 }
-                finally
+                else
                 {
-                    scheduleManager.Dispose();
-                }
+                    return scheduleManager.GetAllSchedules().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Id.ToString() }).ToList();
+                }  
             }
+        }
 
+        public int CountEntities()
+        {
+            return GetEntities(0, -1).Count();
         }
 
         public string GetTitleById(long id)

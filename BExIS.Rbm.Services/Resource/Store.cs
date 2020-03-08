@@ -13,21 +13,30 @@ namespace BExIS.Rbm.Services.Resource
     {
         public List<EntityStoreItem> GetEntities()
         {
+            return GetEntities(0, -1);
+        }
+
+        public List<EntityStoreItem> GetEntities(int skip, int take)
+        {
+            bool withPaging = (take >= 0);
+
             using (var uow = this.GetUnitOfWork())
+            using (ResourceManager resourceManager = new ResourceManager())
             {
-                ResourceManager resourceManager = new ResourceManager();
-
-                try
+                if (withPaging)
                 {
-                    var entities = resourceManager.GetAllResources().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name});
-                    return entities.ToList();
+                    return resourceManager.GetAllResources().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name }).Take(take).Skip(skip).ToList();
                 }
-                finally
+                else
                 {
-                    resourceManager.Dispose();
-                }
+                    return resourceManager.GetAllResources().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name }).ToList();
+                } 
             }
+        }
 
+        public int CountEntities()
+        {
+            return GetEntities(0, -1).Count();
         }
 
         public string GetTitleById(long id)
@@ -55,22 +64,31 @@ namespace BExIS.Rbm.Services.Resource
     {
         public List<EntityStoreItem> GetEntities()
         {
+            return GetEntities(0, -1);
+        }
+
+        public List<EntityStoreItem> GetEntities(int skip, int take)
+        {
+            bool withPaging = (take >= 0);
+
             using (var uow = this.GetUnitOfWork())
+            using (ResourceManager resourceManager = new ResourceManager())
             {
-                ResourceManager resourceManager = new ResourceManager();
-
-                try
+                if (withPaging)
                 {
-                    var entities = resourceManager.GetAllResourceGroups().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name });
-                    return entities.ToList();
+                    return resourceManager.GetAllResourceGroups().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name }).Skip(skip).Take(take).ToList();
                 }
-
-                finally
+                else
                 {
-                    resourceManager.Dispose();
+                    return resourceManager.GetAllResourceGroups().Select(r => new EntityStoreItem() { Id = r.Id, Title = r.Name }).ToList();
                 }
             }
 
+        }
+
+        public int CountEntities()
+        {
+            return GetEntities(0, -1).Count();
         }
 
         public string GetTitleById(long id)
