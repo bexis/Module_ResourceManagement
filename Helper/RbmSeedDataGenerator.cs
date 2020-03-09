@@ -214,7 +214,7 @@ namespace BExIS.Modules.RBM.UI.Helper
                 rs_new.Add(new newResourceStructure() { name = "Forest - all MIPs (HAI)", color = "#8cca0d", description = "Visit of all forest MIPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
                 rs_new.Add(new newResourceStructure() { name = "Forest - all VIPs (HAI)", color = "#8cca0d", description = "Visit of all forest VIPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
 
-                rs_new.Add(new newResourceStructure() { name = "Forest - all Gap-Plots (SCH)", color = "8cca0d", description = "Visit of all new gap experiment plots in HAI (HEW5,6,19,21,29,30,32,47,48)", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Forest - all Gap-Plots (HAI)", color = "8cca0d", description = "Visit of all new gap experiment plots in HAI (HEW5,6,19,21,29,30,32,47,48)", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
 
                 rs_new.Add(new newResourceStructure() { name = "Forest - district Anrode", color = "#8cca0d", description = "Forest - district Anrode", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
                 rs_new.Add(new newResourceStructure() { name = "Forest - city of Mühlhausen", color = "#8cca0d", description = "Forest - city of Mühlhausen", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
@@ -234,7 +234,7 @@ namespace BExIS.Modules.RBM.UI.Helper
                 rs_new.Add(new newResourceStructure() { name = "Grassland - all VIPs (HAI)", color = "#9acd32", description = "Visit of all grassland VIPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
 
                 rs_new.Add(new newResourceStructure() { name = "Grassland - all new EE-Plots (HAI)", color = "9acd32", description = "Visit of all new extensification experiment plots in HAI (HEG 1,2,3,6,7,10,13,14,15,27,40,47,48,49,50)", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
-                rs_new.Add(new newResourceStructure() { name = "Grassland - all new LE-Plots (SCH)", color = "9acd32", description = "Visit of all new landuse experiment plots in HAI (HEG1,2,3,6,14,15)", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Grassland - all new LE-Plots (HAI)", color = "9acd32", description = "Visit of all new landuse experiment plots in HAI (HEG1,2,3,6,14,15)", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
 
 
                 rs_new.Add(new newResourceStructure() { name = "Grassland - AG Diedorf", color = "#9acd32", description = "Grassland - AG Diedorf", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
