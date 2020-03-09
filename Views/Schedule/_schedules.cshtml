@@ -130,6 +130,8 @@
             <td colspan="3">
             @if(Model[i].ResourceQuantity > 0  && Model[i].ResourceName.Contains("Sleeping")){ 
                 <span>Please note, that sleepling places should be booked separate (one by one) within a booking with a maximum number of 1. You can use  <span class="bx bx-grid-function fa-copy" onclick="OnClickCopy(@Model[i].Index, @Model[i].EventId)" title="Copy the whole resource schedule"></span> to copy this resource multiple times.</span> 
+                <br />
+                <span>The <b>To</b> date refers to the last day you need the sleeping place in the evening.</span>
                 }
             </td>
             <tr>
