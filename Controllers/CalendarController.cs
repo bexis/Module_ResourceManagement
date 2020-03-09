@@ -71,7 +71,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     if (duration == null) break;
                     var timeUnit = duration.TimeUnit;
 
-                    scheduleObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource.Name, s.Resource.Color, timeUnit, s.StartDate, s.EndDate, s.BookingEvent.Id)) });
+                    scheduleObjectList.Add(new object[] { JsonHelper.JsonSerializer<CalendarItemsModel>(new CalendarItemsModel(s.Resource.Name, s.Resource.Color, timeUnit, s.StartDate, s.EndDate, s.BookingEvent.Id, s.Resource.Quantity, s.Quantity)) });
                 }
             }
 
@@ -178,7 +178,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         resource.Name,
                         s.StartDate,
                         s.EndDate,
-                        s.Quantity,
+                        "(" +  s.Quantity + "/" + s.Resource.Quantity + ")",
                         forperson,
                         s.Activities
                         ));

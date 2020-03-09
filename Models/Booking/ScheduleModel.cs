@@ -159,8 +159,8 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
         public DateTime EndDate { get; set; }
 
-        public int Quantity { get; set; }
-       
+        public string Quantity { get; set; }
+
         public string Activities { get; set; }
 
         public ScheduleListModel()
@@ -170,41 +170,37 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
         //public ScheduleListModel(Schedule s)
         public ScheduleListModel(long eventId,
-            string bookingEventName, string bookingEventDescription, string resourceName, DateTime start, DateTime end, int quantity, Person forPerson, ICollection<Activity> activities)
+            string bookingEventName, string bookingEventDescription, string resourceName, DateTime start, DateTime end, string quantity, Person forPerson, ICollection<Activity> activities)
         {
 
             EventID = eventId;
             EventName = bookingEventName;
             EventDescription = bookingEventDescription;
             ResourceName = resourceName;
-            
+
             StartDate = start;
             EndDate = end;
             Quantity = quantity;
 
-            using (var partyManager = new PartyManager())
+            string forPersonContactName = getPartyName(forPerson.Contact.Id);
+            if (forPersonContactName != "false")
             {
-                Party party = partyManager.GetPartyByUser(forPerson.Contact.Id);
-                if (party != null)
-                {
-                    ContactPerson = party.Name;
-                }
-                else
-                {
-                    ContactPerson = forPerson.Contact.Name;
-                }
+                forPerson.Contact.Name = forPersonContactName;
             }
-
-
-
-
+            
             if (forPerson is PersonGroup)
             {
                 PersonGroup pg = (PersonGroup)forPerson;
                 int count = 0;
-                foreach(User u in pg.Users)
+                foreach (User u in pg.Users)
                 {
-                    if(count < pg.Users.Count())
+                    string reservedForName = getPartyName(u.Id);
+                    if (reservedForName != "false")
+                    {
+                        u.Name = reservedForName;
+                    }
+
+                    if (count < pg.Users.Count())
                         ReservedFor += u.Name + " ,";
                     else
                         ReservedFor += u.Name;
@@ -212,7 +208,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                     count++;
                 }
             }
-            else if(forPerson is IndividualPerson)
+            else if (forPerson is IndividualPerson)
             {
                 IndividualPerson ip = (IndividualPerson)forPerson;
                 ReservedFor = ip.Person.Name;
@@ -226,12 +222,27 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                     Activities += a.Name + " ,";
                 else
                     Activities += a.Name;
-
             }
         }
+
+
+        private string getPartyName(long Id)
+        {
+            using (var partyManager = new PartyManager())
+            {
+                Party party = partyManager.GetPartyByUser(Id);
+                if (party != null)
+                {
+                    return ContactPerson = party.Name;
+                }
+                else
+                {
+                    return "false";
+                }
+            }
+
+        }
     }
-
-
     //Model for a schedule in a event
     public class ScheduleEventModel
     {

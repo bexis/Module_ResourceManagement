@@ -159,10 +159,18 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             }
         }
 
-        public CalendarItemsModel(string resourceName,string resourceColor, SystemDefinedUnit timeUnit, DateTime startDate, DateTime endDate, long eId)
+        public CalendarItemsModel(string resourceName,string resourceColor, SystemDefinedUnit timeUnit, DateTime startDate, DateTime endDate, long eId, long rQuantity, long sQuantity)
         {
             eventId = eId;
-            title = resourceName;
+            if (rQuantity > 0)
+            {
+                title = resourceName + " (" + sQuantity + "/" + rQuantity + ")";
+            }
+            else
+            {
+                title = resourceName;
+            }
+            
             color = resourceColor;
             start = startDate;
             end = endDate;
