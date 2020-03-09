@@ -365,7 +365,7 @@
 
         $.get('@Url.Action("CheckResourceAvailability", "Schedule", new RouteValueDictionary { { "area", "RBM" } })', { id: id, startDate: startDate, endDate: endDate }, function (data) {
             if (data == "False") {
-                $('#availability_' + id).css('color', 'red');
+                $('#availability_' + id + index).css('color', 'red');
                 //$("span[id$=" + id + "]").css('color', 'red');
                 //window.setTimeout(clickToday, 200);
                 //$.get('@Url.Action("LoadResourceAlternatives", "Schedule")', { scheduleIndex: index }, function (data) {
@@ -375,7 +375,7 @@
                // });
             }
             else {
-                $('#availability_' + id).css('color', 'green');
+                $('#availability_' + id + index).css('color', 'green');
             }
         });
     }
