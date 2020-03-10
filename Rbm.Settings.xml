@@ -15,5 +15,8 @@
 
 
   <!--Setting to define party type name-->
-  <entry key="AccountPartyTypes" value="Person" type="string"/>  
+  <entry key="AccountPartyTypes" value="Person" type="string"/>
+
+  <!--Setting admin group to edit and delete events and schedules-->
+  <entry key="EventAdminGroup" value="" type="string"/>
 </settings>

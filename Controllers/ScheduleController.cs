@@ -959,10 +959,32 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 var entityTypeSchedule = entityTypeManager.FindByName("Schedule");
                                 var entityTypeEvent = entityTypeManager.FindByName("BookingEvent");
 
+                                //full rights as int
+                                int fullRights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete + (int)RightType.Grant;
+
+                                //get event admin group
+                                var eventAdminGroup = Helper.Settings.get("EventAdminGroup").ToString();
+
+                                //give rights to group if group exsits
+                                using (var groupManager = new GroupManager())
+                                {
+                                    var group = groupManager.FindByNameAsync(eventAdminGroup).Result;
+                                    if(group != null)
+                                    {
+                                        //rights on schedule
+                                        if (permissionManager.GetRights(group.Id, entityTypeSchedule.Id, newSchedule.Id) == 0)
+                                            permissionManager.Create(group.Id, entityTypeSchedule.Id, newSchedule.Id, fullRights);
+
+                                        //rights on event
+                                        if (permissionManager.GetRights(group.Id, entityTypeEvent.Id, eEvent.Id) == 0)
+                                            permissionManager.Create(group.Id, entityTypeEvent.Id, eEvent.Id, fullRights);
+                                    }
+                                }
+
                                 //add rights to logged in user if not exsit
                                 //rights on schedule 31 is the sum from all rights:  Read = 1, Write = 4, Delete = 8, Grant = 16
-                                int fullRights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete + (int)RightType.Grant;
-                                var userIdLoggedIn = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+
+                                    var userIdLoggedIn = UserHelper.GetUserId(HttpContext.User.Identity.Name);
                                 if (permissionManager.GetRights(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id) == 0)
                                     permissionManager.Create(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id, fullRights);
 
