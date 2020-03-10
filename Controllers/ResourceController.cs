@@ -212,8 +212,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         //get entity type
                         Entity entityType = entityTypeManager.FindByName("SingleResource");
 
-                        //31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
-                        pManager.Create(user, entityType, resource.Id, 31);
+                        //31 is the sum from all rights:  Read = 1,  Write = 4, Delete = 8, Grant = 16
+                        int rights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete + (int)RightType.Grant;
+                        pManager.Create(user, entityType, resource.Id, rights);
                     }
 
                     //End -> add security ------------------------------------------

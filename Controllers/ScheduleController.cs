@@ -960,14 +960,15 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 var entityTypeEvent = entityTypeManager.FindByName("BookingEvent");
 
                                 //add rights to logged in user if not exsit
-                                //rights on schedule 31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
+                                //rights on schedule 31 is the sum from all rights:  Read = 1, Write = 4, Delete = 8, Grant = 16
+                                int fullRights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete + (int)RightType.Grant;
                                 var userIdLoggedIn = UserHelper.GetUserId(HttpContext.User.Identity.Name);
                                 if (permissionManager.GetRights(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id) == 0)
-                                    permissionManager.Create(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id, 31);
+                                    permissionManager.Create(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id, fullRights);
 
                                 //rights on event
                                 if (permissionManager.GetRights(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id) == 0)
-                                    permissionManager.Create(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id, 31);
+                                    permissionManager.Create(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id, fullRights);
 
                                 foreach (PersonInSchedule user in schedule.ForPersons)
                                 {
@@ -975,11 +976,13 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                     if (us.Id != userIdLoggedIn)
                                     {
                                         //rights on schedule 15 is the sum from this rights:  Read = 1, Download = 2, Write = 4, Delete = 8
+                                        int schedulesRights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete;
                                         if (permissionManager.GetRights(us.Id, entityTypeSchedule.Id, newSchedule.Id) == 0)
-                                            permissionManager.Create(us.Id, entityTypeSchedule.Id, newSchedule.Id, 15);
+                                            permissionManager.Create(us.Id, entityTypeSchedule.Id, newSchedule.Id, schedulesRights);
                                         //rights on event, Read = 1, Write = 4
+                                        int eventRights = (int)RightType.Read + (int)RightType.Write;
                                         if (permissionManager.GetRights(us.Id, entityTypeEvent.Id, eEvent.Id) == 0)
-                                            permissionManager.Create(us.Id, entityTypeEvent.Id, eEvent.Id, 5);
+                                            permissionManager.Create(us.Id, entityTypeEvent.Id, eEvent.Id, eventRights);
                                     }
                                 }
 

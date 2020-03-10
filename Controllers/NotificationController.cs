@@ -148,8 +148,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                             Entity entityType = entityTypeManager.FindByName("Notification");
 
-                            //31 is the sum from all rights:  Read = 1, Download = 2, Write = 4, Delete = 8, Grant = 16
-                            pManager.Create(user, entityType, notification.Id, 31);
+                            //31 is the sum from all rights:  Read = 1,  Write = 4, Delete = 8, Grant = 16
+                            int rights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete + (int)RightType.Grant;
+                            pManager.Create(user, entityType, notification.Id, rights);
                         }
 
                         //End -> add security ------------------------------------------
