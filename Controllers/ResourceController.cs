@@ -324,7 +324,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult OnChangeResourceItem(string element, string value, string valuetype, string constraintelement, string constraintindex, string periodicTimeIntervalElement, string dayId)
         {
             EditResourceModel model = (EditResourceModel)Session["Resource"];
-  
+
             if (model != null)
             {
                 switch (element)
@@ -444,7 +444,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                             default:
                                 break;
                         }
-                        var i = model.BlockingConstraints.FindIndex(p=>p.Index == Convert.ToInt32(constraintindex));
+                        var i = model.BlockingConstraints.FindIndex(p => p.Index == Convert.ToInt32(constraintindex));
                         model.BlockingConstraints[i] = tempBC;
                         break;
                     case "dependencyconstraint":
@@ -502,9 +502,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             EditResourceModel model = (EditResourceModel)Session["Resource"];
 
-            foreach(FileValueModel fv in model.FileValues)
+            foreach (FileValueModel fv in model.FileValues)
             {
-                if(id == fv.ResourceAttributeUsageId)
+                if (id == fv.ResourceAttributeUsageId)
                 {
                     FileValueModel fvm = (FileValueModel)fv;
                     fvm.Name = file.FileName;
@@ -529,18 +529,18 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult DeleteFile(long id)
         {
 
-                EditResourceModel model = (EditResourceModel)Session["Resource"];
-                ResourceStructureAttributeValueModel m = model.ResourceStructureAttributeValues.Where(a => a.Id == id).FirstOrDefault();
+            EditResourceModel model = (EditResourceModel)Session["Resource"];
+            ResourceStructureAttributeValueModel m = model.ResourceStructureAttributeValues.Where(a => a.Id == id).FirstOrDefault();
 
-                using (var valueManager = new ResourceStructureAttributeManager())
-                {
-                    FileValue fValue = valueManager.GetFileValueById(id);
-                    valueManager.DeleteResourceAttributeValue(fValue);
-                }
+            using (var valueManager = new ResourceStructureAttributeManager())
+            {
+                FileValue fValue = valueManager.GetFileValueById(id);
+                valueManager.DeleteResourceAttributeValue(fValue);
+            }
 
-                model.ResourceStructureAttributeValues.Remove(m);
+            model.ResourceStructureAttributeValues.Remove(m);
 
-                Session["Resource"] = model;
+            Session["Resource"] = model;
 
             return RedirectToAction("Edit", new { id = model.Id });
 
@@ -648,7 +648,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                 return PartialView("_showResource", model);
             }
-                
+
         }
 
         #endregion
@@ -744,7 +744,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 return PartialView("_fillResourceStructure", model.ResourceStructureAttributeValues);
             }
         }
-        
+
         private List<ResourceAttributeUsage> GetAllAttributes(ResourceStructure rs)
         {
             List<ResourceAttributeUsage> temp = new List<ResourceAttributeUsage>();
@@ -769,7 +769,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             using (var rManager = new ResourceManager())
             using (var permissionManager = new EntityPermissionManager())
-                using (var entityTypeManager = new EntityManager())
+            using (var entityTypeManager = new EntityManager())
             {
                 IQueryable<SingleResource> data = rManager.GetAllResources();
                 List<ResourceManagerModel> resources = new List<ResourceManagerModel>();
@@ -783,8 +783,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     temp.InUse = rManager.IsResourceInSet(r.Id);
 
                     //get permission from logged in user
-                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, entity.Id, r.Id, RightType.Write);
-                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, entity.Id, r.Id, RightType.Delete);
+                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity.Id}, r.Id, RightType.Write);
+                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity.Id }, r.Id, RightType.Delete);
 
                     resources.Add(temp);
                 }
@@ -1201,15 +1201,16 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 List<PersonInConstraint> personListSelected = new List<PersonInConstraint>();
                 List<PersonInConstraint> personList = new List<PersonInConstraint>();
                 ResourceConstraintModel tempConstraint = model.ResourceConstraints.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
+                var users = userManager.Users;
 
-                foreach (var partyPerson in partyPersons)
+                foreach (var user in users)
                 {
-                    var userTask = userManager.FindByIdAsync(partyManager.GetUserIdByParty(partyPerson.Id));
-                    userTask.Wait();
-                    var user = userTask.Result;
+                   // var userTask = userManager.FindByIdAsync(partyManager.GetUserIdByParty(partyPerson.Id));
+                   // userTask.Wait();
+                   // var user = userTask.Result;
                   
                     PersonInConstraint pc = new PersonInConstraint(user, 0, int.Parse(index));
-                    pc.UserFullName = partyPerson.Name;
+                    pc.UserFullName = user.DisplayName;
                     pc.Index = int.Parse(index);
                     if (tempConstraint.ForPersons.Select(a => a.UserId).ToList().Contains(pc.UserId))
                     {

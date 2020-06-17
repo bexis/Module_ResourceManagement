@@ -2047,14 +2047,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                 //Check permission for BookingEvent
                 Entity entity = entityTypeManager.FindByName("BookingEvent");
-                model.EditAccess = permissionManager.HasEffectiveRight(userId, entity.Id, id, RightType.Write);
-                model.DeleteAccess = permissionManager.HasEffectiveRight(userId, entity.Id, id, RightType.Delete);
+                model.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity.Id }, id, RightType.Write);
+                model.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity.Id }, id, RightType.Delete);
 
 
                 //Check permission for Schedule
                 Entity entity2 = entityTypeManager.FindByName("Schedule");
-                model.Schedules.ForEach(a => a.EditAccess = permissionManager.HasEffectiveRight(userId, entity2.Id, a.ScheduleId, RightType.Write));
-                model.Schedules.ForEach(a => a.DeleteAccess = permissionManager.HasEffectiveRight(userId, entity2.Id, a.ScheduleId, RightType.Delete));
+                model.Schedules.ForEach(a => a.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity2.Id }, a.ScheduleId, RightType.Write));
+                model.Schedules.ForEach(a => a.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity2.Id }, a.ScheduleId, RightType.Delete));
 
                 //Set Edit access 
                 foreach (var s in model.Schedules)
