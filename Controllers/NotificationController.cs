@@ -374,8 +374,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     NotificationModel temp = new NotificationModel(n);
 
                     //get permission from logged in user
-                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, n.Id, RightType.Write);
-                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, n.Id, RightType.Delete);
+                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, n.Id, RightType.Write);
+                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, n.Id, RightType.Delete);
 
                     notifications.Add(temp);
                 }

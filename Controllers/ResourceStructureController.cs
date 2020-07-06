@@ -226,8 +226,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     temp.InUse = rsManager.IsResourceStructureInUse(rs.Id);
 
                     //get permission from logged in user
-                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, rs.Id, RightType.Write);
-                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, rs.Id, RightType.Delete);
+                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, rs.Id, RightType.Write);
+                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, rs.Id, RightType.Delete);
 
                     resourceStructures.Add(temp);
                 }
@@ -570,8 +570,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     long entityTypeId = entityTypeManager.FindByName("ResourceStructureAttribute").Id;
 
                     //get permission from logged in user
-                    rsaModel.EditAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, a.Id, RightType.Write);
-                    rsaModel.DeleteAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, a.Id, RightType.Delete);
+                    rsaModel.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, a.Id, RightType.Write);
+                    rsaModel.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, a.Id, RightType.Delete);
                     list.Add(rsaModel);
                 }
                 return View("ResourceStructureAttributeManager", new GridModel<ResourceStructureAttributeModel> { Data = list });

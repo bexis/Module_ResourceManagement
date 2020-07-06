@@ -167,8 +167,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     //temp.InUse = rManager.IsInEvent(a.Id);
 
                     //get permission from logged in user
-                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, a.Id, RightType.Read);
-                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, entityTypeId, a.Id, RightType.Delete);
+                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, a.Id, RightType.Read);
+                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, a.Id, RightType.Delete);
 
                     activities.Add(temp);
                 }
