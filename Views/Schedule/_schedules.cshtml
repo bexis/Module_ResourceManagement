@@ -108,18 +108,23 @@
                     {
                         if ((Model[i].EditMode && Model[i].EditAccess) || Model[i].EventId == 0)
                         {
-                            @Html.TextBoxFor(m => m[i].ScheduleQuantity, new { OnChange = "onChangeControl(this)", @Name = "Quantity_" + @Model[i].Index.ToString() , @style = "width: 30px" })
-                                                    }
-                                                else
-                                                {
-                                                    @Model[i].ScheduleQuantity;
-                                                    //@Html.TextBoxFor(m => m[i].ScheduleQuantity, new { OnChange = "onChangeControl(this)", disabled = "disabled", @Name = "Quantity_" + @Model[i].Index.ToString() })
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <p>no limitation</p>
-                                            }
+                            //@Html.TextBoxFor(m => m[i].ScheduleQuantity, new { OnChange = "onChangeControl(this)", @Name = "Quantity_" + @Model[i].Index.ToString(), @style = "width: 30px" })
+                            var ScheduleQuantity = Model[i].ScheduleQuantity;
+                            if (@Model[i].ScheduleQuantity == 0)
+                            {
+                                ScheduleQuantity = 1; // allways selct one by default
+                            }   
+                            <input name="Quantity_@Model[i].Index.ToString()" onchange="onChangeControl(this)" data-val="true" data-val-number="The field Number must be a number." data-val-required="The Number field is required." style="width: 30px" type="text" value="@ScheduleQuantity">
+                        }
+                        else
+                        {
+                            @Model[i].ScheduleQuantity;
+                        }
+                    }
+                    else
+                    {
+                        <p>no limitation</p>
+                    }
                 </td>
                 <td></td>
                 <td></td>
