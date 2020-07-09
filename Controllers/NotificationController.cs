@@ -36,23 +36,16 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult CreateNotification()
         {
-            ResourceManager rManager = null;
-            try
+            using (ResourceManager rManager = new ResourceManager())
             {
-                using (rManager = new ResourceManager())
-                {
-                    List<SingleResource> resources = rManager.GetAllResources().ToList();
-                    List<ResourceModel> rModelList = new List<ResourceModel>();
-                    resources.ToList().ForEach(r => rModelList.Add(new ResourceModel(r)));
-                    EditNotificationModel model = new EditNotificationModel(rModelList);
-                    Session["FilterOptions"] = model.AttributeDomainItems;
-                    return PartialView("_editNotification", model);
-                }
-            }
-            finally
-            {
-                rManager.Dispose();
-            }
+                List<SingleResource> resources = rManager.GetAllResources().ToList();
+                List<ResourceModel> rModelList = new List<ResourceModel>();
+                resources.ToList().ForEach(r => rModelList.Add(new ResourceModel(r)));
+                EditNotificationModel model = new EditNotificationModel(rModelList);
+                Session["FilterOptions"] = model.AttributeDomainItems;
+                Session["ResourceFilter"] = null;
+                return PartialView("_editNotification", model);
+            } 
         }
 
         [HttpPost]
@@ -63,12 +56,13 @@ namespace BExIS.Modules.RBM.UI.Controllers
             using (EntityManager entityTypeManager = new EntityManager())
             using (UserManager userManager = new UserManager())
             {
-                if (ModelState.IsValid)
+                Dictionary<long, List<string>> dictionary = (Dictionary<long, List<string>>)Session["ResourceFilter"];
+                if (ModelState.IsValid && dictionary != null)
                 {
 
                     //if edit need comarison between stored dependensies and set in session
                     //get resource filter from the notification
-                    Dictionary<long, List<string>> dictionary = (Dictionary<long, List<string>>)Session["ResourceFilter"];
+                    //Dictionary<long, List<string>> dictionary = (Dictionary<long, List<string>>)Session["ResourceFilter"];
                     Session["ResourceFilter"] = null;
 
                     List<Schedule> affectedSchedules = GetAffectedSchedules(dictionary, model.StartDate, model.EndDate);
@@ -168,7 +162,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 else
                 {
                     List<AttributeDomainItemsModel> attributeDomainItems = (List<AttributeDomainItemsModel>)Session["FilterOptions"];
-                    Dictionary<long, List<string>> dictionary = (Dictionary<long, List<string>>)Session["ResourceFilter"];
+                    //Dictionary<long, List<string>> dictionary = (Dictionary<long, List<string>>)Session["ResourceFilter"];
                     if (dictionary != null)
                     {
                         foreach (AttributeDomainItemsModel m in attributeDomainItems)
@@ -326,11 +320,13 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         private bool CheckTreeDomainModel(ResourceAttributeValueModel model, Dictionary<long, List<string>> filters)
         {
-            foreach (KeyValuePair<long, List<string>> kp in filters)
-            {
-                if (IsResult(model, kp.Key, kp.Value) == false) return false;
+            
+            if (filters != null){
+                foreach (KeyValuePair<long, List<string>> kp in filters)
+                {
+                    if (IsResult(model, kp.Key, kp.Value) == false) return false;
+                }
             }
-
             return true;
         }
 

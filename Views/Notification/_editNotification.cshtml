@@ -2,7 +2,7 @@
 @using BExIS.Web.Shell.Areas.RBM.Models.Booking;
 
 @model EditNotificationModel
-
+@{ var checked_found = false; }
 @Html.ValidationSummary(true)
 @using (Ajax.BeginForm("Save", "Notification", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "notificationEdit", OnSuccess = "notificationEdit_onSuccess" }))
 {
@@ -47,9 +47,11 @@
                 {
                     TreeViewItem subitem = new TreeViewItem();
                     item.Items.Add(subitem);
-                    if(Model.NotificationDependencies.Select(a => a.DomainItem).ToList().Contains(di.Key))
+
+                    if(Model.NotificationDependencies.Select(a => a.DomainItem).ToList().Contains(di.Key) || di.Selected == true)
                     {
                         subitem.Checked = true;
+                        checked_found = true;
                     }
                     subitem.Text = di.Key;
                     subitem.Value = di.Key;
@@ -64,6 +66,17 @@
                     )
                 </td>
             </tr>
+            <tr>
+                <td></td>
+                <td>
+                    @if (Model.Subject != null && checked_found == false)
+                    {
+                        <span class="field-validation-error" data-valmsg-for="Message" data-valmsg-replace="true">At least one resource is required.</span>
+                    }
+
+                </td>
+            </tr>
+
             <tr>
                 <td>@Html.LabelFor(m => m.Message)</td>
                 <td>@Html.TextAreaFor(m => m.Message, new { @class = "bx-input", @tabindex = "2", title= "Message that is to mediate" })<br />
