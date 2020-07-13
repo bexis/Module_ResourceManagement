@@ -34,7 +34,7 @@
 
     <many-to-one name="ForPerson" class="BExIS.Rbm.Entities.Users.Person" not-null="true"  column="ForPerson" index="idx_RBM_Schedules_ForPerson" lazy="false"/>
 
-    <set name="Activities" table="Schedule_Activity"  cascade="save-update"  lazy="false">
+    <set name="Activities" table="RBM_Schedule_Activity"  cascade="save-update"  lazy="false">
       <key column="ScheduleRef" />
       <many-to-many column="ActivityRef" class="BExIS.Rbm.Entities.Booking.Activity, BExIS.Rbm.Entities" lazy="false"/>
     </set>
