@@ -1141,7 +1141,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             BookingEventModel sEventM = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
 
-            if (tempSchedule.ScheduleDurationModel != null)
+            if (tempSchedule != null && tempSchedule.ScheduleDurationModel != null)
             {
                 tempSchedule.ScheduleDurationModel.EditAccess = tempSchedule.EditAccess;
                 tempSchedule.ScheduleDurationModel.EditMode = tempSchedule.EditMode;
@@ -1162,7 +1162,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             BookingEventModel sEventM = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
 
-            if (tempSchedule.ForPersons != null)
+            if (tempSchedule != null && tempSchedule.ForPersons != null)
             {
                 tempSchedule.ForPersons.ForEach(a =>
                 {
@@ -1444,8 +1444,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
             ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
 
             var index_int = Convert.ToInt32(index);
-
-            if (tempSchedule.Activities != null)
+     
+            if (tempSchedule != null && tempSchedule.Activities != null)
             {
                 tempSchedule.Activities.ForEach(a => a.EditAccess = tempSchedule.EditAccess);
                 tempSchedule.Activities.ForEach(a => a.Index = index_int);
