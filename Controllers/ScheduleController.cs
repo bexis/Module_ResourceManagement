@@ -1979,7 +1979,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 }
                 string subject = "NoReply: BExIS Booking Notification to your Event";
 
-                SendNotificationHelper.SendNotification(userToNotify, "bexis@listserv.uni-jena.de", message, subject);
+                SendNotificationHelper.SendNotification(userToNotify, message, subject);
             }
 
         }

@@ -249,14 +249,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 }
             }
 
-            string subject = "Noreply: BExIS Resource Notification - " + notification.Subject;
+            string subject = "Resource Notification - " + notification.Subject;
             string message = "";
             message += "<b>" + notification.Subject + "</b><br/>";
             message += "Startdate:" + notification.StartDate + "<br/>";
             message += "EndDate:" + notification.EndDate + "<br/>";
             message += notification.Message + "<br/>";
 
-            SendNotificationHelper.SendNotification(userToNotify, "bexis@listserv.uni-jena.de", message, subject);
+            SendNotificationHelper.SendNotification(userToNotify, message, subject);
 
         }
 

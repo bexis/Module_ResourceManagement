@@ -24,19 +24,13 @@ namespace BExIS.Web.Shell.Areas.RBM.Helpers
         }
 
 
-        public static void SendNotification(List<string> receiver, string sender, string message, string subject)
+        public static void SendNotification(List<string> receiver, string message, string subject)
         {
-            List<string> receiverCC = new List<string>();
-            receiverCC.Add("eleonora.petzold@uni-jena.de");
-
             List<string> receiverBCC = new List<string>();
-            receiverBCC.Add("eleonora.petzold@uni-jena.de");
-
-            List<string> replyToList = new List<string>();
-            replyToList.Add("eleonora.petzold@uni-jena.de");
+            receiverBCC.Add(ConfigurationManager.AppSettings["SystemEmail"]);
 
             var emailService = new EmailService();
-            emailService.Send(subject, message, receiver, receiverCC, receiverBCC, replyToList);
+            emailService.Send(subject, message, receiver, null, receiverBCC, null);
         }
 
         /// <summary>
