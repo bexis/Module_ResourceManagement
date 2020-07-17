@@ -60,7 +60,7 @@
                     <div class="controlPanel">
 
                         <div> Check availability  <span id="availability_@Model[i].ResourceId@Model[i].Index" class="bx bx-grid-function fa-calendar-o" onclick="OnClickCheckAvailability(@Model[i].Index,@Model[i].ResourceId)" title="Check availability for the defined time period and quantity"></span> </div>
-                        <div> Show similar resources  <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-filter" onclick="OnClickShowSimilar(@Model[i].Index,@Model[i].ResourceId)" title="Show similar resources"></span></div>
+                        <div> Show further resources  <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-filter" onclick="OnClickShowSimilar(@Model[i].Index,@Model[i].ResourceId)" title="Show further resources"></span></div>
                         <div> Copy filled values to all other  <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-reply-all" onclick="useValuesForAll(@Model[i].Index)" title="Use filled values for all other schedules"></span></div>
                         <div> Copy whole resource  <span id="@Model[i].ResourceId" class="bx bx-grid-function fa-copy" onclick="OnClickCopy(@Model[i].Index, @Model[i].EventId)" title="Copy the whole resource schedule"></span></div>
                     </div>
