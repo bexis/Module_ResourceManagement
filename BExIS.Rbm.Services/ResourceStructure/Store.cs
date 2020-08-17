@@ -57,6 +57,11 @@ namespace BExIS.Rbm.Services.ResourceStructure
         {
             throw new NotImplementedException();
         }
+
+        public bool Exist(long id)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class ResourceStructureAttributeStore : IEntityStore
@@ -105,6 +110,11 @@ namespace BExIS.Rbm.Services.ResourceStructure
         }
 
         public List<EntityStoreItem> GetVersionsById(long id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Exist(long id)
         {
             throw new NotImplementedException();
         }
