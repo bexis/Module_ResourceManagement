@@ -52,8 +52,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
         //internal usage to store seleced resources schedules in a session
         private struct TempSchedule
         {
+
             public long Id;
+
             public DateTime StartDate;
+
             public DateTime EndDate;
         }
 
@@ -323,9 +326,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                 using (var srManager = new ResourceManager())
                 using (var pManager = new PersonManager())
+                using (UserManager userManager = new UserManager())
                 {
-                    UserManager userManager = new UserManager();
-
                     //for (int i = 0; i < rIds.Count(); i++)
                     //{
                     //set index for resource in cart
@@ -513,6 +515,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             using (var partyManager = new PartyManager())
             using (var rManager = new ResourceManager())
+            using (UserManager userManager = new UserManager())
             {
                 List<ResourceCart> cart = (List<ResourceCart>)Session["ResourceCart"];
                 if (cart == null)
@@ -549,7 +552,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 s.ByPerson = rc.ByPersonName;
 
                                 //add as default resvered by user as reserved for user
-                                UserManager userManager = new UserManager();
+
                                 var userTask = userManager.FindByIdAsync(rc.ByPersonUserId);
                                 userTask.Wait();
                                 var user = userTask.Result;
@@ -851,8 +854,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    UserManager userManager = new UserManager();
-
+                    using (UserManager userManager = new UserManager())
                     using (var scheduleManager = new ScheduleManager())
                     using (var personManager = new PersonManager())
                     using (var eventManager = new BookingEventManager())
@@ -969,7 +971,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 using (var groupManager = new GroupManager())
                                 {
                                     var group = groupManager.FindByNameAsync(eventAdminGroup).Result;
-                                    if(group != null)
+                                    if (group != null)
                                     {
                                         //rights on schedule
                                         if (permissionManager.GetRights(group.Id, entityTypeSchedule.Id, newSchedule.Id) == 0)
@@ -984,7 +986,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 //add rights to logged in user if not exsit
                                 //rights on schedule 31 is the sum from all rights:  Read = 1, Write = 4, Delete = 8, Grant = 16
 
-                                    var userIdLoggedIn = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+                                var userIdLoggedIn = UserHelper.GetUserId(HttpContext.User.Identity.Name);
                                 if (permissionManager.GetRights(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id) == 0)
                                     permissionManager.Create(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id, fullRights);
 
@@ -1204,9 +1206,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             using (var partyManager = new PartyManager())
             using (var partyTypeManager = new PartyTypeManager())
+            using (UserManager userManager = new UserManager())
             {
-                UserManager userManager = new UserManager();
-
                 //get party type where you store the first and-lastname of the persons
                 var accountPartyTypesStr = Helper.Settings.get("AccountPartyTypes");
                 var partyType = partyTypeManager.PartyTypes.Where(p => p.Title == accountPartyTypesStr.ToString()).FirstOrDefault();
@@ -1275,8 +1276,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
             //    sEventUser = new List<PersonInSchedule>();
 
             using (var partyManager = new PartyManager())
+            using (UserManager userManager = new UserManager())
             {
-                UserManager userManager = new UserManager();
                 var userTask = userManager.FindByIdAsync(Convert.ToInt64(userId));
                 userTask.Wait();
                 var user = userTask.Result;
@@ -1581,7 +1582,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 resourceCart.Add(cartItem);
             }
 
-            Session["ResourceCart"] = resourceCart;
+            //Session["ResourceCart"] = resourceCart;
 
             return View("SelectResources");
         }
@@ -1846,7 +1847,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     sEventM.Schedules.Add(tempSchedule);
                 }
             }
+#pragma warning disable CS0168 // The variable 'e' is declared but never used
             catch (Exception e)
+#pragma warning restore CS0168 // The variable 'e' is declared but never used
             {
             }
 
@@ -2235,7 +2238,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         if ((DateTime.Compare(startDate.Date, s.StartDate.Date) >= 0 && DateTime.Compare(endDate.Date, s.EndDate.Date) <= 0) || (DateTime.Compare(endDate.Date, s.StartDate.Date) >= 0 && DateTime.Compare(startDate.Date, s.EndDate.Date) <= 0))
                         {
                             //Count all quantities in in time schedules to get schedulesQuantity
-                            schedulesQuantity = schedulesQuantity + s.Quantity;
+                            schedulesQuantity += s.Quantity;
                         }
                     }
                 }

@@ -58,7 +58,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
         public BookingEventModel(List<ResourceCart> cart)
         {
-            using (UserManager userManager = new UserManager())
+            using (var userManager = new UserManager())
             using (var rManager = new ResourceManager())
             {
                 Schedules = new List<ScheduleEventModel>();
@@ -105,12 +105,12 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             EditAccess = false;
             DeleteAccess = false;
 
-            BookingEventManager em = new BookingEventManager();
-            
+            using (BookingEventManager em = new BookingEventManager())
+            {
                 //Get event again as not everything needed already fetched
-                var event_ =  em.GetBookingEventById(e.Id);
-                
-           
+                var event_ = em.GetBookingEventById(e.Id);
+
+
                 foreach (Schedule s in event_.Schedules)
                 {
                     ScheduleEventModel seM = new ScheduleEventModel(s);
@@ -121,7 +121,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                     s.Activities.ToList().ForEach(r => seM.Activities.Add(new ActivityEventModel(r)));
                     Schedules.Add(seM);
                 }
-            
+            }
         }
     }
 

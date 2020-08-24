@@ -296,6 +296,7 @@ namespace BExIS.Modules.RBM.UI.Helper
                 using (var groupManager = new GroupManager())
                 using (var permissionManager = new EntityPermissionManager())
                 using (var entityManager = new EntityManager())
+                using (var valueManager = new ResourceStructureAttributeManager())
                 {
                     var adminGroup = groupManager.Groups.Where(r => r.Name == "administrator").FirstOrDefault();
                     if (adminGroup == null)
@@ -320,7 +321,7 @@ namespace BExIS.Modules.RBM.UI.Helper
                         var duration = new TimeDuration();
                         duration.Value = rs_item.duration;
                         var resource = rManager.CreateResource(rs_item.name, rs_item.description, rs_item.quantity, rs_item.color, rs_item.withActivity, rs_item.resourceStructure, duration);
-                        
+
                         //add entity rights
                         permissionManager.Create(adminGroup,
                                        entityManager.FindByName("SingleResource"),
@@ -328,7 +329,6 @@ namespace BExIS.Modules.RBM.UI.Helper
                                        rights
                                       );
 
-                        var valueManager = new ResourceStructureAttributeManager();
                         ResourceAttributeUsage usage = valueManager.GetResourceAttributeUsageById(1);
                         valueManager.CreateResourceAttributeValue(rs_item.explo, rManager.GetResourceById(resource.Id), usage);
                         ResourceAttributeUsage usage2 = valueManager.GetResourceAttributeUsageById(2);
@@ -341,8 +341,6 @@ namespace BExIS.Modules.RBM.UI.Helper
             {
                 Console.WriteLine("{0} Exception caught.", e);
             }
-
-
             #endregion
 
             #region SECURITY
