@@ -305,6 +305,7 @@ namespace BExIS.Modules.RBM.UI.Helper
                         {
                             Name = "administrator",
                             Description = "administrator",
+                            DisplayName = "administrator",
                             IsSystemGroup = false,
                             IsValid = true
                         };
