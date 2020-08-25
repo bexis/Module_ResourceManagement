@@ -3,7 +3,7 @@
 
     <!-- Mapping Entity properties -->
 
-    <many-to-one name="Person" class="BExIS.Security.Entities.Subjects.User" column="Person"  cascade="none" />
+    <many-to-one name="Person" class="BExIS.Security.Entities.Subjects.User" column="Person"  cascade="none" lazy="false"/>
     
 
    

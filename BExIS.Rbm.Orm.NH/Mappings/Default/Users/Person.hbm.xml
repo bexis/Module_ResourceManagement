@@ -19,7 +19,7 @@
 
     <!-- Mapping Event Properties -->
 
-    <many-to-one name="Contact" class="BExIS.Security.Entities.Subjects.User" not-null="false" column="Contact"/>
+    <many-to-one name="Contact" class="BExIS.Security.Entities.Subjects.User" not-null="false" column="Contact" lazy="false"/>
 
     <!--<one-to-one name="ResourceConstraint" class="BExIS.Rbm.Entities.ResourceConstraint.ResourceConstraint, BExIS.Rbm.Entities" />-->
 

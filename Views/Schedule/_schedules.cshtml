@@ -60,7 +60,7 @@
                     <div class="controlPanel">
 
                         <div> Check availability  <span id="availability_@Model[i].ResourceId@Model[i].Index" class="bx bx-grid-function fa-calendar-o" onclick="OnClickCheckAvailability(@Model[i].Index,@Model[i].ResourceId)" title="Check availability for the defined time period and quantity"></span> </div>
-                        <div> Show similar resources  <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-filter" onclick="OnClickShowSimilar(@Model[i].Index,@Model[i].ResourceId)" title="Show similar resources"></span></div>
+                        <div> Show further resources  <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-filter" onclick="OnClickShowSimilar(@Model[i].Index,@Model[i].ResourceId)" title="Show further resources"></span></div>
                         <div> Copy filled values to all other  <span id="TT_@Model[i].ResourceId" class="bx bx-grid-function fa-reply-all" onclick="useValuesForAll(@Model[i].Index)" title="Use filled values for all other schedules"></span></div>
                         <div> Copy whole resource  <span id="@Model[i].ResourceId" class="bx bx-grid-function fa-copy" onclick="OnClickCopy(@Model[i].Index, @Model[i].EventId)" title="Copy the whole resource schedule"></span></div>
                     </div>
@@ -108,18 +108,23 @@
                     {
                         if ((Model[i].EditMode && Model[i].EditAccess) || Model[i].EventId == 0)
                         {
-                            @Html.TextBoxFor(m => m[i].ScheduleQuantity, new { OnChange = "onChangeControl(this)", @Name = "Quantity_" + @Model[i].Index.ToString() , @style = "width: 30px" })
-                                                    }
-                                                else
-                                                {
-                                                    @Model[i].ScheduleQuantity;
-                                                    //@Html.TextBoxFor(m => m[i].ScheduleQuantity, new { OnChange = "onChangeControl(this)", disabled = "disabled", @Name = "Quantity_" + @Model[i].Index.ToString() })
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <p>no limitation</p>
-                                            }
+                            //@Html.TextBoxFor(m => m[i].ScheduleQuantity, new { OnChange = "onChangeControl(this)", @Name = "Quantity_" + @Model[i].Index.ToString(), @style = "width: 30px" })
+                            var ScheduleQuantity = Model[i].ScheduleQuantity;
+                            if (@Model[i].ScheduleQuantity == 0)
+                            {
+                                ScheduleQuantity = 1; // allways selct one by default
+                            }   
+                            <input name="Quantity_@Model[i].Index.ToString()" onchange="onChangeControl(this)" data-val="true" data-val-number="The field Number must be a number." data-val-required="The Number field is required." style="width: 30px" type="text" value="@ScheduleQuantity">
+                        }
+                        else
+                        {
+                            @Model[i].ScheduleQuantity;
+                        }
+                    }
+                    else
+                    {
+                        <p>no limitation</p>
+                    }
                 </td>
                 <td></td>
                 <td></td>

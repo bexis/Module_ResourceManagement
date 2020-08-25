@@ -57,6 +57,11 @@ namespace BExIS.Rbm.Services.Booking
         {
             throw new NotImplementedException();
         }
+
+        public bool Exist(long id)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class BookingEventStore : IEntityStore
@@ -105,6 +110,11 @@ namespace BExIS.Rbm.Services.Booking
         }
 
         public List<EntityStoreItem> GetVersionsById(long id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Exist(long id)
         {
             throw new NotImplementedException();
         }
@@ -160,6 +170,11 @@ namespace BExIS.Rbm.Services.Booking
         {
             throw new NotImplementedException();
         }
+
+        public bool Exist(long id)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class ScheduleStore : IEntityStore
@@ -208,6 +223,11 @@ namespace BExIS.Rbm.Services.Booking
         }
 
         public List<EntityStoreItem> GetVersionsById(long id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Exist(long id)
         {
             throw new NotImplementedException();
         }

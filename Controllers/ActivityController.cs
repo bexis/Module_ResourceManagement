@@ -1,79 +1,72 @@
-﻿using BExIS.Rbm.Entities.Booking;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Web.Mvc;
+using BExIS.Modules.RBM.UI.Helper;
+using BExIS.Rbm.Entities.Booking;
 using BExIS.Rbm.Services.Booking;
+using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Entities.Objects;
 using BExIS.Security.Services.Authorization;
-using BExIS.Security.Services.Subjects;
-using BExIS.Security.Entities.Subjects;
-using BExIS.Web.Shell.Areas.RBM.Models.Booking;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using Telerik.Web.Mvc;
-using Vaiona.Web.Mvc.Models;
-using BExIS.Web.Shell.Areas.RBM.Helpers;
-using Vaiona.Web.Extensions;
-using BExIS.Security.Entities.Authorization;
-using BExIS.Modules.RBM.UI.Helper;
 using BExIS.Security.Services.Objects;
+using BExIS.Security.Services.Subjects;
+using BExIS.Web.Shell.Areas.RBM.Helpers;
+using BExIS.Web.Shell.Areas.RBM.Models.Booking;
+using Telerik.Web.Mvc;
+using Vaiona.Web.Extensions;
+using Vaiona.Web.Mvc.Models;
 
 namespace BExIS.Modules.RBM.UI.Controllers
 {
     public class ActivityController : Controller
     {
-
         public ActionResult Activity()
         {
-            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Manage Activities", this.Session.GetTenant());
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Manage Activities", Session.GetTenant());
             return View("ActivityManager");
         }
 
-
         public ActionResult CreateActivity()
         {
-            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Create Activity", this.Session.GetTenant());
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Create Activity", Session.GetTenant());
             return PartialView("_createActivity", new ActivityModel());
         }
 
-        //[HttpPost]
+        // [HttpPost]
         public ActionResult Create(ActivityModel model)
         {
-
             using (ActivityManager aManager = new ActivityManager())
             {
-
-                //check name
+                // check name
                 Activity temp = aManager.GetActivityByName(StringHelper.CutSpaces(model.Name));
                 if (temp != null)
+                {
                     ModelState.AddModelError("NameExist", "Name already exist");
+                }
 
                 if (ModelState.IsValid)
                 {
                     Activity a = aManager.CreateActivity(model.Name, model.Description, model.Disable);
 
-                    //Start -> add security ----------------------------------------
-
+                    // Start -> add security ----------------------------------------
                     using (EntityPermissionManager pManager = new EntityPermissionManager())
                     using (SubjectManager subManager = new SubjectManager())
                     using (var entityTypeManager = new EntityManager())
+                    using (UserManager userManager = new UserManager())
                     {
-
-                        UserManager userManager = new UserManager();
                         var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                         userTask.Wait();
                         var user = userTask.Result;
 
                         Entity entityType = entityTypeManager.FindByName("Activity");
 
-                        //31 is the sum from all rights:  Read = 1, Write = 4, Delete = 8, Grant = 16
+                        // 31 is the sum from all rights:  Read = 1, Write = 4, Delete = 8, Grant = 16
                         int rights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete + (int)RightType.Grant;
                         pManager.Create(user, entityType, a.Id, rights);
 
-                        //End -> add security ------------------------------------------
+                        // End -> add security ------------------------------------------
                     }
 
-                    //return View("ActivityManager");
+                    // return View("ActivityManager");
                     return Json(new { success = true });
                 }
                 else
@@ -81,12 +74,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     return PartialView("_createActivity", model);
                 }
             }
-            
         }
 
         public ActionResult Edit(long id)
         {
-            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Edit Activity", this.Session.GetTenant());
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Edit Activity", Session.GetTenant());
 
             using (var aManager = new ActivityManager())
             {
@@ -97,15 +89,17 @@ namespace BExIS.Modules.RBM.UI.Controllers
         }
 
         [HttpPost]
+        [ValidateInput(true)]
         public ActionResult Edit(ActivityModel model)
         {
             using (ActivityManager aManager = new ActivityManager())
             {
-
-                //check name
+                // check name
                 Activity temp = aManager.GetActivityByName(StringHelper.CutSpaces(model.Name));
                 if (temp != null && temp.Id != model.Id)
+                {
                     ModelState.AddModelError("NameExist", "Name already exist");
+                }
 
                 if (ModelState.IsValid)
                 {
@@ -119,11 +113,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         aManager.UpdateActivity(activity);
                     }
 
-
-                    //return View("ActivityManager");
+                // return View("ActivityManager");
                     return Json(new { success = true });
                 }
-
                 else
                 {
                     return PartialView("_editActivity", model);
@@ -142,41 +134,42 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     aManager.DeleteActivity(activity);
                 }
             }
-             return View("ActivityManager");
-        }
 
+            return View("ActivityManager");
+        }
 
         [GridAction]
         public ActionResult Activity_Select()
         {
             using (var rManager = new ActivityManager())
             using (var permissionManager = new EntityPermissionManager())
-            using(var entityTypeManager = new EntityManager())
+            using (var entityTypeManager = new EntityManager())
             {
                 List<Activity> data = rManager.GetAllActivities().ToList();
                 List<ActivityModel> activities = new List<ActivityModel>();
 
-                //get id from loged in user
+                // get id from loged in user
                 long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
-                //get entity type id
+
+                // get entity type id
                 long entityTypeId = entityTypeManager.FindByName("Activity").Id;
 
                 foreach (Activity a in data)
                 {
                     ActivityModel temp = new ActivityModel(a);
-                    //temp.InUse = rManager.IsInEvent(a.Id);
+                    // temp.InUse = rManager.IsInEvent(a.Id);
 
-                    //get permission from logged in user
-                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, a.Id, RightType.Read);
-                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, a.Id, RightType.Delete);
+                    // get permission from logged in user
+                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long> { entityTypeId }, a.Id, RightType.Read);
+                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long> { entityTypeId }, a.Id, RightType.Delete);
 
                     activities.Add(temp);
                 }
-                //data.ToList().ForEach(r => activities.Add(new ActivityModel(r)));
+
+                // data.ToList().ForEach(r => activities.Add(new ActivityModel(r)));
 
                 return View("ActivityManager", new GridModel<ActivityModel> { Data = activities });
             }
         }
-
     }
 }

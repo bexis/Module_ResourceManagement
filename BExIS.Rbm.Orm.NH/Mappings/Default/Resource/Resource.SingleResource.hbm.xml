@@ -26,7 +26,7 @@
 
     <!--<many-to-one name="BookingTimeGranularity" column="BookingTimeGranularity" unique="true"/>-->
 
-    <set name="ResourceGroups" table="SingleResource_ResourceGroup" inverse="true" cascade="save-update" lazy="true">
+    <set name="ResourceGroups" table="RBM_SingleResource_ResourceGroup" inverse="true" cascade="save-update" lazy="true">
       <key column="SingleResourceRef"/>
       <many-to-many column="ResourceGroupRef" class="ResourceGroup"/>
     </set>

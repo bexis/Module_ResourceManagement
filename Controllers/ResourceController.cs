@@ -203,8 +203,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                     using (var pManager = new EntityPermissionManager())
                     using (var entityTypeManager = new EntityManager())
+                    using (UserManager userManager = new UserManager())
                     {
-                        UserManager userManager = new UserManager();
                         var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                         userTask.Wait();
                         var user = userTask.Result;
@@ -1136,7 +1136,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         {
                             users.Add(userManager.FindByIdAsync(p.UserId).Result);
                         }
-
+                         
                         if (person.Self is IndividualPerson)
                         {
                             IndividualPerson iPerson = (IndividualPerson)person.Self;
@@ -1191,8 +1191,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             using (var partyManager = new PartyManager())
             using (var partyTypeManager = new PartyTypeManager())
+            using (UserManager userManager = new UserManager())
             {
-                UserManager userManager = new UserManager();
+
                 //get party type person
                 var partyType = partyTypeManager.PartyTypes.Where(p => p.Title == "Person").FirstOrDefault();
                 //get all parties with person party type
@@ -1255,7 +1256,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             EditResourceModel model = (EditResourceModel)Session["Resource"];
             ResourceConstraintModel tempConstraint = model.ResourceConstraints.Where(p=>p.Index == int.Parse(index)).FirstOrDefault();
 
-            UserManager userManager = new UserManager();
+            using (UserManager userManager = new UserManager())
             using (var pManager = new PersonManager())
             {
                 User user = userManager.FindByIdAsync(Convert.ToInt64(userId)).Result;

@@ -120,7 +120,7 @@ namespace BExIS.Modules.RBM.UI.Helper
 
                 var dcManager2 = new DataContainerManager();
 
-                string[]  keys2 = { "Area", "Object", "Sleeping place"};
+                string[]  keys2 = { "Area", "Equipment", "Sleeping place"};
                 List<DomainItem>  domainItems2 = CreateDomainItems(keys2);
                 DomainConstraint dc2 = new DomainConstraint(ConstraintProviderSource.Internal, "", "en-US", "a simple domain validation constraint", false, null, null, null, domainItems2);
                 dcManager2.AddConstraint(dc2, rsa2);
@@ -202,12 +202,12 @@ namespace BExIS.Modules.RBM.UI.Helper
 
                 rs_new.Add(new newResourceStructure() { name = "Sleeping place (SCH)", color = "#9c3939", description = "Sleeping places in Schorfheide-Chorin", duration = 1, quantity = 8, withActivity = false, resourceStructure = rs, type = "Sleeping place", explo = "Schorfheide-Chorin" });
 
-                rs_new.Add(new newResourceStructure() { name = "Drying cabinet (SCH)", color = "#940b0b", description = "Drying cabinet in Schorfheide-Chorin", duration = 1, quantity = 5, withActivity = false, resourceStructure = rs, type = "Object", explo = "Schorfheide-Chorin" });
-                rs_new.Add(new newResourceStructure() { name = "Fridge (SCH)", color = "#940b0b", description = "Fridge in Schorfheide-Chorin", duration = 1, quantity = 2, withActivity = false, resourceStructure = rs, type = "Object", explo = "Schorfheide-Chorin" });
-                rs_new.Add(new newResourceStructure() { name = "Freezer (SCH)", color = "#940b0b", description = "Freezer in Schorfheide-Chorin", duration = 1, quantity = 2, withActivity = false, resourceStructure = rs, type = "Object", explo = "Schorfheide-Chorin" });
-                rs_new.Add(new newResourceStructure() { name = "Metal detector (Magna Trak 100) (SCH)", color = "#940b0b", description = "Metal detector (Magna Trak 100) in Schorfheide-Chorin", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Object", explo = "Schorfheide-Chorin" });
-                rs_new.Add(new newResourceStructure() { name = "Binocular (SCH)", color = "#940b0b", description = "", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Object", explo = "Schorfheide-Chorin" });
-                rs_new.Add(new newResourceStructure() { name = "Chest freezer (SCH)", color = "#940b0b", description = "", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Object", explo = "Schorfheide-Chorin" });
+                rs_new.Add(new newResourceStructure() { name = "Drying cabinet (SCH)", color = "#940b0b", description = "Drying cabinet in Schorfheide-Chorin", duration = 1, quantity = 5, withActivity = false, resourceStructure = rs, type = "Equipment", explo = "Schorfheide-Chorin" });
+                rs_new.Add(new newResourceStructure() { name = "Fridge (SCH)", color = "#940b0b", description = "Fridge in Schorfheide-Chorin", duration = 1, quantity = 2, withActivity = false, resourceStructure = rs, type = "Equipment", explo = "Schorfheide-Chorin" });
+                rs_new.Add(new newResourceStructure() { name = "Freezer (SCH)", color = "#940b0b", description = "Freezer in Schorfheide-Chorin", duration = 1, quantity = 2, withActivity = false, resourceStructure = rs, type = "Equipment", explo = "Schorfheide-Chorin" });
+                rs_new.Add(new newResourceStructure() { name = "Metal detector (Magna Trak 100) (SCH)", color = "#940b0b", description = "Metal detector (Magna Trak 100) in Schorfheide-Chorin", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Equipment", explo = "Schorfheide-Chorin" });
+                rs_new.Add(new newResourceStructure() { name = "Binocular (SCH)", color = "#940b0b", description = "", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Equipment", explo = "Schorfheide-Chorin" });
+                rs_new.Add(new newResourceStructure() { name = "Chest freezer (SCH)", color = "#940b0b", description = "", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Equipment", explo = "Schorfheide-Chorin" });
 
                 rs_new.Add(new newResourceStructure() { name = "Forest - all EPs (HAI)", color = "#8cca0d", description = "Visit of all forest EPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
                 rs_new.Add(new newResourceStructure() { name = "Forest - all GPs (HAI)", color = "#8cca0d", description = "Visit of all forestGPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
@@ -263,11 +263,11 @@ namespace BExIS.Modules.RBM.UI.Helper
 
                 rs_new.Add(new newResourceStructure() { name = "Sleeping place (HAI)", color = "#78ab0f", description = "Sleeping place in Hainich-Dün", duration = 1, quantity = 8, withActivity = false, resourceStructure = rs, type = "Sleeping place", explo = "Hainich-Dün" });
 
-                rs_new.Add(new newResourceStructure() { name = "Drying cabinet (HAI)", color = "#6a8a27", description = "Drying cabinete in Hainich-Dün", duration = 1, quantity = 4, withActivity = false, resourceStructure = rs, type = "Object", explo = "Hainich-Dün" });
-                rs_new.Add(new newResourceStructure() { name = "Fridge (HAI)", color = "#6a8a27", description = "Fridge in Hainich-Dün", duration = 1, quantity = 2, withActivity = false, resourceStructure = rs, type = "Object", explo = "Hainich-Dün" });
-                rs_new.Add(new newResourceStructure() { name = "Freezer (HAI)", color = "#6a8a27", description = "Freezer in Hainich-Dün", duration = 1, quantity = 3, withActivity = false, resourceStructure = rs, type = "Object", explo = "Hainich-Dün" });
-                rs_new.Add(new newResourceStructure() { name = "Metal detector (Magna Trak 100) (HAI)", color = "#6a8a27", description = "Metal detector (Magna Trak 100) in Hainich-Dün", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Object", explo = "Hainich-Dün" });
-                rs_new.Add(new newResourceStructure() { name = "Metal detector (Garrett ACE  150) (HAI)", color = "#6a8a27", description = "Metal detector (Garrett ACE  150) in Hainich-Dün", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Object", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Drying cabinet (HAI)", color = "#6a8a27", description = "Drying cabinete in Hainich-Dün", duration = 1, quantity = 4, withActivity = false, resourceStructure = rs, type = "Equipment", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Fridge (HAI)", color = "#6a8a27", description = "Fridge in Hainich-Dün", duration = 1, quantity = 2, withActivity = false, resourceStructure = rs, type = "Equipment", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Freezer (HAI)", color = "#6a8a27", description = "Freezer in Hainich-Dün", duration = 1, quantity = 3, withActivity = false, resourceStructure = rs, type = "Equipment", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Metal detector (Magna Trak 100) (HAI)", color = "#6a8a27", description = "Metal detector (Magna Trak 100) in Hainich-Dün", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Equipment", explo = "Hainich-Dün" });
+                rs_new.Add(new newResourceStructure() { name = "Metal detector (Garrett ACE  150) (HAI)", color = "#6a8a27", description = "Metal detector (Garrett ACE  150) in Hainich-Dün", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Equipment", explo = "Hainich-Dün" });
 
 
                 rs_new.Add(new newResourceStructure() { name = "Forest - all EPs (ALB)", color = "#3a75e0", description = "Visit of all forest EPs in Schwäbische Alb", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
@@ -288,14 +288,15 @@ namespace BExIS.Modules.RBM.UI.Helper
         
                 rs_new.Add(new newResourceStructure() { name = "Sleeping place (ALB)", color = "#27509a", description = "Sleeping places in Schwäbische Alb", duration = 1, quantity = 8, withActivity = false, resourceStructure = rs, type = "Sleeping place", explo = "Schwäbische Alb" });
 
-                rs_new.Add(new newResourceStructure() { name = "Drying cabinet (ALB)", color = "#7e95bf", description = "Drying cabinet in Schwäbische Alb", duration = 1, quantity = 5, withActivity = false, resourceStructure = rs, type = "Object", explo = "Schwäbische Alb" });
-                rs_new.Add(new newResourceStructure() { name = "Binocular (ALB)", color = "#7e95bf", description = "", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Object", explo = "Schwäbische Alb" });
-                rs_new.Add(new newResourceStructure() { name = "Metal detector (Magna Trak 100) (ALB)", color = "#7e95bf", description = "Metal detector (Magna Trak 100) in Schwäbische Alb", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Object", explo = "Schwäbische Alb" });
+                rs_new.Add(new newResourceStructure() { name = "Drying cabinet (ALB)", color = "#7e95bf", description = "Drying cabinet in Schwäbische Alb", duration = 1, quantity = 5, withActivity = false, resourceStructure = rs, type = "Equipment", explo = "Schwäbische Alb" });
+                rs_new.Add(new newResourceStructure() { name = "Binocular (ALB)", color = "#7e95bf", description = "", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Equipment", explo = "Schwäbische Alb" });
+                rs_new.Add(new newResourceStructure() { name = "Metal detector (Magna Trak 100) (ALB)", color = "#7e95bf", description = "Metal detector (Magna Trak 100) in Schwäbische Alb", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Equipment", explo = "Schwäbische Alb" });
 
                 //get/create admin group for entity rights
                 using (var groupManager = new GroupManager())
                 using (var permissionManager = new EntityPermissionManager())
                 using (var entityManager = new EntityManager())
+                using (var valueManager = new ResourceStructureAttributeManager())
                 {
                     var adminGroup = groupManager.Groups.Where(r => r.Name == "administrator").FirstOrDefault();
                     if (adminGroup == null)
@@ -321,7 +322,7 @@ namespace BExIS.Modules.RBM.UI.Helper
                         var duration = new TimeDuration();
                         duration.Value = rs_item.duration;
                         var resource = rManager.CreateResource(rs_item.name, rs_item.description, rs_item.quantity, rs_item.color, rs_item.withActivity, rs_item.resourceStructure, duration);
-                        
+
                         //add entity rights
                         permissionManager.Create(adminGroup,
                                        entityManager.FindByName("SingleResource"),
@@ -329,7 +330,6 @@ namespace BExIS.Modules.RBM.UI.Helper
                                        rights
                                       );
 
-                        var valueManager = new ResourceStructureAttributeManager();
                         ResourceAttributeUsage usage = valueManager.GetResourceAttributeUsageById(1);
                         valueManager.CreateResourceAttributeValue(rs_item.explo, rManager.GetResourceById(resource.Id), usage);
                         ResourceAttributeUsage usage2 = valueManager.GetResourceAttributeUsageById(2);
@@ -342,8 +342,6 @@ namespace BExIS.Modules.RBM.UI.Helper
             {
                 Console.WriteLine("{0} Exception caught.", e);
             }
-
-
             #endregion
 
             #region SECURITY

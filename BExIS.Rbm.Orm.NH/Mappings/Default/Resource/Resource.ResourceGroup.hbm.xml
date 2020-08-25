@@ -9,7 +9,7 @@
 
     <!-- Mapping Entity Associations -->
 
-    <set name="SingleResources" table="SingleResource_ResourceGroup" cascade="save-update" lazy="true">
+    <set name="SingleResources" table="RBM_SingleResource_ResourceGroup" cascade="save-update" lazy="true">
       <key column="ResourceGroupRef"/>
       <many-to-many column="SingleResourceRef" class="SingleResource"/>
     </set>
