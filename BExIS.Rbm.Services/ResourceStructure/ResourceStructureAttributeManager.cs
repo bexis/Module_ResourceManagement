@@ -60,29 +60,32 @@ namespace BExIS.Rbm.Services.ResourceStructure
             Contract.Requires(!string.IsNullOrWhiteSpace(name));
             Contract.Requires(!String.IsNullOrWhiteSpace(description));
 
-            DataTypeManager dataTypeManager = new DataTypeManager(); 
-            DataType type = dataTypeManager.Repo.Get(p => p.SystemType.Equals("String")).FirstOrDefault();
-            if (type == null)
+            using (DataTypeManager dataTypeManager = new DataTypeManager())
             {
-                type = dataTypeManager.Create("String", "string", TypeCode.String);
+                DataType type = dataTypeManager.Repo.Get(p => p.SystemType.Equals("String")).FirstOrDefault();
+                if (type == null)
+                {
+                    type = dataTypeManager.Create("String", "string", TypeCode.String);
 
+                }
+
+                RS.ResourceStructureAttribute resourceStrucAtt = new RS.ResourceStructureAttribute()
+                {
+                    Name = name,
+                    Description = description,
+                    DataType = type,
+                };
+
+
+                using (IUnitOfWork uow = this.GetUnitOfWork())
+                {
+                    IRepository<RS.ResourceStructureAttribute> repo = uow.GetRepository<RS.ResourceStructureAttribute>();
+                    repo.Put(resourceStrucAtt);
+                    uow.Commit();
+                }
+
+                return resourceStrucAtt;
             }
-
-            RS.ResourceStructureAttribute resourceStrucAtt = new RS.ResourceStructureAttribute()
-            {
-                Name = name,
-                Description = description,
-                DataType = type,
-            };
-
-            using (IUnitOfWork uow = this.GetUnitOfWork())
-            {
-                IRepository<RS.ResourceStructureAttribute> repo = uow.GetRepository<RS.ResourceStructureAttribute>();
-                repo.Put(resourceStrucAtt);
-                uow.Commit();
-            }
-
-            return resourceStrucAtt;
         }
 
         public bool DeleteResourceStructureAttribute(RS.ResourceStructureAttribute resourceStrucAtt)

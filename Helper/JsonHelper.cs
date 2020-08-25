@@ -41,9 +41,11 @@ namespace BExIS.Web.Shell.Areas.RBM.Helpers
             Regex reg = new Regex(p);
             jsonString = reg.Replace(jsonString, matchEvaluator);
             DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(T));
-            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonString));
-            T obj = (T)ser.ReadObject(ms);
-            return obj;
+            using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonString)))
+            {
+                T obj = (T)ser.ReadObject(ms);
+                return obj;
+            }
         }
 
         /// <summary>

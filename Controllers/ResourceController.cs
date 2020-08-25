@@ -324,178 +324,179 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult OnChangeResourceItem(string element, string value, string valuetype, string constraintelement, string constraintindex, string periodicTimeIntervalElement, string dayId)
         {
             EditResourceModel model = (EditResourceModel)Session["Resource"];
-
-            if (model != null)
+            using (ResourceStructureManager rsManager = new ResourceStructureManager())
             {
-                switch (element)
+                if (model != null)
                 {
-                    case "name":
-                        model.Name = value;
-                        break;
-                    case "description":
-                        model.Description = value;
-                        break;
-                    case "quantity":
-                        model.Quantity = Convert.ToInt32(value);
-                        break;
-                    case "color":
-                        model.Color = value;
-                        break;
-                    case "duration":
-                        model.Duration.Value = Convert.ToInt32(value);
-                        break;
-                    case "timeunit":
-                        model.Duration.TimeUnit = (SystemDefinedUnit)Enum.Parse(typeof(SystemDefinedUnit), value);
-                        break;
-                    case "withactivity":
-                        model.WithActivity = Convert.ToBoolean(value);
-                        break;
-                    case "resourcestructureid":
-                        ResourceStructureManager rsManager = new ResourceStructureManager();
-                        model.ResourceStructure = new ResourceStructureModel(rsManager.GetResourceStructureById(Convert.ToInt64(value)));
-                        break;
-                    case "resourcestructurevalue":
-                        ResourceStructureAttributeValueModel temp = model.ResourceStructureAttributeValues.Where(a => a.AttributeName == valuetype).FirstOrDefault();
-                        if (temp is TextValueModel)
-                        {
-                            TextValueModel tv = (TextValueModel)temp;
-                            tv.Value = value;
+                    switch (element)
+                    {
+                        case "name":
+                            model.Name = value;
+                            break;
+                        case "description":
+                            model.Description = value;
+                            break;
+                        case "quantity":
+                            model.Quantity = Convert.ToInt32(value);
+                            break;
+                        case "color":
+                            model.Color = value;
+                            break;
+                        case "duration":
+                            model.Duration.Value = Convert.ToInt32(value);
+                            break;
+                        case "timeunit":
+                            model.Duration.TimeUnit = (SystemDefinedUnit)Enum.Parse(typeof(SystemDefinedUnit), value);
+                            break;
+                        case "withactivity":
+                            model.WithActivity = Convert.ToBoolean(value);
+                            break;
+                        case "resourcestructureid":
+                            model.ResourceStructure = new ResourceStructureModel(rsManager.GetResourceStructureById(Convert.ToInt64(value)));
+                            break;
+                        case "resourcestructurevalue":
+                            ResourceStructureAttributeValueModel temp = model.ResourceStructureAttributeValues.Where(a => a.AttributeName == valuetype).FirstOrDefault();
+                            if (temp is TextValueModel)
+                            {
+                                TextValueModel tv = (TextValueModel)temp;
+                                tv.Value = value;
 
-                            var l = model.TextValues.FindIndex(p => p.AttributeName == valuetype);
-                            model.ResourceStructureAttributeValues[l] = tv;
-                        }
-                        if (temp is FileValueModel)
-                        {
-                            //save file in session???????
-                            FileValueModel fv = (FileValueModel)temp;
-                            fv.NeedConfirmation = Convert.ToBoolean(value);
-                            var z = model.ResourceStructureAttributeValues.FindIndex(p => p.AttributeName == valuetype);
-                            model.ResourceStructureAttributeValues[z] = fv;
-                        }
-                        break;
-                    case "constraint":
-                        ResourceConstraintModel tempC = new ResourceConstraintModel();
-                        tempC = model.ResourceConstraints.Where(a => a.Index == int.Parse(constraintindex)).FirstOrDefault();
-                        switch (constraintelement)
-                        {
-                            case "description":
-                                tempC.Description = value;
-                                break;
-                            case "mode":
-                                tempC.SelectedMode = (ConstraintMode)Enum.Parse(typeof(ConstraintMode), value);
-                                break;
-                            case "negated":
-                                tempC.Negated = Convert.ToBoolean(value);
-                                break;
-                            case "startdate":
-                                tempC.ForTimeInterval.StartTime.Instant = DateTime.Parse(value);
-                                break;
-                            case "enddate":
-                                tempC.ForTimeInterval.EndTime.Instant = DateTime.Parse(value);
-                                break;
-                            case "periodictimeintervalisset":
-                                tempC.ForPeriodicTimeInterval.IsSet = Boolean.Parse(value);
-                                break;
-                            case "periodictimeinterval":
-                                switch (periodicTimeIntervalElement)
-                                {
-                                    case "resetfrequency":
-                                        tempC.ForPeriodicTimeInterval.PeriodicTimeInstant.ResetFrequency = (ResetFrequency)Enum.Parse(typeof(ResetFrequency), value);
-                                        break;
-                                    case "resetinterval":
-                                        tempC.ForPeriodicTimeInterval.PeriodicTimeInstant.ResetInterval = int.Parse(value);
-                                        break;
-                                    case "starttime":
-                                        tempC.ForPeriodicTimeInterval.StartTime = DateTime.Parse(value);
-                                        break;
-                                    case "endtime":
-                                        tempC.ForPeriodicTimeInterval.EndTime = DateTime.Parse(value);
-                                        break;
-                                    case "monthlyselectionstart":
-                                        tempC.ForPeriodicTimeInterval.StartDate = DateTime.Parse(value);
-                                        break;
-                                    case "monthlyselectionend":
-                                        tempC.ForPeriodicTimeInterval.EndDate = DateTime.Parse(value);
-                                        break;
-                                    case "repeaton":
-                                        bool selected = bool.Parse(value);
-                                        if (selected)
-                                            tempC.ForPeriodicTimeInterval.SelectedDays.Add(int.Parse(dayId));
-                                        else
-                                            tempC.ForPeriodicTimeInterval.SelectedDays.Remove(int.Parse(dayId));
-                                        break;
-                                }
-                                break;
-                        }
-                        var d = model.ResourceConstraints.FindIndex(p => p.Index == Convert.ToInt32(constraintindex));
-                        model.ResourceConstraints[d] = tempC;
-                        break;
-                    case "blockingconstraint":
-                        BlockingConstraintModel tempBC = new BlockingConstraintModel();
-                        tempBC = model.BlockingConstraints.Where(a => a.Index == int.Parse(constraintindex)).FirstOrDefault();
-                        switch (constraintelement)
-                        {
-                            case "forever":
-                                tempBC.ForEver = Convert.ToBoolean(value);
-                                break;
-                            case "allusers":
-                                tempBC.AllUsers = Convert.ToBoolean(value);
-                                break;
-                            default:
-                                break;
-                        }
-                        var i = model.BlockingConstraints.FindIndex(p => p.Index == Convert.ToInt32(constraintindex));
-                        model.BlockingConstraints[i] = tempBC;
-                        break;
-                    case "dependencyconstraint":
-                        DependencyConstraintModel tempDC = new DependencyConstraintModel();
-                        tempDC = model.DependencyConstraints.Where(a => a.Index == int.Parse(constraintindex)).FirstOrDefault();
-                        switch (constraintelement)
-                        {
-                            case "quantity":
-                                tempDC.Quantity = Convert.ToInt32(value);
-                                break;
-                            case "implicit":
-                                tempDC.Implicit = Convert.ToBoolean(value);
-                                break;
-                            case "objectid":
-                                tempDC.ObjectId = value;
-                                break;
-                            case "objectname":
-                                tempDC.ObjectName = value;
-                                break;
-                            default:
-                                break;
-                        }
-                        var j = model.DependencyConstraints.FindIndex(p => p.Index == Convert.ToInt32(constraintindex));
-                        model.DependencyConstraints[j] = tempDC;
-                        break;
-                    case "quantityconstraint":
-                        QuantityConstraintModel tempQC = new QuantityConstraintModel();
-                        tempQC = model.QuantityConstraints.Where(a => a.Index == int.Parse(constraintindex)).FirstOrDefault();
-                        switch (constraintelement)
-                        {
-                            case "forever":
-                                tempQC.ForEver = Convert.ToBoolean(value);
-                                break;
-                            case "allusers":
-                                tempQC.AllUsers = Convert.ToBoolean(value);
-                                break;
-                            case "quantity":
-                                tempQC.Quantity = Convert.ToInt32(value);
-                                break;
-                            default:
-                                break;
-                        }
-                        var k = model.QuantityConstraints.FindIndex(p => p.Index == Convert.ToInt32(constraintindex));
-                        model.QuantityConstraints[k] = tempQC;
-                        break;
+                                var l = model.TextValues.FindIndex(p => p.AttributeName == valuetype);
+                                model.ResourceStructureAttributeValues[l] = tv;
+                            }
+                            if (temp is FileValueModel)
+                            {
+                                //save file in session???????
+                                FileValueModel fv = (FileValueModel)temp;
+                                fv.NeedConfirmation = Convert.ToBoolean(value);
+                                var z = model.ResourceStructureAttributeValues.FindIndex(p => p.AttributeName == valuetype);
+                                model.ResourceStructureAttributeValues[z] = fv;
+                            }
+                            break;
+                        case "constraint":
+                            ResourceConstraintModel tempC = new ResourceConstraintModel();
+                            tempC = model.ResourceConstraints.Where(a => a.Index == int.Parse(constraintindex)).FirstOrDefault();
+                            switch (constraintelement)
+                            {
+                                case "description":
+                                    tempC.Description = value;
+                                    break;
+                                case "mode":
+                                    tempC.SelectedMode = (ConstraintMode)Enum.Parse(typeof(ConstraintMode), value);
+                                    break;
+                                case "negated":
+                                    tempC.Negated = Convert.ToBoolean(value);
+                                    break;
+                                case "startdate":
+                                    tempC.ForTimeInterval.StartTime.Instant = DateTime.Parse(value);
+                                    break;
+                                case "enddate":
+                                    tempC.ForTimeInterval.EndTime.Instant = DateTime.Parse(value);
+                                    break;
+                                case "periodictimeintervalisset":
+                                    tempC.ForPeriodicTimeInterval.IsSet = Boolean.Parse(value);
+                                    break;
+                                case "periodictimeinterval":
+                                    switch (periodicTimeIntervalElement)
+                                    {
+                                        case "resetfrequency":
+                                            tempC.ForPeriodicTimeInterval.PeriodicTimeInstant.ResetFrequency = (ResetFrequency)Enum.Parse(typeof(ResetFrequency), value);
+                                            break;
+                                        case "resetinterval":
+                                            tempC.ForPeriodicTimeInterval.PeriodicTimeInstant.ResetInterval = int.Parse(value);
+                                            break;
+                                        case "starttime":
+                                            tempC.ForPeriodicTimeInterval.StartTime = DateTime.Parse(value);
+                                            break;
+                                        case "endtime":
+                                            tempC.ForPeriodicTimeInterval.EndTime = DateTime.Parse(value);
+                                            break;
+                                        case "monthlyselectionstart":
+                                            tempC.ForPeriodicTimeInterval.StartDate = DateTime.Parse(value);
+                                            break;
+                                        case "monthlyselectionend":
+                                            tempC.ForPeriodicTimeInterval.EndDate = DateTime.Parse(value);
+                                            break;
+                                        case "repeaton":
+                                            bool selected = bool.Parse(value);
+                                            if (selected)
+                                                tempC.ForPeriodicTimeInterval.SelectedDays.Add(int.Parse(dayId));
+                                            else
+                                                tempC.ForPeriodicTimeInterval.SelectedDays.Remove(int.Parse(dayId));
+                                            break;
+                                    }
+                                    break;
+                            }
+                            var d = model.ResourceConstraints.FindIndex(p => p.Index == Convert.ToInt32(constraintindex));
+                            model.ResourceConstraints[d] = tempC;
+                            break;
+                        case "blockingconstraint":
+                            BlockingConstraintModel tempBC = new BlockingConstraintModel();
+                            tempBC = model.BlockingConstraints.Where(a => a.Index == int.Parse(constraintindex)).FirstOrDefault();
+                            switch (constraintelement)
+                            {
+                                case "forever":
+                                    tempBC.ForEver = Convert.ToBoolean(value);
+                                    break;
+                                case "allusers":
+                                    tempBC.AllUsers = Convert.ToBoolean(value);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            var i = model.BlockingConstraints.FindIndex(p => p.Index == Convert.ToInt32(constraintindex));
+                            model.BlockingConstraints[i] = tempBC;
+                            break;
+                        case "dependencyconstraint":
+                            DependencyConstraintModel tempDC = new DependencyConstraintModel();
+                            tempDC = model.DependencyConstraints.Where(a => a.Index == int.Parse(constraintindex)).FirstOrDefault();
+                            switch (constraintelement)
+                            {
+                                case "quantity":
+                                    tempDC.Quantity = Convert.ToInt32(value);
+                                    break;
+                                case "implicit":
+                                    tempDC.Implicit = Convert.ToBoolean(value);
+                                    break;
+                                case "objectid":
+                                    tempDC.ObjectId = value;
+                                    break;
+                                case "objectname":
+                                    tempDC.ObjectName = value;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            var j = model.DependencyConstraints.FindIndex(p => p.Index == Convert.ToInt32(constraintindex));
+                            model.DependencyConstraints[j] = tempDC;
+                            break;
+                        case "quantityconstraint":
+                            QuantityConstraintModel tempQC = new QuantityConstraintModel();
+                            tempQC = model.QuantityConstraints.Where(a => a.Index == int.Parse(constraintindex)).FirstOrDefault();
+                            switch (constraintelement)
+                            {
+                                case "forever":
+                                    tempQC.ForEver = Convert.ToBoolean(value);
+                                    break;
+                                case "allusers":
+                                    tempQC.AllUsers = Convert.ToBoolean(value);
+                                    break;
+                                case "quantity":
+                                    tempQC.Quantity = Convert.ToInt32(value);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            var k = model.QuantityConstraints.FindIndex(p => p.Index == Convert.ToInt32(constraintindex));
+                            model.QuantityConstraints[k] = tempQC;
+                            break;
+                    }
                 }
+
+                Session["Resource"] = model;
+
+                return View("EditResource", model);
             }
-
-            Session["Resource"] = model;
-
-            return View("EditResource", model);
         }
 
         public ActionResult SaveFileTemp(HttpPostedFileBase file, long id)
@@ -871,210 +872,217 @@ namespace BExIS.Modules.RBM.UI.Controllers
         private void SaveConstraint(Resource resource, int index)
         {
             EditResourceModel model = (EditResourceModel)Session["Resource"];
-            ResourceConstraintModel rcm = model.ResourceConstraints.Where(p=>p.Index== index).FirstOrDefault();
+            ResourceConstraintModel rcm = model.ResourceConstraints.Where(p => p.Index == index).FirstOrDefault();
 
-            TimeManager timeManager = new TimeManager();
-
-            //Create PeriodicTimeInterval
-            PeriodicTimeInterval ptInterval = new PeriodicTimeInterval();
-            PeriodicTimeInstant ptInstanz = new PeriodicTimeInstant();
-
-            if (rcm.ForPeriodicTimeInterval != null)
+            using (TimeManager timeManager = new TimeManager())
+            using (TimeManager tManager = new TimeManager())
             {
-                TimeManager tManager = new TimeManager();
-                if (rcm.ForPeriodicTimeInterval.IsSet)
+
+                //Create PeriodicTimeInterval
+                PeriodicTimeInterval ptInterval = new PeriodicTimeInterval();
+                PeriodicTimeInstant ptInstanz = new PeriodicTimeInstant();
+
+                if (rcm.ForPeriodicTimeInterval != null)
                 {
-                    ptInstanz = rcm.ForPeriodicTimeInterval.PeriodicTimeInstant;
-                    ptInterval.PeriodicTimeInstant = ptInstanz;
-                    ptInterval.Duration = rcm.ForPeriodicTimeInterval.Duration;
-                }
-                else
-                {
-                    if (rcm.ForPeriodicTimeInterval.Id != 0)
-                        tManager.DeletePeriodicTimeInterval(tManager.GetPeriodicTimeIntervalById(rcm.ForPeriodicTimeInterval.Id));
-                }
-            }
-
-            using (ResourceConstraintManager rcManager = new ResourceConstraintManager())
-            using (ResourceManager srManager = new ResourceManager())
-            {
-                if (rcm is DependencyConstraintModel)
-                {
-                    DependencyConstraintModel dcm = model.DependencyConstraints.Where(p => p.Index == index).FirstOrDefault();
-
-                    DependencyConstraint dc = new DependencyConstraint();
-                    if (dcm.Id != 0)
-                        dc = rcManager.GetDependencyConstraintById(dcm.Id);
-
-                    //if (dcm.SelectedType == "Single Resource")
-                    //{
-                    SingleResource singleResource = srManager.GetResourceById(Convert.ToInt64(dcm.ObjectId));
-                    dc.ForResource = singleResource;
-                    //}
-                    //else if (dcm.SelectedType == "Resource Group")
-                    //{
-                    //    ResourceGroup resourceGroup = srManager.GetResourceGroupById(Convert.ToInt64(dcm.ObjectId));
-                    //    dc.ForResource = resourceGroup;
-                    //}
-
-                    dc.Implicit = dcm.Implicit;
-                    dc.Quantity = dcm.Quantity;
-                    dc.Index = dcm.Index;
-
-                    dc.Negated = rcm.Negated;
-                    dc.Description = rcm.Description;
-                    dc.Mode = rcm.SelectedMode;
-
-
-                    if (dcm.Id == 0)
+                  
+                    if (rcm.ForPeriodicTimeInterval.IsSet)
                     {
-                        dc.Resource = resource;
-                        rcManager.SaveConstraint(dc);
+                        ptInstanz = rcm.ForPeriodicTimeInterval.PeriodicTimeInstant;
+                        ptInterval.PeriodicTimeInstant = ptInstanz;
+                        ptInterval.Duration = rcm.ForPeriodicTimeInterval.Duration;
                     }
                     else
-                        rcManager.UpdateConstraint(dc);
-                }
-                else if (rcm is BlockingConstraintModel)
-                {
-                    BlockingConstraintModel bcm = model.BlockingConstraints.Where(a => a.Index == index).FirstOrDefault();
-
-                    BlockingConstraint bc = new BlockingConstraint();
-                    if (bcm.Id != 0)
-                        bc = rcManager.GetBlockingConstraintById(bcm.Id);
-                    //needed for delete later after update constraint
-                    PeriodicTimeInterval tempPeriodicTimeInterval = bc.ForPeriodicTimeInterval;
-
-                    bc.Negated = rcm.Negated;
-                    bc.Description = rcm.Description;
-                    bc.Mode = rcm.SelectedMode;
-                    bc.Index = bcm.Index;
-
-                    bc.ForEver = bcm.ForEver;
-                    bc.AllUsers = bcm.AllUsers;
-
-                    //create TimeIntervall and Person before save constraint
-                    if (bcm.Id == 0)
                     {
-                        bc.Resource = resource;
-                        if (rcm.ForTimeInterval.StartTime.Instant != null)
-                            bc.ForTimeInterval = this.CreateTimeInterval(rcm.ForTimeInterval);
+                        if (rcm.ForPeriodicTimeInterval.Id != 0)
+                            tManager.DeletePeriodicTimeInterval(tManager.GetPeriodicTimeIntervalById(rcm.ForPeriodicTimeInterval.Id));
+                    }
+                }
 
-                        //if (bcm.ForPersons.Count() > 0)
+                using (ResourceConstraintManager rcManager = new ResourceConstraintManager())
+                using (ResourceManager srManager = new ResourceManager())
+                {
+                    if (rcm is DependencyConstraintModel)
+                    {
+                        DependencyConstraintModel dcm = model.DependencyConstraints.Where(p => p.Index == index).FirstOrDefault();
+
+                        DependencyConstraint dc = new DependencyConstraint();
+                        if (dcm.Id != 0)
+                            dc = rcManager.GetDependencyConstraintById(dcm.Id);
+
+                        //if (dcm.SelectedType == "Single Resource")
                         //{
-                        if (rcm.ForTimeInterval.StartTime.Instant != null)
-                            bc.ForTimeInterval = this.CreateTimeInterval(rcm.ForTimeInterval);
+                        SingleResource singleResource = srManager.GetResourceById(Convert.ToInt64(dcm.ObjectId));
+                        dc.ForResource = singleResource;
+                        //}
+                        //else if (dcm.SelectedType == "Resource Group")
+                        //{
+                        //    ResourceGroup resourceGroup = srManager.GetResourceGroupById(Convert.ToInt64(dcm.ObjectId));
+                        //    dc.ForResource = resourceGroup;
                         //}
 
-                        if (bcm.ForPersons.Count() != 0)
-                            bc.ForPerson = CreatePerson(bcm.ForPersons);
+                        dc.Implicit = dcm.Implicit;
+                        dc.Quantity = dcm.Quantity;
+                        dc.Index = dcm.Index;
 
-                        if (rcm.ForPeriodicTimeInterval != null)
-                            if (rcm.ForPeriodicTimeInterval.IsSet)
-                                bc.ForPeriodicTimeInterval = ptInterval;
+                        dc.Negated = rcm.Negated;
+                        dc.Description = rcm.Description;
+                        dc.Mode = rcm.SelectedMode;
 
-                        rcManager.SaveConstraint(bc);
-                    }
-                    else
-                    {
-                        if (bc.ForTimeInterval != null)
-                            bc.ForTimeInterval = timeManager.UpdateTimeInterval(bcm.ForTimeInterval);
 
-                        if (rcm.ForPeriodicTimeInterval != null)
+                        if (dcm.Id == 0)
                         {
-                            if (rcm.ForPeriodicTimeInterval.IsSet)
-                                bc.ForPeriodicTimeInterval = ptInterval;
+                            dc.Resource = resource;
+                            rcManager.SaveConstraint(dc);
                         }
                         else
-                            bc.ForPeriodicTimeInterval = null;
+                            rcManager.UpdateConstraint(dc);
+                    }
+                    else if (rcm is BlockingConstraintModel)
+                    {
+                        BlockingConstraintModel bcm = model.BlockingConstraints.Where(a => a.Index == index).FirstOrDefault();
 
-                        //if person exstists and the persons form the UI is grater then 0 then update person
-                        if (bcm.ForPersons.Count() > 0)
-                            bc.ForPerson = UpdatePerson(bcm.ForPersons);
+                        BlockingConstraint bc = new BlockingConstraint();
+                        if (bcm.Id != 0)
+                            bc = rcManager.GetBlockingConstraintById(bcm.Id);
+                        //needed for delete later after update constraint
+                        PeriodicTimeInterval tempPeriodicTimeInterval = bc.ForPeriodicTimeInterval;
 
-                        //if person exsist and count auf Persons from UI is 0 then delete the Person
-                        else if (bc.ForPerson != null && bcm.ForPersons.Count() == 0)
+                        bc.Negated = rcm.Negated;
+                        bc.Description = rcm.Description;
+                        bc.Mode = rcm.SelectedMode;
+                        bc.Index = bcm.Index;
+
+                        bc.ForEver = bcm.ForEver;
+                        bc.AllUsers = bcm.AllUsers;
+
+                        //create TimeIntervall and Person before save constraint
+                        if (bcm.Id == 0)
                         {
-                            PersonManager pManager = new PersonManager();
-                            if (bc.ForPerson is IndividualPerson)
-                                pManager.DeleteIndividualPerson((IndividualPerson)bc.ForPerson.Self);
+                            bc.Resource = resource;
+                            if (rcm.ForTimeInterval.StartTime.Instant != null)
+                                bc.ForTimeInterval = this.CreateTimeInterval(rcm.ForTimeInterval);
+
+                            //if (bcm.ForPersons.Count() > 0)
+                            //{
+                            if (rcm.ForTimeInterval.StartTime.Instant != null)
+                                bc.ForTimeInterval = this.CreateTimeInterval(rcm.ForTimeInterval);
+                            //}
+
+                            if (bcm.ForPersons.Count() != 0)
+                                bc.ForPerson = CreatePerson(bcm.ForPersons);
+
+                            if (rcm.ForPeriodicTimeInterval != null)
+                                if (rcm.ForPeriodicTimeInterval.IsSet)
+                                    bc.ForPeriodicTimeInterval = ptInterval;
+
+                            rcManager.SaveConstraint(bc);
+                        }
+                        else
+                        {
+                            if (bc.ForTimeInterval != null)
+                                bc.ForTimeInterval = timeManager.UpdateTimeInterval(bcm.ForTimeInterval);
+
+                            if (rcm.ForPeriodicTimeInterval != null)
+                            {
+                                if (rcm.ForPeriodicTimeInterval.IsSet)
+                                    bc.ForPeriodicTimeInterval = ptInterval;
+                            }
                             else
-                                pManager.DeletePersonGroup((PersonGroup)bc.ForPerson.Self);
+                                bc.ForPeriodicTimeInterval = null;
 
-                            bc.ForPerson = null;
-                        }
-                        rcManager.UpdateConstraint(bc);
+                            //if person exstists and the persons form the UI is grater then 0 then update person
+                            if (bcm.ForPersons.Count() > 0)
+                                bc.ForPerson = UpdatePerson(bcm.ForPersons);
 
-                        //delete PeriodicTimeInterval if exsist bevor and where deleted
-                        if (bc.ForPeriodicTimeInterval == null && tempPeriodicTimeInterval != null)
-                        {
-                            timeManager.DeletePeriodicTimeInterval(tempPeriodicTimeInterval);
+                            //if person exsist and count auf Persons from UI is 0 then delete the Person
+                            else if (bc.ForPerson != null && bcm.ForPersons.Count() == 0)
+                            {
+                                using (PersonManager pManager = new PersonManager())
+                                {
+                                    if (bc.ForPerson is IndividualPerson)
+                                        pManager.DeleteIndividualPerson((IndividualPerson)bc.ForPerson.Self);
+                                    else
+                                        pManager.DeletePersonGroup((PersonGroup)bc.ForPerson.Self);
+                                }
+
+                                bc.ForPerson = null;
+                            }
+                            rcManager.UpdateConstraint(bc);
+
+                            //delete PeriodicTimeInterval if exsist bevor and where deleted
+                            if (bc.ForPeriodicTimeInterval == null && tempPeriodicTimeInterval != null)
+                            {
+                                timeManager.DeletePeriodicTimeInterval(tempPeriodicTimeInterval);
+                            }
                         }
                     }
-                }
-                else if (rcm is QuantityConstraintModel)
-                {
-                    QuantityConstraintModel qcm = model.QuantityConstraints.Where(e => e.Index == index).FirstOrDefault();
-
-                    QuantityConstraint qc = new QuantityConstraint();
-                    if (qcm.Id != 0)
-                        qc = rcManager.GetQuantityConstraintById(qcm.Id);
-
-                    //needed for delete later after update constraint
-                    PeriodicTimeInterval tempPeriodicTimeInterval = qc.ForPeriodicTimeInterval;
-
-                    qc.Quantity = qcm.Quantity;
-                    qc.Index = qcm.Index;
-
-                    qc.Negated = rcm.Negated;
-                    qc.Description = rcm.Description;
-                    qc.Mode = rcm.SelectedMode;
-
-                    qc.ForEver = qcm.ForEver;
-                    qc.AllUsers = qcm.AllUsers;
-
-
-                    if (rcm.ForPeriodicTimeInterval.IsSet)
-                        qc.ForPeriodicTimeInterval = ptInterval;
-
-
-                    //create TimeIntervall and Person before save constraint
-                    if (qcm.Id == 0)
+                    else if (rcm is QuantityConstraintModel)
                     {
-                        qc.Resource = resource;
-                        if (qcm.ForTimeInterval.StartTime.Instant != null)
-                            qc.ForTimeInterval = this.CreateTimeInterval(qcm.ForTimeInterval);
+                        QuantityConstraintModel qcm = model.QuantityConstraints.Where(e => e.Index == index).FirstOrDefault();
 
-                        //if (qcm.ForPersons.Count() > 0)
-                        //    {
-                        //        if (qcm.ForTimeInterval != null)
-                        //            qc.ForTimeInterval = this.CreateTimeInterval(qcm.ForTimeInterval);
-                        //    }
+                        QuantityConstraint qc = new QuantityConstraint();
+                        if (qcm.Id != 0)
+                            qc = rcManager.GetQuantityConstraintById(qcm.Id);
 
-                        if (qcm.ForPersons.Count() != 0)
-                            qc.ForPerson = this.CreatePerson(qcm.ForPersons);
+                        //needed for delete later after update constraint
+                        PeriodicTimeInterval tempPeriodicTimeInterval = qc.ForPeriodicTimeInterval;
 
-                        rcManager.SaveConstraint(qc);
-                    }
-                    else
-                    {
-                        qc.ForTimeInterval = timeManager.UpdateTimeInterval(qcm.ForTimeInterval);
+                        qc.Quantity = qcm.Quantity;
+                        qc.Index = qcm.Index;
 
-                        //if person exstists and the persons form the UI is grater then 0 then update person
-                        if (qcm.ForPersons.Count() > 0)
-                            qc.ForPerson = UpdatePerson(qcm.ForPersons);
-                        //if person exsist and count auf Persons from UI is 0 then delete the Person
-                        else if (qc.ForPerson != null && qcm.ForPersons.Count() == 0)
+                        qc.Negated = rcm.Negated;
+                        qc.Description = rcm.Description;
+                        qc.Mode = rcm.SelectedMode;
+
+                        qc.ForEver = qcm.ForEver;
+                        qc.AllUsers = qcm.AllUsers;
+
+
+                        if (rcm.ForPeriodicTimeInterval.IsSet)
+                            qc.ForPeriodicTimeInterval = ptInterval;
+
+
+                        //create TimeIntervall and Person before save constraint
+                        if (qcm.Id == 0)
                         {
-                            PersonManager pManager = new PersonManager();
-                            pManager.DeletePerson(qc.ForPerson);
-                            qc.ForPerson = null;
+                            qc.Resource = resource;
+                            if (qcm.ForTimeInterval.StartTime.Instant != null)
+                                qc.ForTimeInterval = this.CreateTimeInterval(qcm.ForTimeInterval);
+
+                            //if (qcm.ForPersons.Count() > 0)
+                            //    {
+                            //        if (qcm.ForTimeInterval != null)
+                            //            qc.ForTimeInterval = this.CreateTimeInterval(qcm.ForTimeInterval);
+                            //    }
+
+                            if (qcm.ForPersons.Count() != 0)
+                                qc.ForPerson = this.CreatePerson(qcm.ForPersons);
+
+                            rcManager.SaveConstraint(qc);
                         }
-                        rcManager.UpdateConstraint(qc);
-
-                        //delete PeriodicTimeInterval if exsist bevor and where deleted
-                        if (qc.ForPeriodicTimeInterval == null && tempPeriodicTimeInterval != null)
+                        else
                         {
-                            timeManager.DeletePeriodicTimeInterval(tempPeriodicTimeInterval);
+                            qc.ForTimeInterval = timeManager.UpdateTimeInterval(qcm.ForTimeInterval);
+
+                            //if person exstists and the persons form the UI is grater then 0 then update person
+                            if (qcm.ForPersons.Count() > 0)
+                                qc.ForPerson = UpdatePerson(qcm.ForPersons);
+                            //if person exsist and count auf Persons from UI is 0 then delete the Person
+                            else if (qc.ForPerson != null && qcm.ForPersons.Count() == 0)
+                            {
+                                using (PersonManager pManager = new PersonManager())
+                                {
+                                    pManager.DeletePerson(qc.ForPerson);
+                                    qc.ForPerson = null;
+                                }
+                            }
+                            rcManager.UpdateConstraint(qc);
+
+                            //delete PeriodicTimeInterval if exsist bevor and where deleted
+                            if (qc.ForPeriodicTimeInterval == null && tempPeriodicTimeInterval != null)
+                            {
+                                timeManager.DeletePeriodicTimeInterval(tempPeriodicTimeInterval);
+                            }
                         }
                     }
                 }

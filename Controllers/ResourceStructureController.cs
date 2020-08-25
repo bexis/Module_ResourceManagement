@@ -391,8 +391,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                             using (EntityPermissionManager pManager = new EntityPermissionManager())
                             using (var entityTypeManager = new EntityManager())
+                            using (UserManager userManager = new UserManager())
                             {
-                                UserManager userManager = new UserManager();
                                 var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                                 userTask.Wait();
                                 var user = userTask.Result;
@@ -680,9 +680,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public void CreateDomainConstraint(ResourceStructureAttribute attr, List<DomainItem> domainItems)
         {
-            DataContainerManager dcManager = new DataContainerManager();
-            DomainConstraint c3 = new DomainConstraint(ConstraintProviderSource.Internal, "", "en-US", "a simple domain validation constraint", false, null, null, null, domainItems);
-            dcManager.AddConstraint(c3, attr);
+            using (DataContainerManager dcManager = new DataContainerManager())
+            {
+                DomainConstraint c3 = new DomainConstraint(ConstraintProviderSource.Internal, "", "en-US", "a simple domain validation constraint", false, null, null, null, domainItems);
+                dcManager.AddConstraint(c3, attr);
+            }
         }
 
         public ActionResult LoadDomainItems(EditResourceStructureAttributeModel model)

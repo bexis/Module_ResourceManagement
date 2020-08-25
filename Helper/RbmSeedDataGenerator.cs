@@ -55,6 +55,7 @@ namespace BExIS.Modules.RBM.UI.Helper
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Objekte verwerfen, bevor Bereich verloren geht", Justification = "<Ausstehend>")]
         public void GenerateSeedData()
         {
 

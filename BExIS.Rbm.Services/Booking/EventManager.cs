@@ -80,17 +80,19 @@ namespace BExIS.Rbm.Services.Booking
             Contract.Requires(deleteEvent != null);
             Contract.Requires(deleteEvent.Id >= 0);
 
-            ScheduleManager sManager = new ScheduleManager();
-            bool deleteSchedules = sManager.RemoveAllSchedulesByEvent(deleteEvent.Id);
-
-            if (deleteSchedules)
+            using (ScheduleManager sManager = new ScheduleManager())
             {
-                using (IUnitOfWork uow = this.GetUnitOfWork())
+                bool deleteSchedules = sManager.RemoveAllSchedulesByEvent(deleteEvent.Id);
+
+                if (deleteSchedules)
                 {
-                    IRepository<E.BookingEvent> repo = uow.GetRepository<E.BookingEvent>();
-                    deleteEvent = repo.Reload(deleteEvent);
-                    repo.Delete(deleteEvent);
-                    uow.Commit();
+                    using (IUnitOfWork uow = this.GetUnitOfWork())
+                    {
+                        IRepository<E.BookingEvent> repo = uow.GetRepository<E.BookingEvent>();
+                        deleteEvent = repo.Reload(deleteEvent);
+                        repo.Delete(deleteEvent);
+                        uow.Commit();
+                    }
                 }
             }
 

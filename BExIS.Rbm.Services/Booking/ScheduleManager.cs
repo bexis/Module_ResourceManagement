@@ -146,22 +146,24 @@ namespace BExIS.Rbm.Services.Booking
 
         public bool RemoveAllSchedulesByEvent(long eventId)
         {
-            PersonManager pManager = new PersonManager();
-            List<Schedule> list = ScheduleRepo.Query(a => a.BookingEvent.Id == eventId).ToList();
-            foreach (Schedule s in list)
+            using (PersonManager pManager = new PersonManager())
             {
-                using (IUnitOfWork uow = this.GetUnitOfWork())
+                List<Schedule> list = ScheduleRepo.Query(a => a.BookingEvent.Id == eventId).ToList();
+                foreach (Schedule s in list)
                 {
-                    Person tempForPerson = s.ForPerson;
-                    Person tempCreatedBy = s.ByPerson;
-                    IRepository<Schedule> repo = uow.GetRepository<Schedule>();
-                    Schedule deletedSchedule = s;
-                    deletedSchedule = repo.Reload(s);
-                    repo.Delete(deletedSchedule);
-                    uow.Commit();
-                    //Delete Persons
-                    pManager.DeletePerson(tempForPerson);
-                    pManager.DeletePerson(tempCreatedBy);
+                    using (IUnitOfWork uow = this.GetUnitOfWork())
+                    {
+                        Person tempForPerson = s.ForPerson;
+                        Person tempCreatedBy = s.ByPerson;
+                        IRepository<Schedule> repo = uow.GetRepository<Schedule>();
+                        Schedule deletedSchedule = s;
+                        deletedSchedule = repo.Reload(s);
+                        repo.Delete(deletedSchedule);
+                        uow.Commit();
+                        //Delete Persons
+                        pManager.DeletePerson(tempForPerson);
+                        pManager.DeletePerson(tempCreatedBy);
+                    }
                 }
             }
 
