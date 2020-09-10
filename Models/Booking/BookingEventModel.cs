@@ -71,7 +71,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                     s.ScheduleDurationModel.StartDate = rc.PreselectedStartDate;
                     s.ScheduleDurationModel.EndDate = rc.PreselectedEndDate;
                     s.ScheduleDurationModel.Index = rc.Index;
-                    s.ScheduleQuantity = rc.PreselectdQuantity;
+                    s.ScheduleQuantity = 1; // allways selct one by default
                     s.ResourceQuantity = resource.Quantity;
                     s.ByPerson = rc.ByPersonName;
 
