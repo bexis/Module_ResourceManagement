@@ -96,23 +96,28 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     else
                     {
                         //remove dep.
-                        foreach (NotificationDependency d in notification.NotificationDependency)
+                        for(int i = 0; i < notification.NotificationDependency.Count(); i++)
+                        //foreach (NotificationDependency d in notification.NotificationDependency)
                         {
-                            if (dictionary.ContainsKey(d.AttributeId))
+                            if (dictionary.ContainsKey(notification.NotificationDependency.ToList()[i].AttributeId))
                             {
-                                if (dictionary[d.AttributeId].Contains(d.DomainItem))
+                                if (dictionary[notification.NotificationDependency.ToList()[i].AttributeId].Contains(notification.NotificationDependency.ToList()[i].DomainItem))
                                 {
                                     //:)
                                 }
                                 else
                                 {
-                                    nManager.DeleteNotificationDependency(d);
+                                    notification.NotificationDependency.Remove(notification.NotificationDependency.ToList()[i]);
+                                    nManager.UpdateNotification(notification);
+                                    //nManager.DeleteNotificationDependency(d);
                                 }
 
                             }
                             else
                             {
-                                //delete all dep. by id
+                                //delete all dependencies
+                                notification.NotificationDependency.Clear();
+                                nManager.UpdateNotification(notification);
                             }
 
                         }
