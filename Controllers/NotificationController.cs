@@ -250,7 +250,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 if(s.ForPerson.Self is IndividualPerson)
                 {
                     IndividualPerson iPerson = (IndividualPerson)s.ForPerson.Self;
-                    userToNotify.Add(iPerson.Person.Email);
+                    if(!userToNotify.Contains(iPerson.Person.Email))
+                        userToNotify.Add(iPerson.Person.Email);
                 }
             }
 
@@ -262,7 +263,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
             message += notification.Message + "<br/>";
 
             SendNotificationHelper.SendNotification(userToNotify, message, subject);
-
         }
 
         public ActionResult Edit(long id)
