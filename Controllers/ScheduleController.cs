@@ -918,8 +918,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 //Users
                                 List<User> users = new List<User>();
 
-
-
                                 User contact = new User();
                                 Person person = new Person();
                                 //add all persons reserved for the user list
@@ -932,6 +930,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                         if (user.IsContactPerson == true)
                                         {
                                             contact = u;
+                                            schedule.ContactName = u.DisplayName;
+                                            schedule.Contact = user;
                                         }
                                         users.Add(u);
                                     }
