@@ -1809,6 +1809,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         tempSchedule.ScheduleDurationModel.StartDate = r.StartDate;
                         tempSchedule.ScheduleDurationModel.EndDate = r.EndDate;
                         tempSchedule.Index = sEventM.Schedules.Count() + 1;
+                        tempSchedule.ScheduleQuantity = 1;
                         sEventM.Schedules.Add(tempSchedule);
                     }
                 }

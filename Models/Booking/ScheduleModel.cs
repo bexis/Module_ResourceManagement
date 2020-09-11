@@ -344,6 +344,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             ResourceName = resource.Name;
             ResourceDescription = resource.Description;
             WithActivity = resource.WithActivity;
+            ResourceQuantity = resource.Quantity;
 
             ScheduleDurationModel scheduleDurationModel = new ScheduleDurationModel();
             scheduleDurationModel.DurationValue = resource.Duration.Value;
