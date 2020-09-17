@@ -243,7 +243,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     PersonGroup pGroup = (PersonGroup)s.ForPerson.Self;
                     foreach(User u in pGroup.Users)
                     {
-                        userToNotify.Add(u.Email);
+                        if (!userToNotify.Contains(u.Email))
+                            userToNotify.Add(u.Email);
                     }
                 }
 
