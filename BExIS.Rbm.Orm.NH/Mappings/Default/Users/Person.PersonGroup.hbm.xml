@@ -3,7 +3,7 @@
 
     <!-- Mapping Entity properties -->
 
-    <set name="Users" table="PersonGroup_User" cascade="none"  lazy="true">
+    <set name="Users" table="PersonGroup_User" cascade="none"  lazy="false">
       <key column="PersonGroupRef"/>
       <many-to-many column="UserRef" class="BExIS.Security.Entities.Subjects.User, BExIS.Security.Entities"/>
     </set>
