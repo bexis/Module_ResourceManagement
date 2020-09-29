@@ -1582,7 +1582,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 resourceCart.Add(cartItem);
             }
 
-            //Session["ResourceCart"] = resourceCart;
+            Session["ResourceCart"] = resourceCart;
 
             return View("SelectResources");
         }
