@@ -28,13 +28,16 @@
                  <div id="@calendarId" class="additonalCalendar"></div> 
              </td>
              <td>
-                 @Html.Telerik().DatePickerFor(m=>m[i].StartDate).Value(DateTime.Now)
+                 @Html.Telerik().DatePickerFor(m=>m[i].StartDate).Value(Model[i].StartDate)
              </td>
              <td>
-                 @Html.Telerik().DatePickerFor(m=>m[i].EndDate).Value(DateTime.Now)
+                 @Html.Telerik().DatePickerFor(m=>m[i].EndDate).Value(Model[i].EndDate)
              </td>
-              <td>
-                 @Html.CheckBoxFor(m=>m[i].isChoosen)
+             <td>
+                 @Html.CheckBoxFor(m => m[i].isChoosen)
+                 @Html.HiddenFor(m => m[i].ContactUserId,
+                                 new { @Value = Model[i].ContactUserId })
+
              </td>
          </tr>
     }

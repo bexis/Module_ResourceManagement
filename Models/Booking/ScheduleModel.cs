@@ -125,12 +125,15 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         public DateTime EndDate { get; set; }
         public bool isChoosen { get; set; }
 
-        public AlternateEventResource(SingleResource singleResource)
+        public long ContactUserId { get; set; }
+
+        public AlternateEventResource(SingleResource singleResource, DateTime startDate, DateTime enddate, long contactId)
         {
             ResourceId = singleResource.Id;
             ResourceName = singleResource.Name;
-            StartDate = new DateTime();
-            EndDate = new DateTime();
+            StartDate = startDate;
+            EndDate = enddate;
+            ContactUserId = contactId;
         }
 
         public AlternateEventResource()

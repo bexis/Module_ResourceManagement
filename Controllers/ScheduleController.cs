@@ -1734,7 +1734,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             model.CurrentResourceName = tempSchedule.ResourceName;
             model.Index = int.Parse(scheduleIndex);
 
-            FindSimilarResources(tempSchedule.ResourceId).ToList().ForEach(r => model.AlternateResources.Add(new AlternateEventResource(r)));
+            FindSimilarResources(tempSchedule.ResourceId).ToList().ForEach(r => model.AlternateResources.Add(new AlternateEventResource(r, tempSchedule.ScheduleDurationModel.StartDate, tempSchedule.ScheduleDurationModel.EndDate, tempSchedule.Contact.UserId)));
             //remove this resource from the alternative list
             model.AlternateResources.RemoveAll(a => a.ResourceId == tempSchedule.ResourceId);
             return PartialView("_resourceAvailability", model);
@@ -1782,14 +1782,15 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             BookingEventModel sEventM = (BookingEventModel)Session["Event"];
 
+            ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
+
             //find similar resource to the sourceresource based on there domain constrains
             List<SingleResource> similarResources = FindSimilarResources(long.Parse(id));
 
             List<AlternateEventResource> model = new List<AlternateEventResource>();
-            similarResources.ForEach(r => model.Add(new AlternateEventResource(r)));
+            similarResources.ForEach(r => model.Add(new AlternateEventResource(r, tempSchedule.ScheduleDurationModel.StartDate, tempSchedule.ScheduleDurationModel.EndDate, tempSchedule.Contact.UserId)));
 
             //remove the source resource from the result list
-            ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
             model.RemoveAll(a => a.ResourceId == tempSchedule.ResourceId);
 
             return PartialView("_similarResources", model);
@@ -1799,6 +1800,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             BookingEventModel sEventM = (BookingEventModel)Session["Event"];
             using (ResourceManager srManager = new ResourceManager())
+            using (UserManager userManager = new UserManager())
             {
                 foreach (AlternateEventResource r in model)
                 {
@@ -1808,6 +1810,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         ScheduleEventModel tempSchedule = new ScheduleEventModel(sr);
                         tempSchedule.ScheduleDurationModel.StartDate = r.StartDate;
                         tempSchedule.ScheduleDurationModel.EndDate = r.EndDate;
+                        var userTask = userManager.FindByIdAsync(Convert.ToInt64(r.ContactUserId));
+                        userTask.Wait();
+                        var user = userTask.Result;
+                        var person = new PersonInSchedule(0, user, true);
+                        tempSchedule.Contact = person;
+                        tempSchedule.ForPersons.Add(person);
                         tempSchedule.Index = sEventM.Schedules.Count() + 1;
                         tempSchedule.ScheduleQuantity = 1;
                         sEventM.Schedules.Add(tempSchedule);
