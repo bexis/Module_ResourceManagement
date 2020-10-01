@@ -1,49 +1,7 @@
 ﻿@using Telerik.Web.Mvc.UI;
 @using BExIS.Web.Shell.Areas.RBM.Models.Booking;
 
-
-
 @model ResourceFilterModel
-@*<b>Filter Resources</b><br /><br />*@
-@*
-    <table style=" border: none !important;" class="overlay">
-     <tr>
-                    <td style="border: none !important;">
-                        @if (Model.IsPreSelected)
-                        {
-                            <span>From:@Html.Telerik().DatePickerFor(m => m.StartDate).HtmlAttributes(new { title = "Start date of the time period in which you search resources", style = "width:120px" })</span>
-                        }
-                        else
-                        {
-                            <span>From: @Html.Telerik().DatePicker().Name("StartDate").HtmlAttributes(new { title = "Start date of the time period in which you search resources", style = "width:120px" })</span>
-                        }
-
-                        @if (Model.IsPreSelected)
-                        {
-                            <span>To: @Html.Telerik().DatePickerFor(m => m.EndDate).HtmlAttributes(new { title = "End date of the time period in which you search resources", style = "width:120px" })</span>
-                        }
-                        else
-                        {
-                            <span>To: @Html.Telerik().DatePicker().Name("EndDate").HtmlAttributes(new { title = "End date of the time period in which you search resources", style = "width:120px" })</span>
-                        }
-
-                    </td>
-                </tr>
-
-               <!-- <tr>
-                    <td style="border: none !important;">
-                        <span> Number:  @Html.TextBox("Quantity", Model.Quantity, new { title = "Filter on quantity ", style = "width:34px; border-width:2px" })</span>
-                    </td>
-                </tr>-->
-                <tr>
-                    <td style="border: none !important;">
-
-                        <button onclick="applyFilter()" class="bx-button small function" title="Apply filter">OK</button>
-                        <button onclick="removeFilter()" class="bx-button small function" title="Clear filter">Clear</button>
-                    </td>
-                </tr>
-            </table>
-*@
 
 <br />
 <div class="overlayHeader">
@@ -53,8 +11,7 @@
                         .Name("TreeView")
                         .ShowCheckBox(true)
                         .ClientEvents(events => events
-                                //.OnSelect("onSelect")
-                                .OnChecked("onChangeFilter")
+                        .OnChecked("onChangeFilter")
                         )
 
                          .BindTo<AttributeDomainItemsModel>(Model.TreeItems.Distinct(), (item, attribute) =>
@@ -95,89 +52,7 @@
         return $('#TreeView').data('tTreeView');
     }
 
-    // old code to check availibility
-
-    function applyFilter() {
-
-        var startdate = $("#StartDate").val();
-        var enddate = $("#EndDate").val();
-
-        if (!startdate || !enddate) {
-            alert("End or start date is missing. Add the date to apply the filter.");
-            return;
-        }
-
-
-        if (new Date(enddate) < new Date(startdate))
-        {
-            alert("End date is before start date. Change the date to apply the filter.");
-            return;
-        }
-
-
-        else
-        {
-            var quantity = $("#Quantity").val();
-
-           $.get('@Url.Action("ApplyFilter", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', { startdate: startdate, enddate: enddate, quantity: 0 }, function (data) {
-
-                $('#Content_Resources').html(data);
-            });
-        }
-    }
-
-    function removeFilter() {
-
-        var checkedItems = [];
-
-        if ($('#TreeView>ul>li>ul>li>div :checked').length > 0) {
-
-            $('#TreeView>ul>li>ul>li>div :checked').each(function () {
-
-                var parentSelect = $(this).parent().parent();
-                var itemSelect = parentSelect.find(':input[name="itemValue"]');
-                var attrId = parentSelect.find('span[class$="domainItem"]').attr('id');
-
-                var item = attrId + "_" + itemSelect.attr('value');
-
-                checkedItems.push(item);
-            })
-
-            //convert to string to send it to sever
-            var checkedItemAsString = checkedItems.toString();
-
-            $.get('@Url.Action("RemoveFilter", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', { selectedItems: checkedItemAsString }, function (data) {
-                $("#StartDate").val("");
-                $("#EndDate").val("");
-                $("#Quantity").val(0);
-                $('#Content_Resources').html(data);
-            });
-        }
-        else {
-            $.get('@Url.Action("LoadResources", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', function (data) {
-
-                $('#Content_Resources').html(data);
-
-            });
-        }
-
-
-
-
-
-
-        @*$.get('@Url.Action("RemoveFilter", "Schedule", new RouteValueDictionary { { "area", "RBM"} })', {}, function (data) {
-
-            $("#StartDate").val() = null;
-            $("#EndDate").val() = null;
-            $("#Quantity").val() = 0;
-            $('#Content_Resources').html(data);
-        });*@
-
-    }
-
-
-        function onChangeFilter(e) {
+    function onChangeFilter(e) {
 
             var checkedItems = [];
 
@@ -212,7 +87,6 @@
                 });
             }
         }
-
 
 </script>
 

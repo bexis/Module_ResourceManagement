@@ -83,20 +83,14 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         public long ByPersonUserId { get; set; }
 
         //Status must be included
-        public DateTime PreselectedStartDate { get; set; }
-        public DateTime PreselectedEndDate { get; set; }
-        public bool PreselectedEndStartDate { get; set; }
-        public int PreselectdQuantity { get; set; } 
         public int Index { get; set; }
 
         public bool NewInCart { get; set; }
 
         public ResourceCart()
         {
-            PreselectedStartDate = DateTime.Now;
-            PreselectedEndDate = DateTime.Now;
-            PreselectedEndStartDate = false;
-    }
+           
+        }
 
     }
 

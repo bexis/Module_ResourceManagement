@@ -16,27 +16,7 @@
                 </tr>
                 <tr>
                     <td style="vertical-align:middle; background-color:#d2e8e3;">
-                        <div>
-                            @if (rc.PreselectedEndStartDate == true)
-                            {
-                                <small> @rc.PreselectedStartDate.ToString("dd.MM.yyyy")</small>
-                                <small>- @rc.PreselectedEndDate.ToString("dd.MM.yyyy")</small>
-                            }
-                            else
-                            {
-                                <small>(Please specify date and number in the next step.)</small>
-                            }
-
-                            @if (rc.PreselectdQuantity != 0)
-                            {
-                                <small>(No. @rc.PreselectdQuantity)</small><br />
-                            }
-
-                        </div>
-                    </td>
-                    <td style="vertical-align:middle; background-color:#d2e8e3;">
                         <div id="remove" class="bx bx-grid-function bx-trash" onclick="removeRourceFromCart(@rc.Index)" title="Remove resource from cart"></div>
-
                     </td>
                 </tr>
             }

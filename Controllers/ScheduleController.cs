@@ -62,15 +62,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult OnChangeFilter(string selectedItems)
         {
-            Session["TreeFilterResults"] = null;
             //set result set for tree Filter null
             Session["TreeFilterResults"] = null;
-
-            //get all selected resources from session
-            List<TempSchedule> selectedResources = new List<TempSchedule>();
-
-            //if (Session["SelectedResources"] != null)
-            //    selectedResources = (List<TempSchedule>)Session["SelectedResources"];
 
             //Filter is this format: AttrID_DomainItem, AttrID_Domain
             List<string> items = selectedItems.Split(',').ToList();
@@ -111,18 +104,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     treeDomainList = (List<ResourceAttributeValueModel>)Session["treeDomainModel"];
                 }
 
-
-                //else
-                //{
-                //    List<SelectResourceForEventModel> tempResults = new List<SelectResourceForEventModel>();
-                //    tempResults = (List<SelectResourceForEventModel>)Session["FilterResults"];
-                //    foreach (SelectResourceForEventModel tempResult in tempResults)
-                //    {
-                //        treeDomainList.Add(new ResourceAttributeValueModel(rManager.GetResourceById(tempResult.Id)));
-                //    }
-
-                //}
-
                 List<ResourceFilterHelper.FilterTreeItem> filterList = new List<ResourceFilterHelper.FilterTreeItem>();
 
                 //split Id and DomainItem and add it to a FilterItem list
@@ -136,6 +117,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     filterList.Add(filterItem);
                 }
 
+                //Session["Filter"] = filterList;
 
                 //Dictionary to save every Filter (domain items) to one attr
                 Dictionary<long, List<string>> filterDic = ResourceFilterHelper.GetFilterDic(filterList);
@@ -151,66 +133,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     }
                 }
 
-                List<SelectResourceForEventModel> endResultList = new List<SelectResourceForEventModel>();
-                ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
-                if (Session["Filter"] != null)
-                    filter = (ResourceFilterHelper.Filter)Session["Filter"];
+                Session["TreeFilterResults"] = resultFromTreeFilter;
 
-                //if filter is set apply it on the results
-                if (filter.IsSet == true)
-                {
-                    endResultList = ResourceFilterHelper.ApplyFilter(resultFromTreeFilter, filter);
-                }
-                else
-                    endResultList = resultFromTreeFilter;
-
-                Session["TreeFilterResults"] = endResultList;
-
-                return PartialView("_gridResources", endResultList);
+                return PartialView("_gridResources", resultFromTreeFilter);
             }
-        }
-
-        public ActionResult ApplyFilter(string startdate, string enddate, string quantity)
-            {
-                Session["Filter"] = null;
-
-                ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
-                filter.StartDate = DateTime.Parse(startdate);
-                filter.EndDate = DateTime.Parse(enddate);
-                filter.Quantity = int.Parse(quantity);
-                filter.IsSet = true;
-
-                Session["Filter"] = filter;
-                List<SelectResourceForEventModel> resourcesEventList = new List<SelectResourceForEventModel>();
-
-            using (ResourceManager rManager = new ResourceManager())
-            {
-                //if the user choose already a treefilter then the results in the session and apply filter on this results
-                if (Session["TreeFilterResults"] != null)
-                {
-                    resourcesEventList = (List<SelectResourceForEventModel>)Session["TreeFilterResults"];
-                }
-                else
-                {
-
-                    List<SingleResource> resources = rManager.GetAllResources().ToList();
-                    resources.ForEach(r => resourcesEventList.Add(new SelectResourceForEventModel(r)));
-                }
-
-                List<SelectResourceForEventModel> resultList = new List<SelectResourceForEventModel>();
-                resultList = ResourceFilterHelper.ApplyFilter(resourcesEventList, filter);
-                Session["FilterResults"] = resultList;
-
-                return PartialView("_gridResources", resultList);
-            }
-            
-        }
-
-
-        public ActionResult RemoveFilter(string selectedItems)
-        {
-            Session["Filter"] = null;
-            return RedirectToAction("OnChangeFilter", new RouteValueDictionary(new { controller = "Schedule", action = "Main", selectedItems = selectedItems }));
         }
 
         #endregion
@@ -222,13 +148,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             ResourceFilterModel model = new ResourceFilterModel();
             //if event creation starting point from ´date(time) in calender set date to clicked date
-            if (Session["Filter"] != null)
-            {
-                ResourceFilterHelper.Filter filter = (ResourceFilterHelper.Filter)Session["Filter"];
-                model.StartDate = filter.StartDate;
-                model.EndDate = filter.EndDate;
-                model.IsPreSelected = true;
-            }
 
             using (ResourceStructureManager rsManager = new ResourceStructureManager())
             {
@@ -264,19 +183,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 singelResources = srManager.GetAllResources().ToList();
                 singelResources.ForEach(r => allResourceList.Add(new SelectResourceForEventModel(r)));
 
-                if (Session["Filter"] != null)
-                {
-                    ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
-                    filter = (ResourceFilterHelper.Filter)Session["Filter"];
-                    results = ResourceFilterHelper.ApplyFilter(allResourceList, filter);
-                    Session["TreeFilterResults"] = results;
-                }
-                else
-                {
-                    results = allResourceList;
-                    Session["TreeFilterResults"] = results;
-                 }
-
+               results = allResourceList;
+               Session["TreeFilterResults"] = results;
+                 
                 return PartialView("_gridResources", results);
             }
 
@@ -308,19 +217,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 if (model == null)
                     model = new List<ResourceCart>();
 
-                //get filter values
-                ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
-                if (Session["Filter"] != null)
-                {
-                    filter = (ResourceFilterHelper.Filter)Session["Filter"];
-                }
-                else
-                {
-                    filter.StartDate = new DateTime();
-                    filter.EndDate = new DateTime();
-                    filter.Quantity = 0;
-                }
-
                 //get all selected resource ids
                 //var rIds = resources.Split(',').Select(Int64.Parse).ToList();
 
@@ -351,17 +247,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     cartItem.Index = index;
                     cartItem.NewInCart = true;
 
-                    if (filter.IsSet)
-                    {
-                        cartItem.PreselectdQuantity = filter.Quantity;
-                        cartItem.PreselectedStartDate = filter.StartDate;
-                        cartItem.PreselectedEndDate = filter.EndDate;
-                        cartItem.PreselectedEndStartDate = true;
-                    }
-                    else
-                    {
-                        cartItem.PreselectedEndStartDate = false;
-                    }
 
                     model.Add(cartItem);
                     //}
@@ -377,34 +262,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
             }
 
         }
-
-        //public ActionResult OnChangeQuantityInCart(string quantity, string index)
-        //{
-        //    List<ResourceCart> model = (List<ResourceCart>)Session["ResourceCart"];
-        //    ResourceCart tempCartItem = model.Where(m => m.Index == int.Parse(index)).FirstOrDefault();
-
-        //    if (Session["Filter"] != null)
-        //    {
-        //        Filter filter = (Filter)Session["Filter"];
-        //        int availableQuantity = GetAvailableQuantity(tempCartItem.Id, tempCartItem.ResourceQuantity, tempCartItem.PreselectedStartDate, tempCartItem.PreselectedEndDate, tempCartItem.PreselectdQuantity, 0);
-        //        if ((availableQuantity - int.Parse(quantity)) <= 0)
-        //        {
-        //            ModelState.AddModelError(index, "Your requested number is not available at the timer period in the filter.");
-        //        }
-        //    }
-
-        //    if (ModelState.IsValid)
-        //    {
-        //        tempCartItem.PreselectdQuantity = int.Parse(quantity);
-        //        var i = model.FindIndex(p => p.Index == Convert.ToInt64(index));
-        //        model[i] = tempCartItem;
-
-        //        Session["ResourceCart"] = model;
-        //    }
-
-        //    return PartialView("_cartResources", model);
-
-        //}
 
         public ActionResult RemoveResourceFromCart(string index)
         {
@@ -466,48 +323,15 @@ namespace BExIS.Modules.RBM.UI.Controllers
         #endregion
 
         #region Create/Edit Event
-
-        public ActionResult SetFilter(string startDate)
-        {
-            Session["Filter"] = null;
-            if (startDate != null)
-            {
-                ResourceFilterHelper.Filter filter = new ResourceFilterHelper.Filter();
-                filter.StartDate = DateTime.Parse(startDate);
-                filter.EndDate = DateTime.Parse(startDate);
-                Session["Filter"] = filter;
-            }
-
-            return new EmptyResult();
-        }
-
         public ActionResult Create()
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Create Event", this.Session.GetTenant());
             Session["ResourceCart"] = null;
             Session["Event"] = null;
             Session["FilterResults"] = null;
-
-            //if (Session["Filter"] != null)
-            //{
-            //    Filter filter = (Filter)Session["Filter"];
-            //    if (!filter.IsPredefined)
-            //        Session["Filter"] = null;
-            //}
+            
             ResourceFilterModel model = new ResourceFilterModel();
-            if (Session["Filter"] != null)
-            {
-                ResourceFilterHelper.Filter filter = (ResourceFilterHelper.Filter)Session["Filter"];
-                model.StartDate = filter.StartDate;
-                model.EndDate = filter.EndDate;
-                model.IsPreSelected = true;
-            }
-            else
-            {
-                model.IsPreSelected = false;
-            }
-
-
+           
             return View("SelectResources");
         }
 
@@ -542,12 +366,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 SingleResource resource = rManager.GetResourceById(rc.Id);
                                 ScheduleEventModel s = new ScheduleEventModel(resource);
 
-                                s.ScheduleDurationModel.StartDate = rc.PreselectedStartDate;
-                                s.ScheduleDurationModel.EndDate = rc.PreselectedEndDate;
                                 s.ScheduleDurationModel.Index = rc.Index;
                                 s.ScheduleDurationModel.EventId = model.Id;
 
-                                s.ScheduleQuantity = rc.PreselectdQuantity;
                                 s.ResourceQuantity = resource.Quantity;
                                 s.ByPerson = rc.ByPersonName;
 
@@ -1574,9 +1395,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
             {
                 ResourceCart cartItem = new ResourceCart();
                 cartItem.Name = s.ResourceName;
-                cartItem.PreselectedStartDate = s.ScheduleDurationModel.StartDate;
-                cartItem.PreselectedEndDate = s.ScheduleDurationModel.EndDate;
-                cartItem.PreselectdQuantity = s.ScheduleQuantity;
                 cartItem.NewInCart = false;
                 cartItem.Index = s.Index;
                 resourceCart.Add(cartItem);

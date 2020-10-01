@@ -68,11 +68,11 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                 {
                     SingleResource resource = rManager.GetResourceById(rc.Id);
                     ScheduleEventModel s = new ScheduleEventModel(resource);
-                    s.ScheduleDurationModel.StartDate = rc.PreselectedStartDate;
-                    s.ScheduleDurationModel.EndDate = rc.PreselectedEndDate;
                     s.ScheduleDurationModel.Index = rc.Index;
                     s.ScheduleQuantity = 1; // allways selct one by default
                     s.ResourceQuantity = resource.Quantity;
+                    s.ScheduleDurationModel.StartDate = DateTime.Now;
+                    s.ScheduleDurationModel.EndDate = DateTime.Now;
                     s.ByPerson = rc.ByPersonName;
 
 
@@ -283,9 +283,6 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         //Model for the TreeView to Filter the Resources by Domain Constrains in the Create/Edit Event view
         public class ResourceFilterModel
         {
-            public DateTime? StartDate { get; set; }
-            public DateTime? EndDate { get; set; }
-            public int Quantity { get; set; }
             public bool IsPreSelected { get; set; }
             public bool ShowMyBookings { get; set; }
             public List<AttributeDomainItemsModel> TreeItems { get; set; }
@@ -293,9 +290,6 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
             public ResourceFilterModel()
             {
-                StartDate = null;
-                EndDate = null;
-                Quantity = 0;
                 IsPreSelected = false;
                 ShowMyBookings = false;
                 TreeItems = new List<AttributeDomainItemsModel>();
