@@ -191,11 +191,11 @@
             editable: false,
             eventSources: [ calsources.schedulesource],
 
-            dayClick: function (date, jsEvent, view) {
-                $.get('@Url.Action("SetFilter", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { startdate: date.format() }, function (data) {
-                    window.location.href = 'Create';
-                })
-            },
+        //    dayClick: function (date, jsEvent, view) {
+        //        $.get('@Url.Action("SetFilter", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { startdate: date.format() }, function (data) {
+        //            window.location.href = 'Create';
+        //        })
+        //     },
 
             eventClick: function (event) {
                 var id = event.eventId;
