@@ -162,9 +162,7 @@ namespace BExIS.Modules.RBM.UI.Helper
                 rs_new.Add(new newResourceStructure() { name = "Forest - all EPs (SCH)", color = "#ec5959", description = "Visit of all forest EPs in Schorfheide-Chorin", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
                 rs_new.Add(new newResourceStructure() { name = "Forest - all MIPs (SCH)", color = "#ec5959", description = "Visit of all forest MIPs in Schorfheide-Chorin", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
                 rs_new.Add(new newResourceStructure() { name = "Forest - all VIPs (SCH)", color = "#ec5959", description = "Visit of all forest VIPs in Schorfheide-Chorin", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
-
-                rs_new.Add(new newResourceStructure() { name = "Forest - all Gap-Plots (SCH)", color = "#ec5959", description = "Visit of all new gap experiment plots in SCH (SEW3,4,17,18,24,25,27,31,33,35,36,49)", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
-
+                
                 rs_new.Add(new newResourceStructure() { name = "Forest - district Altenhof", color = "#ec5959", description = "", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
                 rs_new.Add(new newResourceStructure() { name = "Forest - district Arnimswalde", color = "#ec5959", description = "", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
                 rs_new.Add(new newResourceStructure() { name = "Forest - district Chorin", color = "#ec5959", description = "", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
@@ -183,8 +181,6 @@ namespace BExIS.Modules.RBM.UI.Helper
                 rs_new.Add(new newResourceStructure() { name = "Forest - Stiftung Schorfheide-Chorin", color = "#ec5959", description = "", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
                 rs_new.Add(new newResourceStructure() { name = "Forest - FOX (SCH)", color = "#ec5959", description = "", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
 
-                rs_new.Add(new newResourceStructure() { name = "Grassland - all new EE-Plots (SCH)", color = "#ff0000", description = "Visit of all new extensification experiment plots in SCH (SEG3,13,14,25,30,31,32,33,35,36,38,42,43,44,50)", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
-                rs_new.Add(new newResourceStructure() { name = "Grassland - all new LE-Plots (SCH)", color = "#ff0000", description = "Visit of all new landuse experiment plots in SCH (SEG13,42,43,44)", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
                 rs_new.Add(new newResourceStructure() { name = "Grassland - RP/UP (SCH)", color = "#ff0000", description = "", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
 
                 rs_new.Add(new newResourceStructure() { name = "Grassland - ABP Landwirtschaft Neugrimnitz GmbH", color = "#ff0000", description = "", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schorfheide-Chorin" });
@@ -218,7 +214,6 @@ namespace BExIS.Modules.RBM.UI.Helper
                 rs_new.Add(new newResourceStructure() { name = "Forest - all MIPs (HAI)", color = "#8cca0d", description = "Visit of all forest MIPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
                 rs_new.Add(new newResourceStructure() { name = "Forest - all VIPs (HAI)", color = "#8cca0d", description = "Visit of all forest VIPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
 
-                rs_new.Add(new newResourceStructure() { name = "Forest - all Gap-Plots (HAI)", color = "8cca0d", description = "Visit of all new gap experiment plots in HAI (HEW5,6,19,21,29,30,32,47,48)", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
                 rs_new.Add(new newResourceStructure() { name = "Forest - FOX (HAI)", color = "8cca0d", description = "", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
 
                 rs_new.Add(new newResourceStructure() { name = "Forest - district Anrode", color = "#8cca0d", description = "Forest - district Anrode", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
@@ -238,8 +233,6 @@ namespace BExIS.Modules.RBM.UI.Helper
                 rs_new.Add(new newResourceStructure() { name = "Grassland - all MIPs (HAI)", color = "#9acd32", description = "Visit of all grassland MIPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
                 rs_new.Add(new newResourceStructure() { name = "Grassland - all VIPs (HAI)", color = "#9acd32", description = "Visit of all grassland VIPs in Hainich-Dün", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
 
-                rs_new.Add(new newResourceStructure() { name = "Grassland - all new EE-Plots (HAI)", color = "9acd32", description = "Visit of all new extensification experiment plots in HAI (HEG 1,2,3,6,7,10,13,14,15,27,40,47,48,49,50)", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
-                rs_new.Add(new newResourceStructure() { name = "Grassland - all new LE-Plots (HAI)", color = "9acd32", description = "Visit of all new landuse experiment plots in HAI (HEG1,2,3,6,14,15)", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
                 rs_new.Add(new newResourceStructure() { name = "Grassland - RP/UP (HAI)", color = "9acd32", description = "Visit of all new landuse experiment plots in HAI (HEG1,2,3,6,14,15)", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Hainich-Dün" });
 
 
@@ -279,7 +272,6 @@ namespace BExIS.Modules.RBM.UI.Helper
                 rs_new.Add(new newResourceStructure() { name = "Forest - all EPs (ALB)", color = "#3a75e0", description = "Visit of all forest EPs in Schwäbische Alb", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
                 rs_new.Add(new newResourceStructure() { name = "Forest - VIP AEW1-8 (ALB)", color = "#3a75e0", description = "Visit of all VIP AEW1-8 in Schwäbische Alb", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
                 rs_new.Add(new newResourceStructure() { name = "Forest - VIP AEW9 (Alb)", color = "#3a75e0", description = "Visit of all VIP AEW9 in Schwäbische Alb", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
-                rs_new.Add(new newResourceStructure() { name = "Forest - all Gap-Plots (ALB)", color = "#3a75e0", description = "Visit of all new gap experiment plots in ALB (AEW3,22,28,33,34,39,42,47)", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
                 rs_new.Add(new newResourceStructure() { name = "Forest - FOX (ALB)", color = "#3a75e0", description = "", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
 
 
@@ -287,8 +279,6 @@ namespace BExIS.Modules.RBM.UI.Helper
                 rs_new.Add(new newResourceStructure() { name = "Grassland - all EPs including former military training area", color = "#6495ed", description = "", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
                 rs_new.Add(new newResourceStructure() { name = "Grassland - all VIPs (ALB)", color = "#6495ed", description = "Visit of all grassland VIPs in Schwäbische Alb", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
 
-                rs_new.Add(new newResourceStructure() { name = "Grassland - all new EE-Plots (ALB)", color = "#6495ed", description = "Visit of all new extensification experiment plots in ALB (AEG 1,4,5,6,11,12,13,16,18,35,36,37,39,41,46)", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
-                rs_new.Add(new newResourceStructure() { name = "Grassland - all new LE-Plots (ALB)", color = "#6495ed", description = "Visit of all new landuse experiment plots in ALB (AEG1,4,6,12,35,36)", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
                 rs_new.Add(new newResourceStructure() { name = "Grassland - RP/UP (ALB)", color = "#6495ed", description = "", duration = 1, quantity = 0, withActivity = true, resourceStructure = rs, type = "Area", explo = "Schwäbische Alb" });
 
 
