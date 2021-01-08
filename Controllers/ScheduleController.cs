@@ -567,12 +567,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     //check if selected number is available to the timeperiod
                     if (s.ResourceQuantity != 0)
                     {
-                        int availableQuantity = GetAvailableQuantity(s.ResourceId, s.ResourceQuantity, s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate, s.ScheduleQuantity, s.ScheduleId);
+                        bool availableQuantity = GetAvailableQuantity(s.ResourceId, s.ResourceQuantity, s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate, s.ScheduleQuantity, s.ScheduleId);
 
-
-
-
-                        if ((availableQuantity - s.ScheduleQuantity) < 0)
+                        if (!availableQuantity)
                         {
                             isError = true;
                             sError = true;
@@ -2049,28 +2046,28 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return hasActivity;
         }
 
-        private int GetAvailableQuantity(long resourceId, int resourceQuantity, DateTime startDate, DateTime endDate, int requestQuantity, long scheduleId)
+        private bool GetAvailableQuantity(long resourceId, int resourceQuantity, DateTime startDate, DateTime endDate, int requestQuantity, long scheduleId)
         {
             int availableQuantity = 0;
             using (ScheduleManager schManager = new ScheduleManager())
             {
-                List<Schedule> allSchedules = schManager.GetAllSchedulesByResource(resourceId);
-                int schedulesQuantity = 0;
 
-                foreach (Schedule s in allSchedules)
+                var allDays = Enumerable.Range(0, 1 + endDate.Date.Subtract(startDate.Date).Duration().Days).Select(offset => startDate.Date.AddDays(offset));
+                List<int> schedulesQuantitiesPDay = new List<int>();
+
+                foreach (DateTime date in allDays)
                 {
-                    if (s.Id != scheduleId)
+                    List<Schedule> allSchedules = schManager.GetSchedulesBetweenStartAndEndDateByResource(date.Date, date.Date, resourceId);
+                    int schedulesQuantity = 0;
+                    foreach (Schedule s in allSchedules)
                     {
-                        //get all schedule in the given time period
-                        if ((DateTime.Compare(startDate.Date, s.StartDate.Date) >= 0 && DateTime.Compare(endDate.Date, s.EndDate.Date) <= 0) || (DateTime.Compare(endDate.Date, s.StartDate.Date) >= 0 && DateTime.Compare(startDate.Date, s.EndDate.Date) <= 0))
-                        {
-                            //Count all quantities in in time schedules to get schedulesQuantity
-                            schedulesQuantity += s.Quantity;
-                        }
+                        schedulesQuantity += s.Quantity;
                     }
+
+                    schedulesQuantitiesPDay.Add(schedulesQuantity);
                 }
 
-                availableQuantity = resourceQuantity - schedulesQuantity;
+                availableQuantity = resourceQuantity - schedulesQuantitiesPDay.Max();
 
                 //check schedules which are temporary in den Event
                 BookingEventModel eventM = (BookingEventModel)Session["Event"];
@@ -2088,10 +2085,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         }
                         //}
                     }
-                    availableQuantity = availableQuantity - tempScheduleQuantity;
+                    availableQuantity = availableQuantity - (tempScheduleQuantity-1);
                 }
 
-                return availableQuantity;
+                if (availableQuantity > 0)
+                    return true;
+                else
+                    return false;
+
             }
         }
 

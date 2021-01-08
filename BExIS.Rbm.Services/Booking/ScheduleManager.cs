@@ -180,6 +180,11 @@ namespace BExIS.Rbm.Services.Booking
             return ScheduleRepo.Query(a => ((DateTime)a.StartDate.Date >= startDate.Date && (DateTime)a.StartDate.Date <= endDate.Date) || ((DateTime)a.EndDate.Date >= startDate.Date && (DateTime)a.EndDate.Date <= endDate.Date)).ToList();
         }
 
+        public List<Schedule> GetSchedulesBetweenStartAndEndDateByResource(DateTime startDate, DateTime endDate, long resourceId)
+        {
+            return ScheduleRepo.Query(a => a.Resource.Id == resourceId && ((DateTime)a.StartDate.Date >= startDate.Date && (DateTime)a.StartDate.Date <= endDate.Date) || ((DateTime)a.EndDate.Date >= startDate.Date && (DateTime)a.EndDate.Date <= endDate.Date)).ToList();
+        }
+
         public List<Schedule> GetSchedulesBetweenStartAndEndDate(DateTime startDate, DateTime endDate, List<long> eventIds)
         {
             return ScheduleRepo.Query(a => (eventIds.Contains(a.BookingEvent.Id)) && (((DateTime)a.StartDate.Date >= startDate.Date && (DateTime)a.StartDate.Date <= endDate.Date) || ((DateTime)a.EndDate.Date >= startDate.Date && (DateTime)a.EndDate.Date <= endDate.Date))).ToList();
