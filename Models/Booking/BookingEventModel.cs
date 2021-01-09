@@ -152,14 +152,14 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                 List<Schedule> schedules = schManager.GetAllSchedulesByEvent(e.Id);
 
                 eventId = e.Id;
-                title = e.Name;
+                title = e.Name + " (" + e.Schedules.First().ByPerson.Person.DisplayName + ")";
                 start = (from d in schedules select d.StartDate).Min();
                 end = (from d in schedules select d.EndDate).Max();
                 color = "#3868c8"; // fix color, maybe later a other solution for the event color
             }
         }
 
-        public CalendarItemsModel(string resourceName,string resourceColor, SystemDefinedUnit timeUnit, DateTime startDate, DateTime endDate, long eId, long rQuantity, long sQuantity)
+        public CalendarItemsModel(string resourceName,string resourceColor, SystemDefinedUnit timeUnit, DateTime startDate, DateTime endDate, long eId, long rQuantity, long sQuantity, string byPerson)
         {
             eventId = eId;
             if (rQuantity > 0)
@@ -170,6 +170,8 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             {
                 title = resourceName;
             }
+
+            title = title + " (" + byPerson + ")";
             
             color = resourceColor;
             start = startDate;
