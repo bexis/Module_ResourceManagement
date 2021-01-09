@@ -3,10 +3,15 @@
 <link rel='stylesheet' href="@Url.Content("~/Areas/RBM/Content/main.css")" />
 <script src="@Url.Content("~/Areas/RBM/Scripts/moment.min.js")"></script>
 <script src="@Url.Content("~/Areas/RBM/Scripts/fullcalendar/dist/fullcalendar.js")"></script>
-
-@section Information
+<style>
+    .fc-day-grid-event .fc-content
+    {
+        white-space: unset;
+    }
+</style> 
+        @section Information
 {
-    The calendar helps you to plan your fieldwork, inform the LMTs about your planned work and, book sleeping places and equipment.
+        The calendar helps you to plan your fieldwork, inform the LMTs about your planned work and, book sleeping places and equipment.
     <br />
     The calendar shows all reservations in the calendar or as a list. By using the filter (green section on the left) you can display (1) only our bookings, (2) bookings of a specific region, (3) instruments and sleeping places.
     <br />
@@ -15,7 +20,7 @@
     <br />
     uptdate: 27.02.2020
     <p>
-       <!-- <a href="/RBM/Help/Index/#_Toc434570750" class="bx-informationLink" title="go to help" target="_blank">More</a>-->
+        <!-- <a href="/RBM/Help/Index/#_Toc434570750" class="bx-informationLink" title="go to help" target="_blank">More</a>-->
     </p>
 }
 
