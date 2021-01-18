@@ -280,10 +280,12 @@
 
 
     function RemoveScheduleFromEvent(index) {
-
-        $.get('@Url.Action("RemoveScheduleFromEvent", "Schedule")', { index: index }, function (data) {
-            $('#Content_Event').html(data)
-        });
+        var result = confirm('Are you sure you want to delete this reservation?');
+        if (result) {
+            $.get('@Url.Action("RemoveScheduleFromEvent", "Schedule")', { index: index }, function (data) {
+                $('#Content_Event').html(data)
+            });
+        }
     }
 
     function OnClickChooseForPerson(index) {
