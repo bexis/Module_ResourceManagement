@@ -89,24 +89,28 @@
 
 
 
-    <div class="bx-footer right">
-        @Html.ActionLink("Cancel", "Calendar", "Calendar", null, new { area = "rbm", @class = "t-button action", @title = "Cancel", @tabindex = "5" })
+<div class="bx-footer right">
+    @Html.ActionLink("Cancel", "Calendar", "Calendar", null, new { area = "rbm", @class = "t-button action", @title = "Cancel", @tabindex = "5" })
 
-        @if (!Model.EditMode && Model.EditAccess)
-        {
-            <button id="edit" class="t-button action" title="" onclick="openEditMode(@Model.Id)">Edit</button>
-        }
-        else if (Model.EditMode)
-        {
-            @Html.ActionLink("Book", "SaveEvent", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Save event", @tabindex = "5" })
-        }
-        @if (Model.DeleteAccess)
-        {
-            @Html.ActionLink("Delete", "Delete", "Schedule", new { area = "RBM", id = Model.Id }, new { @class = "t-button action", @title = "Delete", @tabindex = "5" })
-        }
+    @if (!Model.EditMode && Model.EditAccess)
+    {
+        <button id="edit" class="t-button action" title="" onclick="openEditMode(@Model.Id)">Edit</button>
+    }
+    else if (Model.EditMode && Model.Id != 0)
+    {
+        @Html.ActionLink("Save", "SaveEvent", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Save event", @tabindex = "5" })
+    }
+    else if (Model.EditMode && Model.Id == 0)
+    {
+        @Html.ActionLink("Book", "SaveEvent", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Save event", @tabindex = "5" })
+    }
+    @if (Model.DeleteAccess)
+    {
+        @Html.ActionLink("Delete", "Delete", "Schedule", new { area = "RBM", id = Model.Id }, new { @class = "t-button action", @title = "Delete", @tabindex = "5" })
+    }
 
 
-    </div>
+</div>
 
 </div>
 
