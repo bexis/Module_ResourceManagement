@@ -707,10 +707,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
                             }
 
                             //Delete deleted schedules in DB
-                            foreach (long id in model.DeletedSchedules)
-                            {
-                                scheduleManager.DeleteSchedule(scheduleManager.GetScheduleById(id));
-                            }
+                            //foreach (long id in model.DeletedSchedules)
+                            //{
+                            //    scheduleManager.DeleteSchedule(scheduleManager.GetScheduleById(id));
+                            //}
 
 
 
@@ -1436,7 +1436,13 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 var i = model.Schedules.FindIndex(p => p.Index == Convert.ToInt64(index));
 
                 if (model.Schedules[i].ScheduleId != 0)
-                    model.DeletedSchedules.Add(model.Schedules[i].ScheduleId);
+                {
+                    using (ScheduleManager scheduleManager = new ScheduleManager())
+                    {
+                        scheduleManager.DeleteSchedule(scheduleManager.GetScheduleById(model.Schedules[i].ScheduleId));
+                        //model.DeletedSchedules.Add(model.Schedules[i].ScheduleId);
+                    }
+                }
 
                 model.Schedules.RemoveAt(i);
                 Session["Event"] = model;
