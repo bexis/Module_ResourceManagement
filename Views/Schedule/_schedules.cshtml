@@ -34,7 +34,7 @@
                     {
                     <small>Max. Number: @Html.DisplayFor(m => m[i].ResourceQuantity)</small>
                     } *@
-                    @if (Model[i].DeleteAccess || Model[i].EventId == 0)
+                     @if ((Model[i].EditMode && Model[i].EditAccess) || Model[i].EventId == 0)
                     {
                         <span class="bx bx-grid-function bx-trash" id="" onclick="RemoveScheduleFromEvent(@Model[i].Index)" title="Remove schedule from event"></span><br />
                     }
