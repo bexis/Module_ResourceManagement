@@ -391,8 +391,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 s.ContactName = byPerson.UserFullName;
                                 s.ForPersons.Add(byPerson);
 
-                                //s.Index = rc.Index;
-                                s.Index = model.Schedules.Count() + 2;
+                                s.Index = rc.Index;
+                                //s.Index = model.Schedules.Count() + 2;
                                 model.Schedules.Add(s);
                             }
                         }
