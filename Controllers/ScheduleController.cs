@@ -369,6 +369,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 s.ScheduleDurationModel.StartDate = DateTime.Now;
                                 s.ScheduleDurationModel.EndDate = DateTime.Now;
 
+                                if (resource.Quantity > 0)
+                                    s.ScheduleQuantity = 1;
+
                                 s.ScheduleDurationModel.Index = rc.Index;
                                 s.ScheduleDurationModel.EventId = model.Id;
 
