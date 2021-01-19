@@ -366,6 +366,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 SingleResource resource = rManager.GetResourceById(rc.Id);
                                 ScheduleEventModel s = new ScheduleEventModel(resource);
 
+                                s.ScheduleDurationModel.StartDate = DateTime.Now;
+                                s.ScheduleDurationModel.EndDate = DateTime.Now;
+
                                 s.ScheduleDurationModel.Index = rc.Index;
                                 s.ScheduleDurationModel.EventId = model.Id;
 
@@ -446,8 +449,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         break;
                     case "Start":
                         seModel = model.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
-                        seModel.ScheduleDurationModel.StartDate = DateTime.ParseExact(value, "dd.MM.yyyy", null);
-                        seModel.ScheduleDurationModel.EndDate = TimeHelper.GetEndDateOfDuration(seModel.ScheduleDurationModel.DurationValue, seModel.ScheduleDurationModel.TimeUnit, seModel.ScheduleDurationModel.StartDate);
+                        if (!String.IsNullOrEmpty(value))
+                        {
+                            seModel.ScheduleDurationModel.StartDate = DateTime.ParseExact(value, "dd.MM.yyyy", null);
+                            seModel.ScheduleDurationModel.EndDate = TimeHelper.GetEndDateOfDuration(seModel.ScheduleDurationModel.DurationValue, seModel.ScheduleDurationModel.TimeUnit, seModel.ScheduleDurationModel.StartDate);
+                        }
+                        else
+                            seModel.ScheduleDurationModel.EndDate = DateTime.MinValue;
+
                         //get index of modify schedule and update it in the session list
                         i = model.Schedules.FindIndex(p => p.Index == int.Parse(index));
                         model.Schedules[i] = seModel;
@@ -456,7 +465,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         return PartialView("_showTimePeriod", seModel.ScheduleDurationModel);
                     case "End":
                         seModel = model.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
-                        seModel.ScheduleDurationModel.EndDate = DateTime.ParseExact(value, "dd.MM.yyyy", null);
+                        if (!String.IsNullOrEmpty(value))
+                            seModel.ScheduleDurationModel.EndDate = DateTime.ParseExact(value, "dd.MM.yyyy", null);
+                        else
+                            seModel.ScheduleDurationModel.EndDate = DateTime.MinValue;
+
                         //get index of modify schedule and update it in the session list
                         i = model.Schedules.FindIndex(p => p.Index == int.Parse(index));
                         model.Schedules[i] = seModel;
@@ -517,6 +530,20 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 {
                     //set if error at this schedule
                     bool sError = false;
+
+                    //check date not empty
+                    if(s.ScheduleDurationModel.StartDate == DateTime.MinValue)
+                    {
+                        ModelState.AddModelError("DateMismatch_" + s.Index, "Start date is missing.");
+                        isError = true;
+                        sError = true;
+                    }
+                    if (s.ScheduleDurationModel.EndDate == DateTime.MinValue)
+                    {
+                        ModelState.AddModelError("DateMismatch_" + s.Index, "End date is missing.");
+                        isError = true;
+                        sError = true;
+                    }
 
                     //check date
                     string dateMismatch = CheckDateInconsistency(s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate);
