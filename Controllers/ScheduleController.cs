@@ -461,7 +461,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                             model.Schedules[i].ScheduleDurationModel.EndDate = DateTime.MinValue;
 
                         Session["Event"] = model;
-                        return PartialView("_showTimePeriod", seModel.ScheduleDurationModel);
+                        return PartialView("_showTimePeriod", model.Schedules[i].ScheduleDurationModel);
 
                     case "End":
                         i = model.Schedules.FindIndex(p => p.Index == int.Parse(index));
@@ -1485,9 +1485,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             BookingEventModel sEventM = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
-            ScheduleEventModel newSchedule = new ScheduleEventModel(tempSchedule);
-            newSchedule.Index = sEventM.Schedules.Count() + 1;
-            newSchedule.ScheduleDurationModel.Index = sEventM.Schedules.Count() + 1;
+            int newIndex = sEventM.Schedules.Count() + 1;
+            ScheduleEventModel newSchedule = new ScheduleEventModel(tempSchedule, newIndex);
+
             sEventM.Schedules.Add(newSchedule);
             Session["Event"] = sEventM;
 

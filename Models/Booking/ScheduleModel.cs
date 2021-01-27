@@ -69,6 +69,18 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             StartDate = new DateTime();
             EndDate = new DateTime();
         }
+
+        //copy hole ScheduleDurationModel with new index
+        public ScheduleDurationModel(ScheduleDurationModel scheduleDurationModel, int newIndex)
+        {
+            Index = newIndex;
+            StartDate = scheduleDurationModel.StartDate;
+            EndDate = scheduleDurationModel.EndDate;
+            EventId = scheduleDurationModel.EventId;
+            DurationValue = scheduleDurationModel.DurationValue;
+            EditMode = scheduleDurationModel.EditMode;
+            EditAccess = scheduleDurationModel.EditAccess;
+        }
     }
 
    
@@ -312,15 +324,15 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         }
 
         // Copy constructor
-        public ScheduleEventModel(ScheduleEventModel previousObject)
+        public ScheduleEventModel(ScheduleEventModel previousObject, int newIndex)
         {
-            Index = 0;
+            Index = newIndex;
             EventId = previousObject.EventId;
             ResourceId = previousObject.ResourceId;
             ResourceName = previousObject.ResourceName;
             ResourceDescription = previousObject.ResourceDescription;
             WithActivity = previousObject.WithActivity;
-            ScheduleDurationModel = previousObject.ScheduleDurationModel;
+            ScheduleDurationModel = new ScheduleDurationModel(previousObject.ScheduleDurationModel, newIndex);
             EditMode = previousObject.EditMode;
             ForPersons = new List<PersonInSchedule>();
             ForPersons = previousObject.ForPersons;
