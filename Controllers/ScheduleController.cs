@@ -451,33 +451,28 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         Session["Event"] = model;
                         break;
                     case "Start":
-                        seModel = model.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
+                        i = model.Schedules.FindIndex(p => p.Index == int.Parse(index));
                         if (!String.IsNullOrEmpty(value))
                         {
-                            seModel.ScheduleDurationModel.StartDate = DateTime.ParseExact(value, "dd.MM.yyyy", null);
-                            seModel.ScheduleDurationModel.EndDate = TimeHelper.GetEndDateOfDuration(seModel.ScheduleDurationModel.DurationValue, seModel.ScheduleDurationModel.TimeUnit, seModel.ScheduleDurationModel.StartDate);
+                            model.Schedules[i].ScheduleDurationModel.StartDate = DateTime.ParseExact(value, "dd.MM.yyyy", null);
+                            model.Schedules[i].ScheduleDurationModel.EndDate = TimeHelper.GetEndDateOfDuration(model.Schedules[i].ScheduleDurationModel.DurationValue, model.Schedules[i].ScheduleDurationModel.TimeUnit, model.Schedules[i].ScheduleDurationModel.StartDate);
                         }
                         else
-                            seModel.ScheduleDurationModel.EndDate = DateTime.MinValue;
+                            model.Schedules[i].ScheduleDurationModel.EndDate = DateTime.MinValue;
 
-                        //get index of modify schedule and update it in the session list
-                        i = model.Schedules.FindIndex(p => p.Index == int.Parse(index));
-                        model.Schedules[i] = seModel;
                         Session["Event"] = model;
-
                         return PartialView("_showTimePeriod", seModel.ScheduleDurationModel);
-                    case "End":
-                        seModel = model.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
-                        if (!String.IsNullOrEmpty(value))
-                            seModel.ScheduleDurationModel.EndDate = DateTime.ParseExact(value, "dd.MM.yyyy", null);
-                        else
-                            seModel.ScheduleDurationModel.EndDate = DateTime.MinValue;
 
-                        //get index of modify schedule and update it in the session list
+                    case "End":
                         i = model.Schedules.FindIndex(p => p.Index == int.Parse(index));
-                        model.Schedules[i] = seModel;
+                        if (!String.IsNullOrEmpty(value))
+                            model.Schedules[i].ScheduleDurationModel.EndDate = DateTime.ParseExact(value, "dd.MM.yyyy", null);
+                        else
+                            model.Schedules[i].ScheduleDurationModel.EndDate = DateTime.MinValue;
+
                         Session["Event"] = model;
                         break;
+
                     case "Quantity":
                         seModel = model.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
 
@@ -1492,6 +1487,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
             ScheduleEventModel newSchedule = new ScheduleEventModel(tempSchedule);
             newSchedule.Index = sEventM.Schedules.Count() + 1;
+            newSchedule.ScheduleDurationModel.Index = sEventM.Schedules.Count() + 1;
             sEventM.Schedules.Add(newSchedule);
             Session["Event"] = sEventM;
 
@@ -2097,7 +2093,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     int schedulesQuantity = 0;
                     foreach (Schedule s in allSchedules)
                     {
-                        schedulesQuantity += s.Quantity;
+                        if(s.Id != scheduleId)
+                            schedulesQuantity += s.Quantity;
+                        else
+                            schedulesQuantity += requestQuantity - s.Quantity;
                     }
 
                     schedulesQuantitiesPDay.Add(schedulesQuantity);
