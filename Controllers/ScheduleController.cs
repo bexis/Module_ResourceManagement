@@ -1663,7 +1663,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         var person = new PersonInSchedule(0, user, true);
                         tempSchedule.Contact = person;
                         tempSchedule.ForPersons.Add(person);
-                        tempSchedule.Index = sEventM.Schedules.Count() + 1;
+                        int index = sEventM.Schedules.Select(a => a.Index).ToList().Max() +1;
+                        tempSchedule.Index = index;
                         tempSchedule.ScheduleQuantity = 1;
                         sEventM.Schedules.Add(tempSchedule);
                     }
@@ -1697,7 +1698,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     sEventM.Schedules.RemoveAt(i);
 
                     //give new event schedule a index
-                    tempSchedule.Index = sEventM.Schedules.Count() + 1;
+                    int index = sEventM.Schedules.Select(s => s.Index).ToList().Max() + 1;
+                    tempSchedule.Index = index;
 
                     //Add alternative to event schedules
                     sEventM.Schedules.Add(tempSchedule);
