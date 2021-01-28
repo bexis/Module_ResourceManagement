@@ -148,18 +148,18 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     if (model.FileValues.Count > 0)
                     {
                         //if one text value has no Id the RS has changed and all old text values must be deleted
-                        if (model.FileValues.Select(a => a.Id).ToList().Contains(0))
-                        {
-                            if (model.Id != 0)
-                            {
-                                SingleResource r = rManager.GetResourceById(model.Id);
-                                List<ResourceAttributeValue> oldValues = valueManager.GetValuesByResource(r);
-                                foreach (ResourceAttributeValue v in oldValues)
-                                {
-                                    valueManager.DeleteResourceAttributeValue(v);
-                                }
-                            }
-                        }
+                        //if (model.FileValues.Select(a => a.Id).ToList().Contains(0))
+                        //{
+                        //    //if (model.Id != 0)
+                        //    //{
+                        //    //    SingleResource r = rManager.GetResourceById(model.Id);
+                        //    //    List<ResourceAttributeValue> oldValues = valueManager.GetValuesByResource(r);
+                        //    //    foreach (ResourceAttributeValue v in oldValues)
+                        //    //    {
+                        //    //        valueManager.DeleteResourceAttributeValue(v);
+                        //    //    }
+                        //    //}
+                        //}
 
                         foreach (FileValueModel fv in model.FileValues)
                         {
