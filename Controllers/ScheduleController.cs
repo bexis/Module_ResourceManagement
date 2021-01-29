@@ -1459,6 +1459,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
             if (model.Schedules.Count() > 1)
             {
                 var i = model.Schedules.FindIndex(p => p.Index == Convert.ToInt64(index));
+                //remove resource schedule from cart, too
+                List<ResourceCart> cartModel = (List<ResourceCart>)Session["ResourceCart"];
+                cartModel.RemoveAt(i);
+                Session["ResourceCart"] = cartModel;
 
                 if (model.Schedules[i].ScheduleId != 0)
                 {
