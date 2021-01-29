@@ -369,6 +369,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 s.ScheduleDurationModel.StartDate = DateTime.Now;
                                 s.ScheduleDurationModel.EndDate = DateTime.Now;
 
+                                s.EditMode = true;
+                                s.EditAccess = true;
+
                                 if (resource.Quantity > 0)
                                     s.ScheduleQuantity = 1;
 
@@ -1171,48 +1174,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
         //Temp adding user to schedule
         public ActionResult AddUsersToSchedule(string scheduleIndex)
         {
-            //var users = userIds.Split(',').Select(Int64.Parse).ToList();
-
-            //List<PersonInSchedule> sEventUser = (List<PersonInSchedule>)Session["ScheduleUsers"];
-
             BookingEventModel eventM = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = eventM.Schedules.Where(a => a.Index == int.Parse(scheduleIndex)).FirstOrDefault();
 
             using (SubjectManager subManager = new SubjectManager())
             {
-
-                //List<PersonUser> personGroup = new List<PersonUser>();
-                var userIdsBefore = tempSchedule.ForPersons.Select(a => a.UserId).ToList();
-
-                if (tempSchedule.ForPersons != null)
-                {
-                    foreach (PersonInSchedule pUser in tempSchedule.ForPersons)
-                    {
-                        if (pUser.IsContactPerson == true)
-                        {
-                            tempSchedule.Contact = pUser;
-                            tempSchedule.ContactName = UserHelper.GetPartyByUserId(pUser.UserId).Name;
-                        }
-                        //PersonUser pu = tempSchedule.ForPersons.Select(a=>a.UserId == userId).FirstOrDefault();
-                        if (!userIdsBefore.Contains(pUser.UserId))
-                        {
-                            tempSchedule.ForPersons.Add(pUser);
-                        }
-                    }
-                }
-                //else
-                //{
-                //    if (!userIdsBefore.Contains(sEventUser[0].UserId))
-                //    {
-                //        if (sEventUser[0].IsContactPerson == true)
-                //        {
-                //            tempSchedule.Contact = sEventUser[0];
-                //            tempSchedule.ContactName = sEventUser[0].UserFullName;
-                //        }
-                //        tempSchedule.ForPersons.Add(sEventUser[0]);
-                //    }
-                //}
-
                 if (tempSchedule.ForPersons != null)
                 {
                     tempSchedule.ForPersons.ForEach(a =>
@@ -1225,8 +1191,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
                     });
                 }
-
-
 
                 //get index of modify schedule and update it in the session list
                 var i = eventM.Schedules.FindIndex(p => p.Index == tempSchedule.Index);

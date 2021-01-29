@@ -58,6 +58,8 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             UserId = user.Id;
             IsContactPerson = isContactPerson;
             IsSelected = false;
+            EditAccess = true;
+            EditMode = true;
         }
     }
 }

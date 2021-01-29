@@ -74,6 +74,8 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                     s.ScheduleDurationModel.StartDate = DateTime.Now;
                     s.ScheduleDurationModel.EndDate = DateTime.Now;
                     s.ByPerson = rc.ByPersonName;
+                    s.EditAccess = true;
+                    s.EditMode = true;
 
 
                     //add as default resvered by user as reserved for user
