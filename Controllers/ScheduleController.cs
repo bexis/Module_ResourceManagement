@@ -1453,7 +1453,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             BookingEventModel sEventM = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
-            int newIndex = sEventM.Schedules.Count() + 1;
+            int newIndex = sEventM.Schedules.Select(a => a.Index).ToList().Max() + 1;
             ScheduleEventModel newSchedule = new ScheduleEventModel(tempSchedule, newIndex);
 
             sEventM.Schedules.Add(newSchedule);
