@@ -2082,18 +2082,15 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     int tempScheduleQuantity = 0;
                     foreach (ScheduleEventModel t in tempSchedules)
                     {
-                        //if (t.ResourceId != resourceId)
-                        //{
                         if ((DateTime.Compare(startDate, t.ScheduleDurationModel.StartDate) >= 0 && DateTime.Compare(endDate, t.ScheduleDurationModel.EndDate) <= 0) || (DateTime.Compare(endDate, t.ScheduleDurationModel.StartDate) >= 0 && DateTime.Compare(startDate, t.ScheduleDurationModel.EndDate) <= 0))
                         {
                             tempScheduleQuantity = tempScheduleQuantity + t.ScheduleQuantity;
                         }
-                        //}
                     }
-                    availableQuantity = availableQuantity - (tempScheduleQuantity-1);
+                    availableQuantity = availableQuantity - (tempScheduleQuantity- requestQuantity);
                 }
 
-                if (availableQuantity > 0)
+                if (availableQuantity > 0 && availableQuantity >= requestQuantity)
                     return true;
                 else
                     return false;
