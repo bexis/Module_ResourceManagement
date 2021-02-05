@@ -526,6 +526,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     isError = true;
                 }
 
+               
 
                 foreach (ScheduleEventModel s in tempScheduleList)
                 {
@@ -574,7 +575,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     }
 
                     //check contact person
-                    if (s.Contact.UserId == 0)
+                    var contactSet = s.ForPersons.Select(a => a.IsContactPerson == true).FirstOrDefault();
+                    if (!contactSet)
                     {
                         ModelState.AddModelError("ContactMissing_" + s.Index, "Contact person is missing.");
                         isError = true;
@@ -1034,9 +1036,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
         //Load all user to select one or more for the event
         public ActionResult LoadUsers(string index)
         {
-            //Session["ScheduleUsers"] = null;
-
-
             // retreive list of all users 
             DataTable result = null;
             string groupName = Helper.Settings.get("AlumniGroup").ToString();
@@ -1177,28 +1176,29 @@ namespace BExIS.Modules.RBM.UI.Controllers
             BookingEventModel eventM = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = eventM.Schedules.Where(a => a.Index == int.Parse(scheduleIndex)).FirstOrDefault();
 
-            using (SubjectManager subManager = new SubjectManager())
-            {
-                if (tempSchedule.ForPersons != null)
+                using (SubjectManager subManager = new SubjectManager())
                 {
-                    tempSchedule.ForPersons.ForEach(a =>
+                    if (tempSchedule.ForPersons != null)
                     {
-                        a.EditAccess = tempSchedule.EditAccess;
-                        a.EditMode = tempSchedule.EditMode;
-                        Party partyPerson = UserHelper.GetPartyByUserId(a.UserId);
-                        a.UserFullName = partyPerson.Name;
-                    //get party type attribute value
-                    a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
-                    });
+                        tempSchedule.ForPersons.ForEach(a =>
+                        {
+                            a.EditAccess = tempSchedule.EditAccess;
+                            a.EditMode = tempSchedule.EditMode;
+                            Party partyPerson = UserHelper.GetPartyByUserId(a.UserId);
+                            a.UserFullName = partyPerson.Name;
+                            //get party type attribute value
+                            a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
+                        });
+                    }
+
+                    //get index of modify schedule and update it in the session list
+                    var i = eventM.Schedules.FindIndex(p => p.Index == tempSchedule.Index);
+                    eventM.Schedules[i] = tempSchedule;
+                    Session["Event"] = eventM;
+
                 }
+         return PartialView("_scheduleUsers", tempSchedule.ForPersons);
 
-                //get index of modify schedule and update it in the session list
-                var i = eventM.Schedules.FindIndex(p => p.Index == tempSchedule.Index);
-                eventM.Schedules[i] = tempSchedule;
-                Session["Event"] = eventM;
-
-                return PartialView("_scheduleUsers", tempSchedule.ForPersons);
-            }
         }
 
         //open widow to show all users wich are related to one schedule
