@@ -336,8 +336,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             EditMode = previousObject.EditMode;
             EditAccess = previousObject.EditAccess;
             DeleteAccess = previousObject.DeleteAccess;
-            ForPersons = new List<PersonInSchedule>();
-            ForPersons = previousObject.ForPersons;
+            ForPersons = new List<PersonInSchedule>(previousObject.ForPersons);
             Activities = new List<ActivityEventModel>(previousObject.Activities);
             ByPerson = previousObject.ByPerson;
             Contact = previousObject.Contact;
