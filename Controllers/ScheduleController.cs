@@ -575,7 +575,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     }
 
                     //check contact person
-                    var contactSet = s.ForPersons.Select(a => a.IsContactPerson == true).FirstOrDefault();
+                    var contactSet = s.ForPersons.Where(a => a.IsContactPerson == true).Count()==1;
                     if (!contactSet)
                     {
                         ModelState.AddModelError("ContactMissing_" + s.Index, "Contact person is missing.");
@@ -1148,7 +1148,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
         // change contact person // remove old set new
         public ActionResult ChangeContactPerson(string userId, string index)
         {
-
             BookingEventModel model = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = model.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
 
@@ -1157,13 +1156,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             if(currentContact!=null) currentContact.IsContactPerson = false;
 
             // find new contact
-            var newContact = tempSchedule.ForPersons.First(d => d.UserId == Convert.ToInt64(userId));
-            newContact.IsContactPerson = true;
-
-            // set new contact
-            tempSchedule.Contact = newContact;
-            tempSchedule.ContactName = newContact.UserFullName;
-
+            tempSchedule.ForPersons.First(d => d.UserId == Convert.ToInt64(userId)).IsContactPerson = true;
 
             Session["Event"] = model;
 
