@@ -338,8 +338,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             DeleteAccess = previousObject.DeleteAccess;
             ForPersons = new List<PersonInSchedule>();
             ForPersons = previousObject.ForPersons;
-            Activities = new List<ActivityEventModel>();
-            Activities = previousObject.Activities;
+            Activities = new List<ActivityEventModel>(previousObject.Activities);
             ByPerson = previousObject.ByPerson;
             Contact = previousObject.Contact;
             ScheduleQuantity = previousObject.ScheduleQuantity;
