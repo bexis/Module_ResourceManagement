@@ -1313,7 +1313,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
         //Temp adding user to schedule
         public ActionResult AddActivitiesToSchedule(string scheduleIndex)
         {
-
             List<ActivityEventModel> sScheduleActivities = (List<ActivityEventModel>)Session["ScheduleActivities"];
             if (sScheduleActivities == null)
                 sScheduleActivities = new List<ActivityEventModel>();
@@ -1321,18 +1320,15 @@ namespace BExIS.Modules.RBM.UI.Controllers
             BookingEventModel eventM = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = eventM.Schedules.Where(a => a.Index == int.Parse(scheduleIndex)).FirstOrDefault();
 
-            using (ActivityManager aManager = new ActivityManager())
+            if (sScheduleActivities != null && sScheduleActivities.Any())
             {
-
-                if (sScheduleActivities != null && sScheduleActivities.Any()) tempSchedule.Activities = sScheduleActivities;
-
-                //get index of modify schedule and update it in the session list
-                var i = eventM.Schedules.FindIndex(p => p.Index == tempSchedule.Index);
-                eventM.Schedules[i] = tempSchedule;
-                Session["Event"] = eventM;
-
-                return PartialView("_showActivities", tempSchedule.Activities);
+                sScheduleActivities.ForEach(a => { a.EditAccess = true; a.EditMode = true; });
+                tempSchedule.Activities = sScheduleActivities;
             }
+
+            Session["Event"] = eventM;
+
+            return PartialView("_showActivities", tempSchedule.Activities);
         }
 
         //open window to show all activities wich are related to one schedule
