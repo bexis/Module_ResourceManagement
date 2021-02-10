@@ -99,7 +99,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         public DateTime EndDate { get; set; }
 
         [Display(Name = "Message")]
-        [StringLength(1000, ErrorMessage = "The message must be {2} - {1} characters long.", MinimumLength = 10)]
+        [StringLength(2000, ErrorMessage = "The message must be {2} - {1} characters long.", MinimumLength = 10)]
         [Required]
         public string Message { get; set; }
 
