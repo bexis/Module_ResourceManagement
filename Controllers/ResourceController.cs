@@ -829,7 +829,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     if (bcModel.ForTimeInterval.StartTime.Instant != null && bcModel.ForTimeInterval.EndTime.Instant != null)
                     {
                         if (CheckDateInconsistency((DateTime)bcModel.ForTimeInterval.StartTime.Instant, (DateTime)bcModel.ForTimeInterval.EndTime.Instant) && bcModel.ForEver == false)
-                            ModelState.AddModelError("Errors", "Blocking Constraint: The end date is befor start date.");
+                            ModelState.AddModelError("Errors", "Blocking Constraint: The end date is before start date.");
                     }
                 }
             }
@@ -848,7 +848,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     if (qcModel.ForTimeInterval.StartTime.Instant != null && qcModel.ForTimeInterval.EndTime.Instant != null)
                     {
                         if (CheckDateInconsistency((DateTime)qcModel.ForTimeInterval.StartTime.Instant, (DateTime)qcModel.ForTimeInterval.EndTime.Instant))
-                            ModelState.AddModelError("Errors", "Quantity Constraint: The end date is befor start date.");
+                            ModelState.AddModelError("Errors", "Quantity Constraint: The end date is before start date.");
                     }
 
                 if (qcModel.Quantity ==0)
