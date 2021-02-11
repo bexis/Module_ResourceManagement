@@ -97,14 +97,15 @@
 
     function showDisplay(displayView, contentView) {
 
-        console.log(displayView, contentView);
         if (displayView == "List")
         {
+            $('#date_filter').show();
             $("#calendar").toggle();
             setListEvents(contentView);
         }
         else if (displayView == "Calendar")
         {
+            $('#date_filter').hide();
             $("#calendar").toggle();
 
             removeCalendarEvents();
@@ -121,15 +122,14 @@
     }
 
     function showContent(displayView, contentView) {
-        console.log(displayView, contentView);
 
         removeCalendarEvents();
-
         if (displayView == "Calendar") {
-
+            $('#date_filter').hide();
             setCalendarEvents(contentView);
         }
         else if (displayView == "List") {
+            $('#date_filter').show();
             setListEvents(contentView);
         }
     }

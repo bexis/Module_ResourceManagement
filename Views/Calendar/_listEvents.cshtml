@@ -4,24 +4,19 @@
 @model List<BookingEventModel>
 
 
-<p id="date_filter">
-    <span id="date-label-from" class="date-label">From: </span><input class="date_range_filter date" type="text" id="datepicker_from" />
-    <span id="date-label-to" class="date-label">To:<input class="date_range_filter date" type="text" id="datepicker_to" />
-</p>
-
 @if (ViewBag.history == "true")
 {
-    <div id="history_yes" class="history_list_booking">Show without history</div>
-    <div id="history_no" style="display:none" class="history_list_booking">Show with history</div>
+    <div id="history_yes" class="btn btn-default history_list_booking">Show without history</div>
+    <div id="history_no" style="display:none" class="btn btn-default history_list_booking">Show with history</div>
 }
 else
 {
-    <div id="history_yes" style="display:none" class="history_list_booking">Show without history</div>
-    <div id="history_no" class="history_list_booking">Show with history</div>
+    <div id="history_yes" style="display:none" class="btn btn-default history_list_booking">Show without history</div>
+    <div id="history_no" class="btn btn-default history_list_booking">Show with history</div>
 }
 
 
-<table id="booking_table" class="display" style="width:100%">
+<table id="booking_table" class="display contenttable" data-date-column="2" style="width:100%">
     <thead>
         <tr>
             <th title="Name">Name</th>
@@ -87,8 +82,6 @@ else
         });    
 
 
-
-
 jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml ) {
     var esc = function ( t ) {
         return t
@@ -129,29 +122,6 @@ jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml )
         return '<span class="ellipsis" title="'+esc(d)+'">'+shortened+'&#8230;</span>';
     };
 };
-
-          var bookingTable = $("#booking_table").DataTable({
-                "autoWidth": false,
-                ordering: true,
-                order: [[ 2, "asc" ]], // order by startDate
-                paging: false,
-                responsive: true,
-                "columns": [
-                    { "width": "30%" },
-                    { "width": "40%" },
-                    null,
-                    null,
-                    null,
-                    null
-
-                ],
-    columnDefs: [
-     {
-      targets: 1,
-      render: $.fn.dataTable.render.ellipsis( 60, true )
-    }]
-            });
-
       
         $("#datepicker_from").datepicker({
             showOn: "button",
@@ -181,34 +151,31 @@ jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml )
             bookingTable.draw();
         });
 
+
+        var bookingTable = $("#booking_table").DataTable({
+            "autoWidth": false,
+            ordering: true,
+            order: [[2, "asc"]], // order by startDate
+            paging: false,
+            responsive: true,
+            "columns": [
+                { "width": "30%" },
+                { "width": "40%" },
+                null,
+                null,
+                null,
+                null
+
+            ],
+            columnDefs: [
+                {
+                    targets: 1,
+                    render: $.fn.dataTable.render.ellipsis(60, true)
+                }]
+        });
+
+  
     });
-
-    // Date range filter
-    minDateFilter = "";
-    maxDateFilter = "";
-
-    $.fn.dataTableExt.afnFiltering.push(
-        function (oSettings, aData, iDataIndex) {
-
-            if (typeof aData._date == 'undefined') {
-                aData._date = moment(aData[2], "DD.MM.YYYY").toDate().getTime();
-            }
-            if (minDateFilter && !isNaN(minDateFilter)) {
-                if (aData._date < minDateFilter) {
-                    return false;
-                }
-            }
-
-            if (maxDateFilter && !isNaN(maxDateFilter)) {
-                if (aData._date > maxDateFilter) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-    );
-
 
 </script>
 <style>

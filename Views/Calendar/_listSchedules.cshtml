@@ -3,25 +3,20 @@
 
 @model List<ScheduleListModel>
 
-<p id="date_filter">
-    <span id="date-label-from" class="date-label">From: </span><input class="date_range_filter date" type="text" id="datepicker_from_book" />
-    <span id="date-label-to" class="date-label">To:<input class="date_range_filter date" type="text" id="datepicker_to_book" />
-</p>
-
 
 @if (ViewBag.history == "true")
 {
-    <div id="history_yes"  class="history_list">Show without history</div>
-    <div id="history_no" style="display:none" class="history_list">Show with history</div>
+    <div id="history_yes"  class="btn btn-default history_list">Show without history</div>
+    <div id="history_no" style="display:none" class="btn btn-default history_list">Show with history</div>
 }
 else
 {
-    <div id="history_yes" style="display:none" class="history_list">Show without history</div>
-    <div id="history_no"  class="history_list">Show with history</div>
+    <div id="history_yes" style="display:none" class="btn btn-default history_list">Show without history</div>
+    <div id="history_no"  class="btn btn-default history_list">Show with history</div>
 }
 
 
-<table id="resources_table" class="display" style="width:100%">
+<table id="resources_table" class="display contenttable" data-date-column="6" style="width:100%">
     <thead>
         <tr>
             <th title="Name">Name</th>
@@ -97,7 +92,6 @@ else
         });
 
 
-
         jQuery.fn.dataTable.render.ellipsis = function (cutoff, wordbreak, escapeHtml) {
             var esc = function (t) {
                 return t
@@ -152,64 +146,9 @@ else
                     render: $.fn.dataTable.render.ellipsis(60, true)
                 }]
         });
-
-        $("#datepicker_from_book").datepicker({
-            showOn: "button",
-            buttonText: "<i class='fa fa-calendar'></i>",
-            "onSelect": function (date) {
-                minDateFilter = new Date(date).getTime();
-                oTable.draw();
-            }
-        }).keyup(function () {
-            minDateFilter = new Date(this.value).getTime();
-            oTable.draw();
-        }).next('button').button({
-            icons: {
-                primary: 'ui-icon-calendar'
-            }, text: false
-        });
-
-        $("#datepicker_to_book").datepicker({
-            showOn: "button",
-            buttonText: "<i class='fa fa-calendar'></i>",
-            "onSelect": function (date) {
-                maxDateFilter = new Date(date).getTime();
-                oTable.draw();
-            }
-        }).keyup(function () {
-            maxDateFilter = new Date(this.value).getTime();
-            oTable.draw();
-        });
+ 
 
     });
-
-    // Date range filter
-    minDateFilter = "";
-    maxDateFilter = "";
-
-    $.fn.dataTableExt.afnFiltering.push(
-        function (oSettings, aData, iDataIndex) {
-
-            if (typeof aData._date == 'undefined') {
-                aData._date = moment(aData[6], "DD.MM.YYYY").toDate().getTime();
-            }
-            if (minDateFilter && !isNaN(minDateFilter)) {
-                if (aData._date < minDateFilter) {
-                    return false;
-                }
-            }
-
-            if (maxDateFilter && !isNaN(maxDateFilter)) {
-                if (aData._date > maxDateFilter) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-    );
-
-
 
 
 //    });

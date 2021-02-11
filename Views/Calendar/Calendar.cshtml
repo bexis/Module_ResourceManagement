@@ -34,8 +34,10 @@
         </label>
     </div>
 
-
-
+</div>
+<div id="date_filter" style="display: none;">
+    <span id="date-label-from" class="date-label">From: </span><input style="margin-right: -0.9em;" class="date_range_filter date" type="text" id="datepicker_from" autocomplete="off" />
+    <span id="date-label-to" class="date-label">To: <input style="margin-right: -0.9em;" class="date_range_filter date" type="text" id="datepicker_to" autocomplete="off" />
 </div>
 
 
@@ -211,6 +213,54 @@
 
         });
 
+        $("#datepicker_from").datepicker({
+            showOn: "button",
+            buttonText: "<i class='fa fa-calendar'></i>",
+            "onSelect": function (date) {
+                $('.contenttable').DataTable().draw();
+            },
+            dateFormat: "dd.mm.yy",
+        }).keyup(function () {
+            $('.contenttable').DataTable().draw();
+        })
+        $("#datepicker_to").datepicker({
+            showOn: "button",
+            buttonText: "<i class='fa fa-calendar'></i>",
+            "onSelect": function (date) {
+                $('.contenttable').DataTable().draw();
+            },
+            dateFormat: "dd.mm.yy",
+        }).keyup(function () {
+            $('.contenttable').DataTable().draw();
+        })
+
+
+        $.fn.dataTableExt.afnFiltering.push(
+            function (oSettings, aData, iDataIndex) {
+
+                // get targeted column
+                const filterCol = +$('.contenttable').attr('data-date-column')
+
+                // get filter values
+                const min = $("#datepicker_from").datepicker('getDate'),
+                    max = $("#datepicker_to").datepicker('getDate'),
+                    minDate = min ? min.getTime() : 0,
+                    maxDate = max ? max.getTime() : Number.MAX_SAFE_INTEGER;
+
+                // filter
+                if (typeof aData._date == 'undefined') {
+                    aData._date = moment(aData[filterCol], "DD.MM.YYYY").toDate().getTime();
+                }
+                if (aData._date < minDate) {
+                    return false;
+                }
+                if (aData._date > maxDate) {
+                    return false;
+                }
+
+                return true;
+            }
+        );
 
         $.get('@Url.Action("TreeFilterSchedules", "Calendar")', function (data) {
 
