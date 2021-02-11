@@ -223,15 +223,8 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                 ReservedFor = ip.Person.Name;
             }
 
-            int countA = 0;
+            Activities = string.Join(", ", activities.Select( a => a.Name ) );
 
-            foreach (Activity a in activities)
-            {
-                if (countA < activities.Count())
-                    Activities += a.Name + " ,";
-                else
-                    Activities += a.Name;
-            }
         }
 
 
