@@ -217,16 +217,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 if (model == null)
                     model = new List<ResourceCart>();
 
-                //get all selected resource ids
-                //var rIds = resources.Split(',').Select(Int64.Parse).ToList();
-
                 using (var srManager = new ResourceManager())
                 using (var pManager = new PersonManager())
                 using (UserManager userManager = new UserManager())
                 {
-                    //for (int i = 0; i < rIds.Count(); i++)
-                    //{
-                    //set index for resource in cart
                     int index = 0;
                     if (model.Count() == 0)
                         index = 1;
@@ -237,21 +231,19 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     ResourceCart cartItem = new ResourceCart();
 
                     cartItem.Id = resource.Id;
-                    //ToDo: User or Default
-                    long createdByUserId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
 
-                    cartItem.ByPersonName = UserHelper.GetPartyByUserId(createdByUserId).Name;
-                    cartItem.ByPersonUserId = createdByUserId;
+                    //ToDo: User or Default
+                    var user = UserHelper.GetUser(HttpContext.User.Identity.Name);
+                    cartItem.ByPersonName = user.DisplayName;
+                    cartItem.ByPersonUserId = user.Id;
 
                     cartItem.Name = resource.Name;
                     cartItem.Index = index;
                     cartItem.NewInCart = true;
 
-
                     model.Add(cartItem);
-                    //}
                 }
-                //model.AddRange(temp);
+
                 Session["ResourceCart"] = model;
 
                 return PartialView("_cartResources", model);

@@ -18,6 +18,15 @@ namespace BExIS.Modules.RBM.UI.Helper
             }
         }
 
+        public static Security.Entities.Subjects.User GetUser(string userName)
+        {
+            using (UserManager userManager = new UserManager())
+            {
+                return userManager.FindByNameAsync(userName).Result;
+            }
+        }
+
+
         public static Party GetPartyByUserId(long userId)
         {
             using (var partyManager = new PartyManager())

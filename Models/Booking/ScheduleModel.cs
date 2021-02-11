@@ -431,7 +431,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                 PersonGroup pGroup = (PersonGroup)schedule.ForPerson.Self;
 
                 Contact = new PersonInSchedule(pGroup.Id, pGroup.Contact, true);
-                ContactName = UserHelper.GetPartyByUserId(pGroup.Contact.Id).Name;
+                ContactName = pGroup.Contact.DisplayName;
 
                 foreach (User u in pGroup.Users)
                 {
@@ -449,7 +449,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             {
                 IndividualPerson iPerson = (IndividualPerson)schedule.ForPerson.Self;
                 Contact = new PersonInSchedule(iPerson.Id, iPerson.Contact, true);
-                ContactName = UserHelper.GetPartyByUserId(iPerson.Contact.Id).Name;
+                ContactName = iPerson.Contact.DisplayName;
 
                 ForPersons.Add(new PersonInSchedule(iPerson.Id,iPerson.Person, true));
             }
@@ -458,8 +458,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             {
                 IndividualPerson iPersonBy = (IndividualPerson)schedule.ByPerson.Self;
 
-                //ByPerson = new PersonInSchedule(iPersonBy.Id,iPersonBy.Person, true);
-                ByPerson = UserHelper.GetPartyByUserId(iPersonBy.Person.Id).Name; 
+                ByPerson = iPersonBy.Person.DisplayName; 
             }
         }
     }
