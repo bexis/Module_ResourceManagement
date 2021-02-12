@@ -1010,12 +1010,13 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 {
                     a.EditAccess = tempSchedule.EditAccess;
                     a.EditMode = tempSchedule.EditMode;
+                    a.UserFullName = tempSchedule.ByPerson;
+
                     Party partyPerson = UserHelper.GetPartyByUserId(a.UserId);
+                    if (partyPerson != null)
+                        a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
 
-                    a.UserFullName = partyPerson.Name;
-                    //get party type attribute value
-                    a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
-
+                  
                     a.Index = int.Parse(index);
 
                 });
@@ -1169,10 +1170,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         {
                             a.EditAccess = tempSchedule.EditAccess;
                             a.EditMode = tempSchedule.EditMode;
+                            a.UserFullName = tempSchedule.ByPerson;
                             Party partyPerson = UserHelper.GetPartyByUserId(a.UserId);
-                            a.UserFullName = partyPerson.Name;
-                            //get party type attribute value
-                            a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
+                            if(partyPerson != null)
+                                a.MobileNumber = partyPerson.CustomAttributeValues.Where(b => b.CustomAttribute.Name == "Mobile").Select(v => v.Value).FirstOrDefault();
                         });
                     }
 
