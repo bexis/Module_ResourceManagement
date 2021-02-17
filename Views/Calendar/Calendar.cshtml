@@ -184,6 +184,7 @@
                 //right: 'month,basicWeek,basicDay'
                // right: 'month,agendaWeek,agendaDay'
             },
+            firstDay: 1,
             defaultView: 'basicWeek',
             eventLimit: true, // for all non-agenda views
             views: {
@@ -220,6 +221,7 @@
                 $('.contenttable').DataTable().draw();
             },
             dateFormat: "dd.mm.yy",
+            firstDay: 1,
         }).keyup(function () {
             $('.contenttable').DataTable().draw();
         })
@@ -230,6 +232,7 @@
                 $('.contenttable').DataTable().draw();
             },
             dateFormat: "dd.mm.yy",
+            firstDay: 1,
         }).keyup(function () {
             $('.contenttable').DataTable().draw();
         })

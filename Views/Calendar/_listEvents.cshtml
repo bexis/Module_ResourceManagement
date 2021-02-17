@@ -125,6 +125,7 @@ jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml )
       
         $("#datepicker_from").datepicker({
             showOn: "button",
+            firstDay: 1,
             buttonText: "<i class='fa fa-calendar'></i>",
             "onSelect": function (date) {
                 minDateFilter = new Date(date).getTime();
@@ -141,6 +142,7 @@ jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml )
 
         $("#datepicker_to").datepicker({
             showOn: "button",
+            firstDay: 1,
             buttonText: "<i class='fa fa-calendar'></i>",
             "onSelect": function (date) {
                 maxDateFilter = new Date(date).getTime();
