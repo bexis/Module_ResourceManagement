@@ -200,7 +200,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             if (forPerson is PersonGroup)
             {
                 PersonGroup pg = (PersonGroup)forPerson;
-                int count = 0;
+                int count = 1;
                 foreach (User u in pg.Users)
                 {
                     string reservedForName = getPartyName(u.Id);
@@ -210,11 +210,14 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                     }
 
                     if (count < pg.Users.Count())
-                        ReservedFor += u.Name + " ,";
+                        ReservedFor += u.Name + ", ";
                     else
                         ReservedFor += u.Name;
 
                     count++;
+
+                   
+
                 }
             }
             else if (forPerson is IndividualPerson)
