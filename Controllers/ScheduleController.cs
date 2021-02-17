@@ -225,7 +225,20 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     if (model.Count() == 0)
                         index = 1;
                     else
-                        index = model.Select(e => e.Index).Max() + 1;
+                    {
+                        BookingEventModel eventModel = (BookingEventModel)Session["Event"];
+                        if (eventModel != null)
+                        {
+                            if (eventModel.Schedules.Count > 0 && model.Count > 0)
+                            {
+                                index = (eventModel.Schedules.Select(e => e.Index).Max() + 1) + model.Select(e => e.Index).Max() + 1;
+                            }
+                            else if (eventModel.Schedules.Count > 0)
+                                index = eventModel.Schedules.Select(e => e.Index).Max() + 1;
+                        }
+                        else
+                            index = model.Select(e => e.Index).Max() + 1;
+                    }
 
                     SingleResource resource = srManager.GetResourceById(long.Parse(id));
                     ResourceCart cartItem = new ResourceCart();
@@ -258,8 +271,32 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult RemoveResourceFromCart(string index)
         {
             List<ResourceCart> model = (List<ResourceCart>)Session["ResourceCart"];
-            var i = model.FindIndex(p => p.Index == Convert.ToInt64(index));
-            model.RemoveAt(i);
+            BookingEventModel eventModel = (BookingEventModel)Session["Event"];
+            var i = model.Where(a=>a.Index == Convert.ToInt32(index)).FirstOrDefault().Index;
+           
+            //if event != null remov resource here, too
+            if (eventModel != null)
+            {
+                //var ie = eventModel.Schedules.FindIndex(p => p.Index == Convert.ToInt64(index));
+                if (eventModel.Schedules.Where(a=>a.Index == i).Count() == 1)
+                {
+                    using (ScheduleManager scheduleManager = new ScheduleManager())
+                    {
+                        var scheduleModel = eventModel.Schedules.Where(a => a.Index == i).FirstOrDefault();
+                        if (scheduleModel != null)
+                        {
+                            var scheduleDB = scheduleManager.GetScheduleById(scheduleModel.ScheduleId);
+                            if(scheduleDB != null)
+                                scheduleManager.DeleteSchedule(scheduleDB);
+                        }
+                    }
+
+                    eventModel.Schedules.Remove(eventModel.Schedules.Where(a => a.Index == i).FirstOrDefault());
+                    Session["Event"] = eventModel;
+                }
+            }
+           
+            model.Remove(model.Where(a => a.Index == i).FirstOrDefault());
             Session["ResourceCart"] = model;
 
             return PartialView("_cartResources", model);
@@ -268,6 +305,22 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult RemoveAll()
         {
             Session["ResourceCart"] = new List<ResourceCart>();
+
+            BookingEventModel eventModel = (BookingEventModel)Session["Event"];
+            if (eventModel.Schedules.Count() > 0)
+            {
+                using (ScheduleManager scheduleManager = new ScheduleManager())
+                {
+                    foreach (var schedule in eventModel.Schedules)
+                    {
+                        var scheduleDB = scheduleManager.GetScheduleById(schedule.ScheduleId);
+                        if(scheduleDB != null)
+                            scheduleManager.DeleteSchedule(scheduleDB);
+                    }
+                }
+                eventModel.Schedules.Clear();
+                Session["Event"] = eventModel;
+            }
 
             return PartialView("_cartResources", new List<ResourceCart>());
         }
