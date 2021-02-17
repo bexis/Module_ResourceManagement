@@ -612,6 +612,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         {
                             if (file.NeedConfirmation && !s.FileConfirmation)
                             {
+                                isError = true;
+                                sError = true;
                                 ModelState.AddModelError("FileConfirmation_" + s.Index, "You must confirm that you read the file(s).");
                             }
                         }
