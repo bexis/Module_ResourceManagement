@@ -1207,10 +1207,31 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             // find new contact
             tempSchedule.ForPersons.First(d => d.UserId == Convert.ToInt64(userId)).IsContactPerson = true;
+            tempSchedule.Contact = tempSchedule.ForPersons.First(d => d.UserId == Convert.ToInt64(userId));
+            tempSchedule.ContactName = getPartyName(Convert.ToInt64(userId));
+
+
 
             Session["Event"] = model;
 
             return new EmptyResult();
+        }
+
+        private string getPartyName(long Id)
+        {
+            using (var partyManager = new PartyManager())
+            {
+                Party party = partyManager.GetPartyByUser(Id);
+                if (party != null)
+                {
+                    return party.Name;
+                }
+                else
+                {
+                    return "false";
+                }
+            }
+
         }
 
         //Temp adding user to schedule

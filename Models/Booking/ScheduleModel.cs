@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Services;
 using BExIS.Rbm.Services.Resource;
 using BExIS.Security.Entities.Subjects;
 using BExIS.Rbm.Entities.Users;
@@ -17,6 +18,8 @@ using BExIS.Rbm.Entities.BookingManagementTime;
 using BExIS.Modules.RBM.UI.Helper;
 using BExIS.Dlm.Entities.Party;
 using BExIS.Dlm.Services.Party;
+
+
 
 namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 {
@@ -179,7 +182,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
         //public ScheduleListModel(Schedule s)
         public ScheduleListModel(long eventId,
-            string bookingEventName, string bookingEventDescription, string resourceName, DateTime start, DateTime end, string quantity, Person forPerson, ICollection<Activity> activities)
+            string bookingEventName, string bookingEventDescription, string resourceName, DateTime start, DateTime end, string quantity, Person forPerson, ICollection<Activity> activities, string contactPerson)
         {
 
             EventID = eventId;
@@ -191,11 +194,12 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             EndDate = end;
             Quantity = quantity;
 
-            string forPersonContactName = getPartyName(forPerson.Contact.Id);
-            if (forPersonContactName != "false")
-            {
-                forPerson.Contact.Name = forPersonContactName;
-            }
+
+            ContactPerson = contactPerson;
+
+
+
+           
             
             if (forPerson is PersonGroup)
             {
@@ -238,7 +242,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                 Party party = partyManager.GetPartyByUser(Id);
                 if (party != null)
                 {
-                    return ContactPerson = party.Name;
+                    return party.Name;
                 }
                 else
                 {

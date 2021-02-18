@@ -162,6 +162,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             }
                         
             List<ScheduleListModel> model = new List<ScheduleListModel>();
+            
 
             using (var uow = this.GetUnitOfWork())
             {
@@ -170,6 +171,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     var booking = uow.GetReadOnlyRepository<BookingEvent>().Get(s.BookingEvent.Id);
                     var resource = uow.GetReadOnlyRepository<Resource>().Get(s.Resource.Id);
                     var forperson = uow.GetReadOnlyRepository<Person>().Get(s.ForPerson.Id);
+                    
+                    // Todo: maybe their is a more performant way to get the info for the ContactName
+                    var schedule = uow.GetReadOnlyRepository<Schedule>().Get(s.Id);
+                    ScheduleEventModel tempSchedule = new ScheduleEventModel(schedule);
 
                     model.Add(new ScheduleListModel(
                         booking.Id,
@@ -180,7 +185,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         s.EndDate,
                         "(" +  s.Quantity + "/" + s.Resource.Quantity + ")",
                         forperson,
-                        s.Activities
+                        s.Activities,
+                        tempSchedule.ContactName
                         ));
                 }
             }
