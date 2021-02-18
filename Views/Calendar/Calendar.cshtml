@@ -242,7 +242,7 @@
             function (oSettings, aData, iDataIndex) {
 
                 // get targeted column
-                const filterCol = +$('.contenttable').attr('data-date-column')
+                const filterCol = +$('.contenttable:visible').attr('data-date-column')
 
                 // get filter values
                 const min = $("#datepicker_from").datepicker('getDate'),
