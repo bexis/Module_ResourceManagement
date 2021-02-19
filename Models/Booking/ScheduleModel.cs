@@ -207,16 +207,16 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                 int count = 1;
                 foreach (User u in pg.Users)
                 {
-                    string reservedForName = getPartyName(u.Id);
-                    if (reservedForName != "false")
-                    {
-                        u.Name = reservedForName;
-                    }
+                    //string reservedForName = getPartyName(u.Id);
+                    //if (reservedForName != "false")
+                   // {
+                   //     u.Name = reservedForName;
+                   // }
 
                     if (count < pg.Users.Count())
-                        ReservedFor += u.Name + ", ";
+                        ReservedFor += u.DisplayName + ", ";
                     else
-                        ReservedFor += u.Name;
+                        ReservedFor += u.DisplayName;
 
                     count++;
 
@@ -227,7 +227,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             else if (forPerson is IndividualPerson)
             {
                 IndividualPerson ip = (IndividualPerson)forPerson;
-                ReservedFor = ip.Person.Name;
+                ReservedFor = ip.Person.DisplayName;
             }
 
             Activities = string.Join(", ", activities.Select( a => a.Name ) );
