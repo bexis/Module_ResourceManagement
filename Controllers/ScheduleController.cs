@@ -848,7 +848,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                                 //Get affected notificationen for the schedule
                                 List<Notification> temp = CheckNotificationForSchedule(schedule);
-                                notifications.AddRange(temp);
+                                foreach(var n in temp)
+                                {
+                                    if(!notifications.Contains(n))
+                                        notifications.Add(n);
+                                }
+                                
 
                                 //Add rights to the schedule and event for all user reserved for
 
@@ -904,10 +909,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                             permissionManager.Create(us.Id, entityTypeEvent.Id, eEvent.Id, eventRights);
                                     }
                                 }
-
-                                if (notifications.Count > 0)
-                                    SendNotification(notifications, model.Schedules);
                             }
+
+                            //send field notifications
+                            if (notifications.Count > 0)
+                                SendNotification(notifications, model.Schedules);
 
                             SendNotificationHelper.SendBookingNotification(bookingAction, model);
 
