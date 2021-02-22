@@ -9,7 +9,6 @@ using BExIS.Web.Shell.Areas.RBM.Models.Resource;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using Telerik.Web.Mvc;
 using BExIS.Security.Entities.Subjects;
@@ -434,30 +433,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
         }
 
         #endregion
-
-        #region Notification Blackboard
-
-        public ActionResult Blackboard()
-        {
-            using (NotificationManager nManager = new NotificationManager())
-            {
-                List<Notification> nList = nManager.GetAllNotifications().ToList();
-                List<NotificationBlackboardModel> model = new List<NotificationBlackboardModel>();
-
-                foreach (Notification n in nList)
-                {
-                    model.Add(new NotificationBlackboardModel(n));
-                }
-
-                return View("NotificationBlackboard", model);
-            }
-            
-        }
-
-
-
-        #endregion
-
-
+  
     }
 }

@@ -56,7 +56,7 @@
     
     <Export tag="menubar" id="rbmMenu_Notif" order="1"
           title="News" description="News" icon=""
-          controller="Notification" action="Blackboard"
+          controller="NotificationBlackboard" action="Index"
           extends="./menubarRoot/rbmMenu" />
 
     <Export tag="menubar" id="rbmMenu_Cal" order="2"
