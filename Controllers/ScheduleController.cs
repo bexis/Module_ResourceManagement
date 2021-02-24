@@ -235,6 +235,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                             }
                             else if (eventModel.Schedules.Count > 0)
                                 index = eventModel.Schedules.Select(e => e.Index).Max() + 1;
+                            else
+                                index = model.Select(e => e.Index).Max() + 1;
                         }
                         else
                             index = model.Select(e => e.Index).Max() + 1;
