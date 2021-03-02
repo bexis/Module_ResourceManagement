@@ -356,6 +356,9 @@ namespace BExIS.Modules.RBM.UI.Helper
                 if (ResourceBooking == null)
                     ResourceBooking = featureManager.Create("Resource Booking", "Resource Booking");
 
+                Feature NotificationBlackboard = features.FirstOrDefault(f => f.Name.Equals("Notification Blackboard"));
+                if (NotificationBlackboard == null)
+                    NotificationBlackboard = featureManager.Create("Notification Blackboard", "Notification Blackboard", ResourceBooking);
 
 
                 Feature ResourceAdmin = features.FirstOrDefault(f => f.Name.Equals("Resource Administration"));
@@ -385,6 +388,8 @@ namespace BExIS.Modules.RBM.UI.Helper
 
                 operationManager.Create("RBM", "Schedule", "*", ResourceBooking);
                 operationManager.Create("RBM", "Calendar", "*", ResourceBooking);
+                operationManager.Create("RBM", " NotificationBlackboard", "*", NotificationBlackboard);
+
 
 
                 operationManager.Create("RBM", "Resource", "*", ResourceManagement);
