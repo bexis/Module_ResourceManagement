@@ -11,7 +11,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         // GET: RBM/Help
         public ActionResult Index()
         {
-            string filePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("BAM"), "Bam.Settings.xml");
+            string filePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RBM"), "Rbm.Settings.xml");
             XDocument settings = XDocument.Load(filePath);
             XElement help = XmlUtility.GetXElementByAttribute("entry", "key", "help", settings);
 

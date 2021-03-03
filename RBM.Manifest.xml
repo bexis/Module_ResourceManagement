@@ -82,5 +82,11 @@
             controller="home" action="index"
             extends="./apiRoot"
             />-->
+
+    <Export tag="lunchbar" id="helpRbm" order="7"
+           title="How-to Fieldwork" description="How-to Fieldwork" icon=""
+           controller="help" action="index"
+           extends="./lunchbarRoot/help" />
+    
   </Exports>
 </Manifest>

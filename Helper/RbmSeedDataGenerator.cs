@@ -397,6 +397,12 @@ namespace BExIS.Modules.RBM.UI.Helper
                 operationManager.Create("RBM", "ResourceStructure", "*", ResourceStructureAttributeManagement);
                 operationManager.Create("RBM", "Notification", "*", NotificationManagement);
                 operationManager.Create("RBM", "Activity", "*", ActivityManagement);
+
+                #region Help Workflow
+
+                if (!operationManager.Exists("RBM", "help", "*")) operationManager.Create("RBM", "Help", "*");
+
+                #endregion Help Workflow
             }
             catch (Exception ex)
             {
