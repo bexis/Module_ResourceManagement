@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using BExIS.Xml.Helpers;
 using System.Web.Mvc;
-using Vaiona.Web.Extensions;
-using Vaiona.Web.Mvc.Models;
+using System.IO;
+using System.Xml.Linq;
+using Vaiona.Utils.Cfg;
 
 namespace BExIS.Modules.RBM.UI.Controllers
 {
@@ -13,9 +11,15 @@ namespace BExIS.Modules.RBM.UI.Controllers
         // GET: RBM/Help
         public ActionResult Index()
         {
-            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Resource Booking Management Manual", this.Session.GetTenant());
+            string filePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("BAM"), "Bam.Settings.xml");
+            XDocument settings = XDocument.Load(filePath);
+            XElement help = XmlUtility.GetXElementByAttribute("entry", "key", "help", settings);
 
-            return View();
+            string helpurl = help.Attribute("value")?.Value;
+
+
+            return Redirect(helpurl);
+
         }
     }
 }
