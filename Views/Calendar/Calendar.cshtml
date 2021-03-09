@@ -241,7 +241,8 @@
             function (oSettings, aData, iDataIndex) {
 
                 // get targeted column
-                const filterCol = +$('.contenttable:visible').attr('data-date-column')
+                const filterColStart = +$('.contenttable:visible').attr('data-date-column-start')
+                const filterColEnd = +$('.contenttable:visible').attr('data-date-column-end')
 
                 // get filter values
                 const min = $("#datepicker_from").datepicker('getDate'),
@@ -250,13 +251,18 @@
                     maxDate = max ? max.getTime() : Number.MAX_SAFE_INTEGER;
 
                 // filter
-                if (typeof aData._date == 'undefined') {
-                    aData._date = moment(aData[filterCol], "DD.MM.YYYY").toDate().getTime();
+                if (typeof aData._dateStart == 'undefined') {
+                    aData._dateStart = moment(aData[filterColStart], "DD.MM.YYYY").toDate().getTime();
                 }
-                if (aData._date < minDate) {
+                if (typeof aData._dateEnd == 'undefined') {
+                    aData._dateEnd = moment(aData[filterColEnd], "DD.MM.YYYY").toDate().getTime();
+                }
+                if (aData._dateEnd < minDate ) {
+                    console.log(aData._dateStart, "Eins");
                     return false;
                 }
-                if (aData._date > maxDate) {
+                if (aData._dateStart > maxDate) {
+                    console.log(aData._dateStart, "zwei");
                     return false;
                 }
 
