@@ -867,21 +867,24 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 int fullRights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete + (int)RightType.Grant;
 
                                 //get event admin group
-                                var eventAdminGroup = Helper.Settings.get("EventAdminGroup").ToString();
+                                string[] eventAdminGroups = Helper.Settings.get("EventAdminGroup").ToString().Split(',');
 
                                 //give rights to group if group exsits
                                 using (var groupManager = new GroupManager())
                                 {
-                                    var group = groupManager.FindByNameAsync(eventAdminGroup).Result;
-                                    if (group != null)
+                                    foreach (string g in eventAdminGroups)
                                     {
-                                        //rights on schedule
-                                        if (permissionManager.GetRights(group.Id, entityTypeSchedule.Id, newSchedule.Id) == 0)
-                                            permissionManager.Create(group.Id, entityTypeSchedule.Id, newSchedule.Id, fullRights);
+                                        var group = groupManager.FindByNameAsync(g).Result;
+                                        if (group != null)
+                                        {
+                                            //rights on schedule
+                                            if (permissionManager.GetRights(group.Id, entityTypeSchedule.Id, newSchedule.Id) == 0)
+                                                permissionManager.Create(group.Id, entityTypeSchedule.Id, newSchedule.Id, fullRights);
 
-                                        //rights on event
-                                        if (permissionManager.GetRights(group.Id, entityTypeEvent.Id, eEvent.Id) == 0)
-                                            permissionManager.Create(group.Id, entityTypeEvent.Id, eEvent.Id, fullRights);
+                                            //rights on event
+                                            if (permissionManager.GetRights(group.Id, entityTypeEvent.Id, eEvent.Id) == 0)
+                                                permissionManager.Create(group.Id, entityTypeEvent.Id, eEvent.Id, fullRights);
+                                        }
                                     }
                                 }
 
