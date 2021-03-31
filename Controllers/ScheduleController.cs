@@ -817,6 +817,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                                 User contact = new User();
                                 Person person = new Person();
+
+                                //get event admin group
+                                string[] eventAdminGroups = Helper.Settings.get("EventAdminGroupA").ToString().Split(',');
+
                                 //add all persons reserved for the user list
                                 if (schedule.ForPersons.Count() > 1)
                                 {
@@ -865,9 +869,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                                 //full rights as int
                                 int fullRights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete + (int)RightType.Grant;
-
-                                //get event admin group
-                                string[] eventAdminGroups = Helper.Settings.get("EventAdminGroup").ToString().Split(',');
 
                                 //give rights to group if group exsits
                                 using (var groupManager = new GroupManager())
@@ -1500,7 +1501,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                 //remove resource schedule from cart, too
                 List<ResourceCart> cartModel = (List<ResourceCart>)Session["ResourceCart"];
-                var inCart = cartModel.Select(a => a.Index == Convert.ToInt32(index)).Count() == 1;
+                var inCart = cartModel.Where(a => a.Index == Convert.ToInt32(index)).Count() == 1;
                 if (inCart)
                 {
                     cartModel.RemoveAt(i);
