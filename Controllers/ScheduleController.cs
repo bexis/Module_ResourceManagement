@@ -470,18 +470,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
             }
         }
 
-        ////get all activities and load in a grid
-        //public ActionResult CreateScheduleActivities()
-        //{
-        //    ActivityManager aManager = new ActivityManager();
-        //    List<Activity> activities = aManager.GetAllActivities().ToList();
-        //    List<ActivityEventModel> aEventM = new List<ActivityEventModel>();
-        //    activities.ForEach(r => aEventM.Add(new ActivityEventModel(r)));
-
-        //   return PartialView("_enterActivities", aEventM);
-        //}
-
-
         public ActionResult OnChangeEventItem(string value, string index, string element)
         {
             BookingEventModel model = (BookingEventModel)Session["Event"];
@@ -819,7 +807,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 Person person = new Person();
 
                                 //get event admin group
-                                string[] eventAdminGroups = Helper.Settings.get("EventAdminGroupA").ToString().Split(',');
+                                string[] eventAdminGroups = Helper.Settings.get("EventAdminGroup").ToString().Split(',');
 
                                 //add all persons reserved for the user list
                                 if (schedule.ForPersons.Count() > 1)
@@ -943,13 +931,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         private Schedule UpdateSchedule(ScheduleEventModel schedule, IEnumerable<long> activityList, Person person, User contact)
         {
-
             using (var uow = this.GetUnitOfWork())
             using (var pManager = new PersonManager())
             using (var schManager = new ScheduleManager())
             {
-                Schedule s = new Schedule();
-                s = schManager.GetScheduleById(schedule.ScheduleId);
+                Schedule s = schManager.GetScheduleById(schedule.ScheduleId);
                 s.StartDate = schedule.ScheduleDurationModel.StartDate;
                 s.EndDate = schedule.ScheduleDurationModel.EndDate;
                 s.Quantity = schedule.ScheduleQuantity;
@@ -966,6 +952,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     pManager.UpdateIndividualPerson(iPerson);
                     s.ForPerson = iPerson;
                 }
+                s.Activities.Clear();
 
                 //load activites
                 activityList.ToList().ForEach(a => s.Activities.Add(uow.GetReadOnlyRepository<Activity>().Get(a)));
@@ -1344,8 +1331,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult LoadActivities(string index)
         {
-            Session["ScheduleActivities"] = null;
-
             List<ActivityEventModel> model = new List<ActivityEventModel>();
             using (ActivityManager aManager = new ActivityManager())
             {
@@ -1353,7 +1338,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 BookingEventModel sEventM = (BookingEventModel)Session["Event"];
 
                 ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
-                Session["ScheduleActivities"] = tempSchedule.Activities;
                 List<long> tempActivityIds = tempSchedule.Activities.Select(c => c.Id).ToList();
                 foreach (Activity a in activities)
                 {
@@ -1371,9 +1355,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult ChangeSelectedActivity(string activityId, string selected, string index)
         {
-            List<ActivityEventModel> model = (List<ActivityEventModel>)Session["ScheduleActivities"];
-            if (model == null)
-                model = new List<ActivityEventModel>();
+            BookingEventModel sEventM = (BookingEventModel)Session["Event"];
+            ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
 
             using (ActivityManager aManager = new ActivityManager())
             {
@@ -1382,36 +1365,32 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 if (selected == "true")
                 {
                     activity.Index = int.Parse(index);
-                    model.Add(activity);
+                    tempSchedule.Activities.Add(activity);
                 }
                 else
                 {
-                    int i = model.FindIndex(a => a.Id == long.Parse(activityId));
-                    model.RemoveAt(i);
+                    int i = tempSchedule.Activities.FindIndex(a => a.Id == long.Parse(activityId));
+                    tempSchedule.Activities.RemoveAt(i);
                 }
 
-                Session["ScheduleActivities"] = model;
+                Session["Event"] = sEventM;
 
                 return new EmptyResult();
             }
         }
 
-        //Temp adding user to schedule
+        //Temp adding activity to schedule
         public ActionResult AddActivitiesToSchedule(string scheduleIndex)
         {
-            List<ActivityEventModel> sScheduleActivities = (List<ActivityEventModel>)Session["ScheduleActivities"];
-            if (sScheduleActivities == null)
-                sScheduleActivities = new List<ActivityEventModel>();
-
             BookingEventModel eventM = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = eventM.Schedules.Where(a => a.Index == int.Parse(scheduleIndex)).FirstOrDefault();
 
-            if (sScheduleActivities != null && sScheduleActivities.Any())
+            if (tempSchedule.Activities != null && tempSchedule.Activities.Any())
             {
-                sScheduleActivities.ForEach(a => { a.EditAccess = true; a.EditMode = true; });
-                tempSchedule.Activities = sScheduleActivities;
+                tempSchedule.Activities.ForEach(a => { a.EditAccess = true; a.EditMode = true; });
             }
-
+            var i = eventM.Schedules.FindIndex(p => p.Index == tempSchedule.Index);
+            eventM.Schedules[i] = tempSchedule;
             Session["Event"] = eventM;
 
             return PartialView("_showActivities", tempSchedule.Activities);
@@ -1470,6 +1449,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         #region Edit Event -- Functions
 
+        
+        /// <summary>
+        /// Fill value from source schedule to all other schedules
+        /// </summary>
+        /// <param name="index">Index of source schedule </param>
+        /// <returns>View with copied schedule values in event</returns>
         public ActionResult UseValuesForAllSchedules(string index)
         {
             BookingEventModel model = (BookingEventModel)Session["Event"];
@@ -1479,10 +1464,18 @@ namespace BExIS.Modules.RBM.UI.Controllers
             {
                 if (s.Index != int.Parse(index))
                 {
-                    s.ForPersons = tempSchedule.ForPersons;
-                    s.Activities = tempSchedule.Activities;
+                    //create for every person object in list a new object
+                    List<PersonInSchedule> copyListPersons = new List<PersonInSchedule>();
+                    tempSchedule.ForPersons.ForEach(r => copyListPersons.Add(new PersonInSchedule(r, s.Index)));
+                    s.ForPersons = copyListPersons;
+
+                    //create for every activity object in list a new object
+                    List<ActivityEventModel> copyListActivities = new List<ActivityEventModel>();
+                    tempSchedule.Activities.ForEach(r => copyListActivities.Add(new ActivityEventModel(r, s.Index)));
+                    s.Activities = copyListActivities;
+                    
                     s.ScheduleQuantity = tempSchedule.ScheduleQuantity;
-                    s.ScheduleDurationModel = tempSchedule.ScheduleDurationModel;
+                    s.ScheduleDurationModel = new ScheduleDurationModel(tempSchedule.ScheduleDurationModel, s.Index); ;
                 }
             }
 
@@ -1939,7 +1932,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult Show(long id)
         {
             Session["ScheduleUsers"] = null;
-            Session["ScheduleActivities"] = null;
+            //Session["ScheduleActivities"] = null;
             Session["Event"] = null;
 
             using (var permissionManager = new EntityPermissionManager())
