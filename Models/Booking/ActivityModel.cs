@@ -72,5 +72,17 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             IsSelected = false;
         }
 
+        public ActivityEventModel(ActivityEventModel activityEventModel, int newIndex)
+        {
+            Id = activityEventModel.Id;
+            Name = activityEventModel.Name;
+            Description = activityEventModel.Description;
+            Disable = activityEventModel.Disable;
+            IsSelected = activityEventModel.IsSelected;
+            EditMode = activityEventModel.EditMode;
+            EditAccess = activityEventModel.EditAccess;
+            Index = newIndex;
+        }
+
     }
 }

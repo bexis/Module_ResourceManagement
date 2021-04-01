@@ -61,5 +61,18 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             EditAccess = true;
             EditMode = true;
         }
+
+        public PersonInSchedule(PersonInSchedule personInSchedule, int newIndex)
+        {
+            Id = personInSchedule.Id;
+            UserId = personInSchedule.UserId;
+            UserFullName = personInSchedule.UserFullName;
+            MobileNumber = personInSchedule.MobileNumber;
+            IsContactPerson = personInSchedule.IsContactPerson;
+            IsSelected = personInSchedule.IsSelected;
+            EditAccess = personInSchedule.EditAccess;
+            EditMode = personInSchedule.EditMode;
+            Index = newIndex;
+        }
     }
 }

@@ -336,8 +336,17 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             EditMode = previousObject.EditMode;
             EditAccess = previousObject.EditAccess;
             DeleteAccess = previousObject.DeleteAccess;
-            ForPersons = new List<PersonInSchedule>(previousObject.ForPersons);
-            Activities = new List<ActivityEventModel>(previousObject.Activities);
+
+            //create for every person object in list a new object
+            List<PersonInSchedule> copyListPersons = new List<PersonInSchedule>();
+            previousObject.ForPersons.ForEach(r => copyListPersons.Add(new PersonInSchedule(r, newIndex)));
+            ForPersons = copyListPersons;
+
+            //create for every activity object in list a new object
+            List<ActivityEventModel> copyListActivities = new List<ActivityEventModel>();
+            previousObject.Activities.ForEach(r => copyListActivities.Add(new ActivityEventModel(r, newIndex)));
+            Activities = copyListActivities;
+
             ByPerson = previousObject.ByPerson;
             Contact = previousObject.Contact;
             ScheduleQuantity = previousObject.ScheduleQuantity;
