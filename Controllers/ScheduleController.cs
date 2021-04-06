@@ -837,7 +837,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 if (model.Id == 0 || (countSchedulesCurrent > countSchedulesBefor && schedule.ScheduleId == 0))
                                     newSchedule = scheduleManager.CreateSchedule(schedule.ScheduleDurationModel.StartDate, schedule.ScheduleDurationModel.EndDate, eEvent, tempResource, person, createdBy, schedule.Activities.Select(a => a.Id), schedule.ScheduleQuantity, index);
                                 else
-                                    UpdateSchedule(schedule, schedule.Activities.Select(a => a.Id), person, contact);
+                                    UpdateSchedule(schedule, schedule.Activities.Select(a => a.Id), person);
 
 
                                 //Get affected notificationen for the schedule
@@ -928,8 +928,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             return RedirectToAction("Calendar", "Calendar");
         }
-
-        private Schedule UpdateSchedule(ScheduleEventModel schedule, IEnumerable<long> activityList, Person person, User contact)
+        /// <summary>
+        /// Update schedule in database
+        /// </summary>
+        /// <param name="schedule"> Filled event schdule model with updates</param>
+        /// <param name="activityList">List of selected activities</param>
+        /// <param name="person">User(s) where schedule is reserved for. Can be IndividualPerson or PersonGroup </param>
+        /// <returns>Updated schedule</returns>
+        private Schedule UpdateSchedule(ScheduleEventModel schedule, IEnumerable<long> activityList, Person person)
         {
             using (var uow = this.GetUnitOfWork())
             using (var pManager = new PersonManager())
@@ -952,10 +958,24 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     pManager.UpdateIndividualPerson(iPerson);
                     s.ForPerson = iPerson;
                 }
-                s.Activities.Clear();
 
-                //load activites
-                activityList.ToList().ForEach(a => s.Activities.Add(uow.GetReadOnlyRepository<Activity>().Get(a)));
+                //add or remove activites
+
+                var scheduleActivitiesIds = s.Activities.Select(c => c.Id).ToList();
+                //find new activity ids to add to schedule
+                var listTempUpdate = activityList.Except(scheduleActivitiesIds).ToList();
+                //find deleted ids to remove from schedule
+                var listTempDelete = scheduleActivitiesIds.Except(activityList).ToList();
+
+                //remove
+                foreach (var id in listTempDelete)
+                {
+                    var i = s.Activities.ToList().Find(e => e.Id == id);
+                    s.Activities.Remove(i);
+                }
+                //add
+                listTempUpdate.ForEach(a => s.Activities.Add(uow.GetReadOnlyRepository<Activity>().Get(a)));
+
                 schManager.UpdateSchedule(s);
 
                 return s;
