@@ -1489,10 +1489,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     tempSchedule.ForPersons.ForEach(r => copyListPersons.Add(new PersonInSchedule(r, s.Index)));
                     s.ForPersons = copyListPersons;
 
-                    //create for every activity object in list a new object
-                    List<ActivityEventModel> copyListActivities = new List<ActivityEventModel>();
-                    tempSchedule.Activities.ForEach(r => copyListActivities.Add(new ActivityEventModel(r, s.Index)));
-                    s.Activities = copyListActivities;
+                    //copy only activity when resource requied activity
+                    if (s.WithActivity)
+                    {
+                        //create for every activity object in list a new object
+                        List<ActivityEventModel> copyListActivities = new List<ActivityEventModel>();
+                        tempSchedule.Activities.ForEach(r => copyListActivities.Add(new ActivityEventModel(r, s.Index)));
+                        s.Activities = copyListActivities;
+                    }
                     
                     s.ScheduleQuantity = tempSchedule.ScheduleQuantity;
                     s.ScheduleDurationModel = new ScheduleDurationModel(tempSchedule.ScheduleDurationModel, s.Index); ;
