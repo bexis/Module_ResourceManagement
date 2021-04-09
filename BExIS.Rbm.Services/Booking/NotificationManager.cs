@@ -107,7 +107,7 @@ namespace BExIS.Rbm.Services.Booking
 
         public IQueryable<Notification> GetAllNotifications()
         {
-            return NotificationRepo.Query();
+            return NotificationRepo.Query().OrderByDescending(a => a.InsertDate);
         }
 
         public Notification GetNotificationById(long id)
