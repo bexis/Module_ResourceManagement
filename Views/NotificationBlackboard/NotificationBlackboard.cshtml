@@ -31,7 +31,7 @@
 }
 <!--<h3>Notification Blackboard</h3>-->
 <hr />
-<div style="display:flex; flex-wrap:wrap">
+<div style="display:flex; flex-wrap:wrap; flex-basis: 100%;">
     @foreach (KeyValuePair<string, List<object>> domianItem in DomainNotification)
     {
         bool inact = new string[] { "Schorfheide-Chorin", "Hainich-Dün", "Schwäbische Alb" }.Any(s => domianItem.Key.Contains(s)); // only show Explos
@@ -41,15 +41,15 @@
 
             DomainNotification.TryGetValue(domianItem.Key, out value);
 
-    <div style="margin-right: 5px;">
-        <fieldset style="min-width: 350px;" title="@domianItem.Key">
-            <legend style="width: auto;border-bottom: none; color: var(--information-bg-color);">@domianItem.Key</legend>
+    <div class="notification-container">
+        <fieldset class="main-fieldset" title="@domianItem.Key">
+            <legend class="main-fieldset-legend">@domianItem.Key</legend>
 
             @foreach (NotificationBlackboardModel item in value)
             {
 
             <fieldset title="@domianItem.Key">
-                <legend style="width: auto;border-bottom: none; color: var(--information-bg-color);">@item.Subject</legend>
+                <legend class="fieldset-legend">@item.Subject</legend>
 
 
                 @if (item.StartDate == item.EndDate)
@@ -61,8 +61,8 @@
                     <div><b> @item.StartDate.ToString("dd.MM.yyyy") - @item.EndDate.ToString("dd.MM.yyyy")</b></div>
                 }
 
-                <div><p style="width:350px">@Html.Raw(item.Message.Replace("\r\n", "<br>")) </p></div>
-                <div style="float:right"><i>Date: @item.InsertDate.ToString("dd.MM.yyyy HH:mm") </i></div>
+                <div><p >@Html.Raw(item.Message.Replace("\r\n", "<br>")) </p></div>
+                <div class="notification-date"><i>Date: @item.InsertDate.ToString("dd.MM.yyyy HH:mm") </i></div>
             </fieldset>
             }
         </fieldset>
@@ -70,3 +70,34 @@
         }
     }
     </div>
+
+<style>
+    .notification-container {
+        margin-right: 5px;
+        width: 32%
+    }
+    .main-fieldset-legend {
+        width: auto;
+        border-bottom: none;
+        color: var(--information-bg-color);
+        text-align: center;
+    }
+    .fieldset-legend {
+        width: auto;
+        border-bottom: none;
+        color: var(--information-bg-color);
+    }
+    .notification-date {
+        float: right;
+    }
+
+    @@media screen and (max-width: 1000px) {
+        .notification-container {
+            width: 100%;
+        }
+        .main-fieldset {
+            border: 4px solid #ddd;
+        }
+   }
+
+</style>
