@@ -9,10 +9,15 @@
         <table>
             @foreach (ResourceCart rc in Model)
             {
-                <tr>
-                    <td colspan="3" style="background-color:#EFF7F6;">
-                        <b>@rc.Name</b><br />
-                    </td>
+            <tr>
+                <td colspan="3" style="background-color:#EFF7F6;">
+                    <b>@rc.Name</b><br />
+                    @if (rc.NewInCart == true)
+                    {
+                <div class="bx bx-info"  title="new added"></div> <small> new added</small>
+                    }
+                </td>
+
                 </tr>
                 <tr>
                     <td style="vertical-align:middle; background-color:#d2e8e3;">
