@@ -70,6 +70,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
                     ScheduleEventModel s = new ScheduleEventModel(resource);
                     s.ScheduleDurationModel.Index = rc.Index;
                     s.ScheduleQuantity = 1; // allways selct one by default
+                    s.ResourceAttributeValues = resource.ResourceAttributeValues;
                     s.ResourceQuantity = resource.Quantity;
                     s.ScheduleDurationModel.StartDate = DateTime.Now;
                     s.ScheduleDurationModel.EndDate = DateTime.Now;

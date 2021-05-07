@@ -426,6 +426,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 s.ScheduleDurationModel.EventId = model.Id;
 
                                 s.ResourceQuantity = resource.Quantity;
+                                s.ResourceAttributeValues = resource.ResourceAttributeValues;
                                 s.ByPerson = rc.ByPersonName;
 
                                 //add as default resvered by user as reserved for user
@@ -739,6 +740,18 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                 if (ModelState.IsValid)
                 {
+                    //get event admin groups: format= "groupname:resource structure attribute value"
+                    string[] eventAdminGroups = Helper.Settings.get("EventAdminGroups").ToString().Split(',');
+                    Dictionary<string, string> adminGroupsDictionary = new Dictionary<string, string>();
+                    if (eventAdminGroups != null && eventAdminGroups.Length > 0)
+                    {
+                       foreach (string group in eventAdminGroups)
+                       {
+                           string[] groupPair = group.Split(':');
+                           adminGroupsDictionary.Add(groupPair[0], groupPair[1]);
+                       }
+                    }
+
                     using (UserManager userManager = new UserManager())
                     using (var scheduleManager = new ScheduleManager())
                     using (var personManager = new PersonManager())
@@ -773,12 +786,50 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 bookingAction = SendNotificationHelper.BookingAction.edited;
                             }
 
-                            //Delete deleted schedules in DB
-                            //foreach (long id in model.DeletedSchedules)
-                            //{
-                            //    scheduleManager.DeleteSchedule(scheduleManager.GetScheduleById(id));
-                            //}
+                            //set rights on event
 
+                            //get entities types
+                            var entityTypeSchedule = entityTypeManager.FindByName("Schedule");
+                            var entityTypeEvent = entityTypeManager.FindByName("BookingEvent");
+
+                            //full rights as int
+                            int fullRights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete + (int)RightType.Grant;
+
+                            //get resource structrue attribute values to compare with admin group settings
+                            if (adminGroupsDictionary.Count > 0)
+                            {
+                                List<string> valuesEvent = new List<string>();
+                                //get value from every schedule in event add add this values to one list
+                                foreach (var s in model.Schedules)
+                                {
+                                    var values = s.ResourceAttributeValues.Where(c => (c as TextValue) != null).Select(e => ((TextValue)e).Value).ToList();
+                                    valuesEvent.AddRange(values);
+                                }
+                                //get admin groups for the schedules in event from settings dictionary
+                                var adminGroups = adminGroupsDictionary
+                                                    .Where(pair => valuesEvent.Contains(pair.Value))
+                                                    .Select(pair => pair.Key)
+                                                    .ToList();
+
+                                foreach (var g in adminGroups)
+                                {
+                                    using (var groupManager = new GroupManager())
+                                    {
+                                        var group = groupManager.FindByNameAsync(g).Result;
+                                        if (group != null)
+                                        {
+                                            if (permissionManager.GetRights(group.Id, entityTypeEvent.Id, eEvent.Id) == 0)
+                                                permissionManager.Create(group.Id, entityTypeEvent.Id, eEvent.Id, fullRights);
+                                        }
+                                    }
+                                }
+                            }
+
+                            //rights on event for logdedin user
+                            var userIdLoggedIn = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+
+                            if (permissionManager.GetRights(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id) == 0)
+                                permissionManager.Create(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id, fullRights);
 
 
                             List<Notification> notifications = new List<Notification>();
@@ -806,9 +857,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 User contact = new User();
                                 Person person = new Person();
 
-                                //get event admin group
-                                string[] eventAdminGroups = Helper.Settings.get("EventAdminGroup").ToString().Split(',');
-
+                                
                                 //add all persons reserved for the user list
                                 if (schedule.ForPersons.Count() > 1)
                                 {
@@ -847,32 +896,25 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                     if(!notifications.Contains(n))
                                         notifications.Add(n);
                                 }
-                                
 
-                                //Add rights to the schedule and event for all user reserved for
-
-                                //get entities types
-                                var entityTypeSchedule = entityTypeManager.FindByName("Schedule");
-                                var entityTypeEvent = entityTypeManager.FindByName("BookingEvent");
-
-                                //full rights as int
-                                int fullRights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete + (int)RightType.Grant;
-
-                                //give rights to group if group exsits
-                                using (var groupManager = new GroupManager())
+                                //get admin groups from settings for the schedule and set rights
+                                if (adminGroupsDictionary.Count > 0)
                                 {
-                                    foreach (string g in eventAdminGroups)
+                                    var valuesSchedule = schedule.ResourceAttributeValues.Where(c => (c as TextValue) != null).Select(e => ((TextValue)e).Value).ToList();
+                                    var adminGroupSchedule = adminGroupsDictionary
+                                                    .Where(pair => valuesSchedule.Contains(pair.Value))
+                                                    .Select(pair => pair.Key).FirstOrDefault();
+
+
+                                    //give rights to group if group exsits
+                                    using (var groupManager = new GroupManager())
                                     {
-                                        var group = groupManager.FindByNameAsync(g).Result;
+                                        var group = groupManager.FindByNameAsync(adminGroupSchedule).Result;
                                         if (group != null)
                                         {
                                             //rights on schedule
                                             if (permissionManager.GetRights(group.Id, entityTypeSchedule.Id, newSchedule.Id) == 0)
                                                 permissionManager.Create(group.Id, entityTypeSchedule.Id, newSchedule.Id, fullRights);
-
-                                            //rights on event
-                                            if (permissionManager.GetRights(group.Id, entityTypeEvent.Id, eEvent.Id) == 0)
-                                                permissionManager.Create(group.Id, entityTypeEvent.Id, eEvent.Id, fullRights);
                                         }
                                     }
                                 }
@@ -880,14 +922,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 //add rights to logged in user if not exsit
                                 //rights on schedule 31 is the sum from all rights:  Read = 1, Write = 4, Delete = 8, Grant = 16
 
-                                var userIdLoggedIn = UserHelper.GetUserId(HttpContext.User.Identity.Name);
                                 if (permissionManager.GetRights(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id) == 0)
                                     permissionManager.Create(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id, fullRights);
 
-                                //rights on event
-                                if (permissionManager.GetRights(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id) == 0)
-                                    permissionManager.Create(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id, fullRights);
-
+                                //Add rights to the schedule and event for all user reserved for
                                 foreach (PersonInSchedule user in schedule.ForPersons)
                                 {
                                     User us = userManager.FindByIdAsync(user.UserId).Result;
@@ -2020,7 +2058,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
         }
 
 
-        #endregion
+
+#endregion
+
+
 
         #region Delete Event
 
@@ -2200,6 +2241,23 @@ namespace BExIS.Modules.RBM.UI.Controllers
         #region Validation - Constraints
 
 
+
+        #endregion
+
+        #region Helper
+
+        private void SetAccessToEventForAdmingroup(long eventId)
+        {
+            //check if event has an schedule where group should get access
+
+
+          
+        }
+
+        private void HasAccessOnSchedule()
+        {
+            
+        }
 
         #endregion
 

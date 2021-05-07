@@ -724,6 +724,10 @@
       <Project>{455ec826-9a92-40ff-bd3b-388c288955ce}</Project>
       <Name>BExIS.IO.Transform.Output</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Components\XML\BExIS.Xml.Helpers\BExIS.Xml.Helpers.csproj">
+      <Project>{252f7872-a69c-43a6-84b4-4d2abdbdd9ab}</Project>
+      <Name>BExIS.Xml.Helpers</Name>
+    </ProjectReference>
     <ProjectReference Include="BExIS.Rbm.Entities\BExIS.Rbm.Entities.csproj">
       <Project>{c9f05c1a-c8a0-47b1-a0da-50af41992767}</Project>
       <Name>BExIS.Rbm.Entities</Name>

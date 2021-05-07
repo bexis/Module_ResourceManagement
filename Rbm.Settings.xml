@@ -1,22 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <settings>
-  <entry key="key1" value="value1" type="String"/>
+  <entry key="help" value="https://github.com/bexis/Documents/blob/master/HowTo/HowToFieldWork.md" type="String"/>
   <entry key="key2" value="value2" type="String"/>
   <entry key="key3" value="21" type="Int16"/>
 
-
   <!--Setting for sending booking notifications-->
-  <entry key="BookingMailReceiver" value="franzi82@gmx.de" type="string"/>
-  <entry key="BookingMailReceiverCC" value="franzi82@gmx.de" type="string"/>
-  <entry key="BookingMailReceiverBCC" value="franziska.zander@uni-jena.de" type="string"/>
+  <!--explo.hai@wzw.tum.de, explo.alb@uni-ulm.de, explo.Sch@senckenberg.de-->
+  <entry key="BookingMailReceiver" value="explo.hai@wzw.tum.de,explo.alb@uni-ulm.de,explo.Sch@senckenberg.de" type="string"/>
+  <entry key="BookingMailReceiverCC" value="bexis-sys@listserv.uni-jena.de" type="string"/>
+  <entry key="BookingMailReceiverBCC" value="bexis-sys@listserv.uni-jena.de" type="string"/>
   <entry key="BookingMailSender" value="Biodiversity Exploratories: Fieldbook" type="string"/>
   <entry key="BookingMailSubject" value="Fieldbook reservation" type="string"/>
   <entry key="AlumniGroup" value="alumni" type="string"/>
-
 
   <!--Setting to define party type name-->
   <entry key="AccountPartyTypes" value="Person" type="string"/>
 
   <!--Setting admin group to edit and delete events and schedules-->
-  <entry key="EventAdminGroup" value="" type="string"/>
+  <entry key="EventAdminGroups" value="FB_Edit_HAI:Hainich-Dün,FB_Edit_SCH:Schorfheide-Chorin,FB_Edit_ALB:Schwäbische Alb" type="string"/>
 </settings>
