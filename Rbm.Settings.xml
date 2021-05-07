@@ -16,6 +16,7 @@
   <!--Setting to define party type name-->
   <entry key="AccountPartyTypes" value="Person" type="string"/>
 
-  <!--Setting admin group to edit and delete events and schedules-->
+  <!--Setting admin group to edit and delete events and schedules, Groupname:resource attribute value
+  -> so you are able to give different rights to group depending on the classification with resource attribute value -->
   <entry key="EventAdminGroups" value="FB_Edit_HAI:Hainich-Dün,FB_Edit_SCH:Schorfheide-Chorin,FB_Edit_ALB:Schwäbische Alb" type="string"/>
 </settings>
