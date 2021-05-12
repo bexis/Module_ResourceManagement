@@ -123,10 +123,13 @@
                         // the end date is exclusive in fullcalendar. To display the duration correct 1 days needs to be added
                         var new_end_date = new Date(val['end']);
                         new_end_date.setDate(new_end_date.getDate() + 1);
-
+                        var newTitle = val['title'];
+                        if (newTitle.includes('Sleeping place')) {
+                            newTitle = newTitle + " to 10am";
+                        }
                         events.push({
                             allDay: true,
-                            title: val['title'],
+                            title: newTitle,
                             start: val['start'],
                             end: new_end_date,
                             color: val['color'],
@@ -135,7 +138,7 @@
                     });
 
                     callback(events);
-                    console.log(events);
+                    //console.log(events);
                 }
             });
         }
@@ -210,6 +213,18 @@
                     window.location.href = '../Schedule/Show/' + id;
                 })
             },
+            eventAfterRender: function (event, element, view) {
+               
+                if (event.title.includes('Sleeping place')) {
+                    //get column width and diff to 2
+                    var colwidth = $('th').width() / 2;
+                    //set width minus colwidth to render line only half of last day
+                    var width = element.width() - colwidth;
+                    width = width + 'px';
+                    $(element).css('width', width);
+                }
+            },
+
 
         });
 
