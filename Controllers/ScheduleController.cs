@@ -633,7 +633,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     //check if selected number is available to the timeperiod
                     if (s.ResourceQuantity != 0)
                     {
-                        bool availableQuantity = GetAvailableQuantity(s.ResourceId, s.ResourceQuantity, s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate, s.ScheduleQuantity, s.ScheduleId);
+                        bool availableQuantity = GetAvailableQuantity(s.ResourceName,s.ResourceId, s.ResourceQuantity, s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate, s.ScheduleQuantity, s.ScheduleId);
 
                         if (!availableQuantity)
                         {
@@ -2186,18 +2186,39 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return hasActivity;
         }
 
-        private bool GetAvailableQuantity(long resourceId, int resourceQuantity, DateTime startDate, DateTime endDate, int requestQuantity, long scheduleId)
+        private bool GetAvailableQuantity(string scheduleResourceName, long resourceId, int resourceQuantity, DateTime startDate, DateTime endDateUI, int requestQuantity, long scheduleId)
         {
+            DateTime endDate = endDateUI;
+            //get resourcename for specific validation
+            string resourceName = Helper.Settings.get("Resource").ToString();
+
+            //if there is a resource name in settings compair the settings name with the schedule resource
+            bool daysCase = false;
+            if (!String.IsNullOrEmpty(resourceName))
+            {
+                if (scheduleResourceName.Contains(resourceName) && endDate.ToShortDateString() != startDate.ToShortDateString())
+                    daysCase = true;
+            }
+
             int availableQuantity = 0;
             using (ScheduleManager schManager = new ScheduleManager())
             {
-
+                //get all day where the rsource wil be booked
                 var allDays = Enumerable.Range(0, 1 + endDate.Date.Subtract(startDate.Date).Duration().Days).Select(offset => startDate.Date.AddDays(offset));
                 List<int> schedulesQuantitiesPDay = new List<int>();
 
                 foreach (DateTime date in allDays)
                 {
-                    List<Schedule> allSchedules = schManager.GetSchedulesBetweenStartAndEndDateByResource(date.Date, date.Date, resourceId);
+                    List<Schedule> allSchedules = new List<Schedule>();
+                    List<Schedule> tmpSchedules = schManager.GetSchedulesBetweenStartAndEndDateByResource(date.Date, date.Date, resourceId);
+
+                    //if we have a resource which is bookable over night then we need to subtract the enddate -1 for the validation
+                    //This is needed to make the resource bookable on the next day after the night
+                    if (daysCase)
+                        allSchedules = tmpSchedules.Where(a => (date.Date >= a.StartDate.Date && date.Date <= a.EndDate.Date.AddDays(-1)) || (date.Date >= a.StartDate.Date && date.Date <= a.EndDate.Date.AddDays(-1))).ToList();
+                    else
+                        allSchedules = tmpSchedules;
+
                     int schedulesQuantity = 0;
                     foreach (Schedule s in allSchedules)
                     {

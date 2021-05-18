@@ -19,4 +19,9 @@
   <!--Setting admin group to edit and delete events and schedules, Groupname:resource attribute value
   -> so you are able to give different rights to group depending on the classification with resource attribute value -->
   <entry key="EventAdminGroups" value="FB_Edit_HAI:Hainich-Dün,FB_Edit_SCH:Schorfheide-Chorin,FB_Edit_ALB:Schwäbische Alb" type="string"/>
+
+    <!--Setting to specify resource for specific validation -->
+  <entry key="Resource" value="Sleeping place" type="string"/>
+
+
 </settings>

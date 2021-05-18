@@ -125,7 +125,7 @@
                         new_end_date.setDate(new_end_date.getDate() + 1);
                         var newTitle = val['title'];
                         if (newTitle.includes('Sleeping place')) {
-                            newTitle = newTitle + " to 10am";
+                            newTitle = newTitle + " till 10am";
                         }
                         events.push({
                             allDay: true,
@@ -214,7 +214,6 @@
                 })
             },
             eventAfterRender: function (event, element, view) {
-               
                 if (event.title.includes('Sleeping place')) {
                     //get column width and diff to 2
                     var colwidth = $('th').width() / 2;
