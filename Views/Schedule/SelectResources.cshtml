@@ -2,9 +2,13 @@
 
 @section Information
 {
-    With this interface you are able to filter and choose resource to added to your resource cart.
+    <p>Select the areas you want to visit as well as the needed equipment and sleeping places. Use the filter options in the green box on the left to preselect
+        the region and the resource type (area, objects, and sleeping places). After choosing all resources, press the ”Continue booking” button.</p>
+
+    <b>Note: Book sleeping places separately for every person.</b>
+
     <p>
-        <a href="/RBM/Help/Index/#_Toc434570750" class="bx-informationLink" title="go to help" target="_blank">More</a>
+        <a href="https://github.com/bexis/Documents/blob/master/HowTo/HowToFieldWork.md" class="bx-informationLink" title="go to help" target="_blank">More</a>
     </p>
 }
 
@@ -22,68 +26,67 @@
         </td>
     </tr>
 </table>
-   
+
 
 <style type="text/css">
 
-/*Table*/
+        /*Table*/
 
-#enterSchedules td {
-     vertical-align:top;
-      /*border: none !important;*/
-      border: none !important;
-     
-}
+        #enterSchedules td {
+            vertical-align: top;
+            /*border: none !important;*/
+            border: none !important;
+        }
 
-/*#enterSchedules th {
-     vertical-align:top;
-      border: none !important;
-     
-}*/
+        /*#enterSchedules th {
+         vertical-align:top;
+          border: none !important;
 
-#filter{
-    border-left:2px solid #e8eef4;
-    border-bottom: 2px solid #e8eef4;
-    border-right:none;
-   
-} 
-#resources{
-    border-right:2px solid #e8eef4;
-    border-bottom: 2px solid #e8eef4;
-    border-left:none;
-}
-#schedules {
-    border:2px solid #e8eef4;
-}
+    }*/
 
-/*Button*/
-#addToEvent {
-    /*margin-left: 78%;*/
-}
+        #filter {
+            border-left: 2px solid #e8eef4;
+            border-bottom: 2px solid #e8eef4;
+            border-right: none;
+        }
 
-/*List*/
-#userList {
-    list-style: none;
-    padding-left: 0em; 
-    margin-left: 0em;
-}
-#userList li {
-   display: block;
+        #resources {
+            border-right: 2px solid #e8eef4;
+            border-bottom: 2px solid #e8eef4;
+            border-left: none;
+        }
 
-}
+        #schedules {
+            border: 2px solid #e8eef4;
+        }
 
+        /*Button*/
+        #addToEvent {
+            /*margin-left: 78%;*/
+        }
+
+        /*List*/
+        #userList {
+            list-style: none;
+            padding-left: 0em;
+            margin-left: 0em;
+        }
+
+            #userList li {
+                display: block;
+            }
 </style>
 
 <script type="text/javascript">
 
     $(document).ready(function () {
-        
+
     $.get('@Url.Action("ResourceFilter", "Schedule")', function (data) {
 
         $('#Content_Filter').html(data);
     }   );
 
-        
+
         $.get('@Url.Action("LoadResources", "Schedule")', function (data) {
 
             $('#Content_Resources').html(data);
@@ -109,6 +112,6 @@
         //}
     }
 
-    </script> 
+</script>
 
 

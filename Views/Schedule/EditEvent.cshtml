@@ -3,10 +3,13 @@
 
 @section Information
 {
-    With this interface you are able to define are details to your event.
-    <p>
-        <a href="/RBM/Help/Index/#_Toc434570750" class="bx-informationLink" title="go to help" target="_blank">More</a>
-    </p>
+    <p>Fill out the forms for each resource with all necessary information: period, accompanying persons, number of needed resources (only for equipment), and add the reason for your visit (only for areas).</p>
+
+   <b> Note: Book sleeping places separately for every person.</b>
+
+   <p>
+       <a href="https://github.com/bexis/Documents/blob/master/HowTo/HowToFieldWork.md" class="bx-informationLink" title="go to help" target="_blank">More</a>
+   </p>
 }
 
 @model BookingEventModel
@@ -89,28 +92,28 @@
 
 
 
-<div class="bx-footer right">
-    @Html.ActionLink("Cancel", "Calendar", "Calendar", null, new { area = "rbm", @class = "t-button action", @title = "Cancel", @tabindex = "5" })
+    <div class="bx-footer right">
+        @Html.ActionLink("Cancel", "Calendar", "Calendar", null, new { area = "rbm", @class = "t-button action", @title = "Cancel", @tabindex = "5" })
 
-    @if (!Model.EditMode && Model.EditAccess)
-    {
-        <button id="edit" class="t-button action" title="" onclick="openEditMode(@Model.Id)">Edit</button>
-    }
-    else if (Model.EditMode && Model.Id != 0)
-    {
-        @Html.ActionLink("Save", "SaveEvent", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Save event", @tabindex = "5" })
-    }
-    else if (Model.EditMode && Model.Id == 0)
-    {
-        @Html.ActionLink("Book", "SaveEvent", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Save event", @tabindex = "5" })
-    }
-    @if (Model.DeleteAccess)
-    {
-        @Html.ActionLink("Delete", "Delete", "Schedule", new { area = "RBM", id = Model.Id }, new { @class = "t-button action", @title = "Delete", @tabindex = "5" })
-    }
+        @if (!Model.EditMode && Model.EditAccess)
+        {
+            <button id="edit" class="t-button action" title="" onclick="openEditMode(@Model.Id)">Edit</button>
+        }
+        else if (Model.EditMode && Model.Id != 0)
+        {
+            @Html.ActionLink("Save", "SaveEvent", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Save event", @tabindex = "5" })
+        }
+        else if (Model.EditMode && Model.Id == 0)
+        {
+            @Html.ActionLink("Book", "SaveEvent", "Schedule", new { area = "RBM", @class = "t-button action", @title = "Save event", @tabindex = "5" })
+        }
+        @if (Model.DeleteAccess)
+        {
+            @Html.ActionLink("Delete", "Delete", "Schedule", new { area = "RBM", id = Model.Id }, new { @class = "t-button action", @title = "Delete", @tabindex = "5" })
+        }
 
 
-</div>
+    </div>
 
 </div>
 
@@ -128,7 +131,6 @@
             <div id="Content_ChooseUsers"></div>
         </text>)
 )
-
 @(Html.Telerik().Window()
         .Name("Window_ShowUsers")
         .Title("Selected users")
@@ -141,7 +143,6 @@
             <div id="Content_ShowUsers"></div>
         </text>)
 )
-
 @(Html.Telerik().Window()
         .Name("Window_ShowActivities")
         .Title("Selected activities")
@@ -154,7 +155,6 @@
             <div id="Content_ShowActivities"></div>
         </text>)
 )
-
 @(Html.Telerik().Window()
         .Name("Window_ChooseActivities")
         .Title("Select Activities")
@@ -167,7 +167,6 @@
             <div id="Content_ChooseActivities"></div>
         </text>)
 )
-
 @(Html.Telerik().Window()
         .Name("Window_Availability")
         .Title("Availability")
@@ -180,7 +179,6 @@
             <div id="Content_Availability"></div>
         </text>)
 )
-
 @(Html.Telerik().Window()
         .Name("Window_Similar")
         .Title("Similar")
