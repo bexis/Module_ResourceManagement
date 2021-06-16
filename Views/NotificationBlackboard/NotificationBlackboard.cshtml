@@ -7,6 +7,11 @@
     ViewBag.Title = "BExIS - News";
 }
 
+@section Information
+{
+    This page shows important up-to-date information on restrictions regarding plot access provided by the local management teams.
+}
+
 @{
     Dictionary<string, List<object>> DomainNotification = new Dictionary<string, List<object>>();
     foreach (NotificationBlackboardModel item in Model)
@@ -41,52 +46,55 @@
 
             DomainNotification.TryGetValue(domianItem.Key, out value);
 
-    <div class="notification-container">
-        <fieldset class="main-fieldset" title="@domianItem.Key">
-            <legend class="main-fieldset-legend">@domianItem.Key</legend>
+            <div class="notification-container">
+                <fieldset class="main-fieldset" title="@domianItem.Key">
+                    <legend class="main-fieldset-legend">@domianItem.Key</legend>
 
-            @foreach (NotificationBlackboardModel item in value)
-            {
+                    @foreach (NotificationBlackboardModel item in value)
+                    {
 
-            <fieldset title="@domianItem.Key">
-                <legend class="fieldset-legend">@item.Subject</legend>
+                        <fieldset title="@domianItem.Key">
+                            <legend class="fieldset-legend">@item.Subject</legend>
 
 
-                @if (item.StartDate == item.EndDate)
-                {
-                    <div><b> @item.StartDate.ToString("dd.MM.yyyy") </b></div>
-                }
-                else
-                {
-                    <div><b> @item.StartDate.ToString("dd.MM.yyyy") - @item.EndDate.ToString("dd.MM.yyyy")</b></div>
-                }
+                            @if (item.StartDate == item.EndDate)
+                            {
+                                <div><b> @item.StartDate.ToString("dd.MM.yyyy") </b></div>
+                            }
+                            else
+                            {
+                                <div><b> @item.StartDate.ToString("dd.MM.yyyy") - @item.EndDate.ToString("dd.MM.yyyy")</b></div>
+                            }
 
-                <div><p >@Html.Raw(item.Message.Replace("\r\n", "<br>")) </p></div>
-                <div class="notification-date"><i>Date: @item.InsertDate.ToString("dd.MM.yyyy HH:mm") </i></div>
-            </fieldset>
-            }
-        </fieldset>
-        </div>
+                            <div><p>@Html.Raw(item.Message.Replace("\r\n", "<br>")) </p></div>
+                            <div class="notification-date"><i>Date: @item.InsertDate.ToString("dd.MM.yyyy HH:mm") </i></div>
+                        </fieldset>
+                    }
+                </fieldset>
+            </div>
         }
     }
-    </div>
+</div>
 
 <style>
     .notification-container {
         margin-right: 5px;
         width: 32%
     }
+
     .main-fieldset-legend {
         width: auto;
         border-bottom: none;
         color: var(--information-bg-color);
         text-align: center;
     }
+
     .fieldset-legend {
         width: auto;
         border-bottom: none;
         color: var(--information-bg-color);
     }
+
     .notification-date {
         float: right;
     }
@@ -95,9 +103,9 @@
         .notification-container {
             width: 100%;
         }
+
         .main-fieldset {
             border: 4px solid #ddd;
         }
-   }
-
+    }
 </style>
