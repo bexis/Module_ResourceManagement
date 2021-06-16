@@ -4,15 +4,16 @@
 @model List<ScheduleListModel>
 
 
+
 @if (ViewBag.history == "true")
 {
-    <div id="history_yes"  class="btn btn-default history_list">Show without history</div>
+    <div id="history_yes" class="btn btn-default history_list">Show without history</div>
     <div id="history_no" style="display:none" class="btn btn-default history_list">Show with history</div>
 }
 else
 {
     <div id="history_yes" style="display:none" class="btn btn-default history_list">Show without history</div>
-    <div id="history_no"  class="btn btn-default history_list">Show with history</div>
+    <div id="history_no" class="btn btn-default history_list">Show with history</div>
 }
 
 
@@ -63,11 +64,11 @@ else
                 $('.history_list').on('click', function () {
             var history = false;
            console.log("click history");
-            if ($("#history_yes").is(":visible")) {  
+            if ($("#history_yes").is(":visible")) {
             }
             else {
-                history = true; 
-                
+                history = true;
+
             }
 
             var myBooking = false;
@@ -83,7 +84,7 @@ else
                     $('#eventList').html(data);
                 });
             }
-            else { 
+            else {
                 $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: myBooking, history: history}, function (data) {
                 $('#scheduleList').html(data);
             });
@@ -133,6 +134,8 @@ else
             };
         };
 
+        jQuery.fn.dataTable.luxon('dd.MM.yyyy');
+
         var oTable = $("#resources_table").DataTable({
             "autoWidth": false,
             ordering: true,
@@ -146,7 +149,7 @@ else
                     render: $.fn.dataTable.render.ellipsis(60, true)
                 }]
         });
- 
+
 
     });
 

@@ -3,6 +3,12 @@
 
 @model List<BookingEventModel>
 
+@section scripts
+{
+    <script src="//cdnjs.cloudflare.com/ajax/libs/luxon/1.27.0/luxon.min.js" type="text/javascript"></script>
+    <script src="//cdn.datatables.net/plug-ins/1.10.25/sorting/datetime-luxon.js" type="text/javascript"></script>
+}
+
 
 @if (ViewBag.history == "true")
 {
@@ -53,11 +59,11 @@ else
              $('.history_list_booking').on('click', function () {
             var history = false;
            console.log("click history");
-            if ($("#history_yes").is(":visible")) {  
+            if ($("#history_yes").is(":visible")) {
             }
             else {
-                history = true; 
-                
+                history = true;
+
             }
 
             var myBooking = false;
@@ -73,13 +79,13 @@ else
                     $('#eventList').html(data);
                 });
             }
-            else { 
+            else {
                 $.get('@Url.Action("GetSchedulesAsList", "Calendar", new RouteValueDictionary { { "area", "RBM"} })', { myBookings: myBooking, history: history}, function (data) {
                 $('#scheduleList').html(data);
             });
             }
 
-        });    
+        });
 
 
 jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml ) {
@@ -122,7 +128,7 @@ jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml )
         return '<span class="ellipsis" title="'+esc(d)+'">'+shortened+'&#8230;</span>';
     };
 };
-      
+
         $("#datepicker_from").datepicker({
             showOn: "button",
             firstDay: 1,
@@ -153,6 +159,7 @@ jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml )
             bookingTable.draw();
         });
 
+        jQuery.fn.dataTable.luxon('dd.MM.yyyy');
 
         var bookingTable = $("#booking_table").DataTable({
             "autoWidth": false,
@@ -176,7 +183,7 @@ jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml )
                 }]
         });
 
-  
+
     });
 
 </script>
