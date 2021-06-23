@@ -372,7 +372,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         #region Create/Edit Event
         public ActionResult Create()
         {
-            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Create Event", this.Session.GetTenant());
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("BExIS - Book Resources I", this.Session.GetTenant());
             Session["ResourceCart"] = null;
             Session["Event"] = null;
             Session["FilterResults"] = null;
@@ -384,6 +384,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult CreateEvent()
         {
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("BExIS - Book Resources II", this.Session.GetTenant());
             using (var partyManager = new PartyManager())
             using (var rManager = new ResourceManager())
             using (UserManager userManager = new UserManager())
@@ -494,7 +495,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         if (!String.IsNullOrEmpty(value))
                         {
                             model.Schedules[i].ScheduleDurationModel.StartDate = DateTime.ParseExact(value, "dd.MM.yyyy", null);
-                            model.Schedules[i].ScheduleDurationModel.EndDate = TimeHelper.GetEndDateOfDuration(model.Schedules[i].ScheduleDurationModel.DurationValue, model.Schedules[i].ScheduleDurationModel.TimeUnit, model.Schedules[i].ScheduleDurationModel.StartDate);
+                            //model.Schedules[i].ScheduleDurationModel.EndDate = TimeHelper.GetEndDateOfDuration(model.Schedules[i].ScheduleDurationModel.DurationValue, model.Schedules[i].ScheduleDurationModel.TimeUnit, model.Schedules[i].ScheduleDurationModel.StartDate);
                         }
                         else
                             model.Schedules[i].ScheduleDurationModel.EndDate = DateTime.MinValue;
@@ -1064,7 +1065,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult Edit(long id)
         {
-            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Edit Event", this.Session.GetTenant());
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("BExIS - Edit Resources", this.Session.GetTenant());
             return View("EditEvent", id);
         }
 
@@ -1993,6 +1994,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
         //
         public ActionResult Show(long id)
         {
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("BExIS - Show reservation", this.Session.GetTenant());
+
             Session["ScheduleUsers"] = null;
             //Session["ScheduleActivities"] = null;
             Session["Event"] = null;
