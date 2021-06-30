@@ -2193,13 +2193,13 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             DateTime endDate = endDateUI;
             //get resourcename for specific validation
-            string resourceName = Helper.Settings.get("Resource").ToString();
+            string overNightResourceName = Helper.Settings.get("OverNightResource").ToString();
 
             //if there is a resource name in settings compair the settings name with the schedule resource
             bool daysCase = false;
-            if (!String.IsNullOrEmpty(resourceName))
+            if (!String.IsNullOrEmpty(overNightResourceName))
             {
-                if (scheduleResourceName.Contains(resourceName) && endDate.ToShortDateString() != startDate.ToShortDateString())
+                if (scheduleResourceName.Contains(overNightResourceName) && endDate.ToShortDateString() != startDate.ToShortDateString())
                     daysCase = true;
             }
 
@@ -2209,6 +2209,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 //get all day where the rsource wil be booked
                 var allDays = Enumerable.Range(0, 1 + endDate.Date.Subtract(startDate.Date).Duration().Days).Select(offset => startDate.Date.AddDays(offset));
                 List<int> schedulesQuantitiesPDay = new List<int>();
+
+                //find last day, so that no availability check runs on it, the last day is the day of departure | only for resources over night like sleeping places
+                var lastDate = allDays.Last();
 
                 foreach (DateTime date in allDays)
                 {
@@ -2223,12 +2226,22 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         allSchedules = tmpSchedules;
 
                     int schedulesQuantity = 0;
+
                     foreach (Schedule s in allSchedules)
                     {
-                        if(s.Id != scheduleId)
-                            schedulesQuantity += s.Quantity;
+                        //check if scheduled resource is over night resource
+                        bool overNight = s.Resource.Name.Contains(overNightResourceName);
+                        if (overNight && date.Equals(lastDate))
+                        {
+                            continue;
+                        }
                         else
-                            schedulesQuantity += requestQuantity - s.Quantity;
+                        {
+                            if (s.Id != scheduleId)
+                                schedulesQuantity += s.Quantity;
+                            else
+                                schedulesQuantity += requestQuantity - s.Quantity;
+                        }
                     }
 
                     schedulesQuantitiesPDay.Add(schedulesQuantity);
