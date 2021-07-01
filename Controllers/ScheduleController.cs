@@ -634,7 +634,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     //check if selected number is available to the timeperiod
                     if (s.ResourceQuantity != 0)
                     {
-                        bool availableQuantity = GetAvailableQuantity(s.ResourceName,s.ResourceId, s.ResourceQuantity, s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate, s.ScheduleQuantity, s.ScheduleId);
+                        bool availableQuantity = GetAvailableQuantity(s.ResourceName,s.ResourceId, s.ResourceQuantity, s.ScheduleDurationModel.StartDate, s.ScheduleDurationModel.EndDate, s.ScheduleQuantity, s.ScheduleId, model.Id);
 
                         if (!availableQuantity)
                         {
@@ -2189,7 +2189,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return hasActivity;
         }
 
-        private bool GetAvailableQuantity(string scheduleResourceName, long resourceId, int resourceQuantity, DateTime startDate, DateTime endDateUI, int requestQuantity, long scheduleId)
+        private bool GetAvailableQuantity(string scheduleResourceName, long resourceId, int resourceQuantity, DateTime startDate, DateTime endDateUI, int requestQuantity, long scheduleId, long eventId)
         {
             DateTime endDate = endDateUI;
             //get resourcename for specific validation
@@ -2229,18 +2229,25 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                     foreach (Schedule s in allSchedules)
                     {
-                        //check if scheduled resource is over night resource
-                        bool overNight = s.Resource.Name.Contains(overNightResourceName);
-                        if (overNight && date.Equals(lastDate))
+                        if (s.BookingEvent.Id == eventId)
                         {
                             continue;
                         }
                         else
                         {
-                            if (s.Id != scheduleId)
-                                schedulesQuantity += s.Quantity;
+                            //check if scheduled resource is over night resource
+                            bool overNight = s.Resource.Name.Contains(overNightResourceName);
+                            if (overNight && date.Equals(lastDate))
+                            {
+                                continue;
+                            }
                             else
-                                schedulesQuantity += requestQuantity - s.Quantity;
+                            {
+                                if (s.Id != scheduleId)
+                                    schedulesQuantity += s.Quantity;
+                                else
+                                    schedulesQuantity += requestQuantity - s.Quantity;
+                            }
                         }
                     }
 
