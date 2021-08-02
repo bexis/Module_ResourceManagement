@@ -115,6 +115,11 @@ namespace BExIS.Rbm.Services.Booking
             return NotificationRepo.Query(a => a.Id == id).FirstOrDefault();
         }
 
+        public List<Notification> GetNotificationsFromTime(DateTime startDate)
+        {
+            return NotificationRepo.Query(a => startDate <= a.EndDate).ToList();
+        }
+
         public List<Notification> GetNotificationsByTimePeriod(DateTime startDate, DateTime endDate)
         {
             return NotificationRepo.Query(a=> startDate >=a.StartDate  && startDate <= a.EndDate || a.EndDate >= a.StartDate && endDate <= a.EndDate).ToList();
