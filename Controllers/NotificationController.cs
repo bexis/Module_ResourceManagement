@@ -133,23 +133,65 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         }
                     }
 
-
                     if (notification.Id != 0 && model.Id == 0)
                     {
                         //Start -> add security ----------------------------------------
 
+                        //31 is the sum from all rights:  Read = 1,  Write = 4, Delete = 8, Grant = 16
+                        int fullRights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete + (int)RightType.Grant;
+                        Entity entityType = entityTypeManager.FindByName("Notification");
 
+                        //get admin groups: format= "groupname:resource structure attribute value"
+                        // give rights to group if fetch to notification
+                        string[] eventAdminGroups = Helper.Settings.get("EventAdminGroups").ToString().Split(',');
+                        Dictionary<string, string> adminGroupsDictionary = new Dictionary<string, string>();
+                        if (eventAdminGroups != null && eventAdminGroups.Length > 0)
                         {
-                            var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-                            userTask.Wait();
-                            var user = userTask.Result;
-
-                            Entity entityType = entityTypeManager.FindByName("Notification");
-
-                            //31 is the sum from all rights:  Read = 1,  Write = 4, Delete = 8, Grant = 16
-                            int rights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete + (int)RightType.Grant;
-                            pManager.Create(user, entityType, notification.Id, rights);
+                            foreach (string group in eventAdminGroups)
+                            {
+                                string[] groupPair = group.Split(':');
+                                adminGroupsDictionary.Add(groupPair[0], groupPair[1]);
+                            }
                         }
+
+                        //get resource structrue attribute values to compare with admin group settings
+                        if (adminGroupsDictionary.Count > 0)
+                        {
+                            //get admin groups for notification
+                            var values = dictionary.SelectMany(pair => pair.Value).ToList();
+                            var adminGroups = adminGroupsDictionary
+                                                .Where(pair => values.Contains(pair.Value))
+                                                .Select(pair => pair.Key)
+                                                .ToList();
+                            using (var groupManager = new GroupManager())
+                            {
+                                foreach (var g in adminGroups)
+                                {
+                                    var group = groupManager.FindByNameAsync(g).Result;
+                                    if (group != null)
+                                    {
+                                        if (pManager.GetRights(group.Id, entityType.Id, notification.Id) == 0)
+                                            pManager.Create(group.Id, entityType.Id, notification.Id, fullRights);
+                                    }
+                                }
+                            }
+                        }
+
+                        //rights to bexcis admin group
+                        using (var groupManager = new GroupManager())
+                        {
+                            var adminGroup = groupManager.FindByNameAsync("administrator").Result;
+                            if (pManager.GetRights(adminGroup.Id, entityType.Id, notification.Id) == 0)
+                                pManager.Create(adminGroup.Id, entityType.Id, notification.Id, fullRights);
+
+                        }
+
+                         //rights to user that has create the notification
+                         var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                         userTask.Wait();
+                         var user = userTask.Result;
+                         pManager.Create(user, entityType, notification.Id, fullRights);
+                        
 
                         //End -> add security ------------------------------------------
                     }
