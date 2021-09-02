@@ -299,10 +299,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             string subject = "Resource Notification - " + notification.Subject;
             string message = "";
-            message += "<b>" + notification.Subject + "</b><br/>";
-            message += "Startdate:" + notification.StartDate + "<br/>";
-            message += "EndDate:" + notification.EndDate + "<br/>";
-            message += notification.Message + "<br/>";
+            message += "<b>" + notification.Subject + "</b><br/><br/>";
+            message += "Startdate: " + notification.StartDate.ToString("yyyy-MM-dd") + "<br/>";
+            message += "EndDate: " + notification.EndDate.ToString("yyyy-MM-dd") + "<br/><br/>";
+            message += "<p>" + notification.Message + "</p>" + "<br/>";
 
             SendNotificationHelper.SendNotification(userToNotify, message, subject);
         }
