@@ -1394,6 +1394,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             using (ActivityManager aManager = new ActivityManager())
             {
                 List<Activity> activities = aManager.GetAllAvailableActivityById().ToList();
+                
                 BookingEventModel sEventM = (BookingEventModel)Session["Event"];
 
                 ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
@@ -1408,6 +1409,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     }
                     model.Add(ae);
                 }
+                model.Reverse();
                 return PartialView("_chooseActivities", model);
             }
         }
@@ -2089,7 +2091,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             if (startDate > endDate)
             {
-                return "The end date is befor start date.";
+                return "The end date you entered occurs before the start date.";
             }
 
             return null;
