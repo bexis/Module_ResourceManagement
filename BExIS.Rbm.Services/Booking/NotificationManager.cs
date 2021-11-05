@@ -117,7 +117,7 @@ namespace BExIS.Rbm.Services.Booking
 
         public List<Notification> GetNotificationsFromTime(DateTime startDate)
         {
-            return NotificationRepo.Query(a => startDate <= a.EndDate).ToList();
+            return NotificationRepo.Query(a => startDate <= a.EndDate).OrderByDescending(a => a.InsertDate).ToList();
         }
 
         public List<Notification> GetNotificationsByTimePeriod(DateTime startDate, DateTime endDate)
