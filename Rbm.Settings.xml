@@ -21,7 +21,7 @@
   <entry key="EventAdminGroups" value="FB_Edit_HAI:Hainich-Dün,FB_Edit_SCH:Schorfheide-Chorin,FB_Edit_ALB:Schwäbische Alb" type="string"/>
 
     <!--Setting to specify resource for specific validation -->
-  <entry key="Resource" value="Sleeping place" type="string"/>
+  <entry key="OverNightResource" value="Sleeping place" type="string"/>
 
 
 </settings>
