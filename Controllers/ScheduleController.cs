@@ -309,19 +309,22 @@ namespace BExIS.Modules.RBM.UI.Controllers
             Session["ResourceCart"] = new List<ResourceCart>();
 
             BookingEventModel eventModel = (BookingEventModel)Session["Event"];
-            if (eventModel.Schedules.Count() > 0)
+            if (eventModel != null)
             {
-                using (ScheduleManager scheduleManager = new ScheduleManager())
+                if (eventModel.Schedules.Count() > 0)
                 {
-                    foreach (var schedule in eventModel.Schedules)
+                    using (ScheduleManager scheduleManager = new ScheduleManager())
                     {
-                        var scheduleDB = scheduleManager.GetScheduleById(schedule.ScheduleId);
-                        if(scheduleDB != null)
-                            scheduleManager.DeleteSchedule(scheduleDB);
+                        foreach (var schedule in eventModel.Schedules)
+                        {
+                            var scheduleDB = scheduleManager.GetScheduleById(schedule.ScheduleId);
+                            if (scheduleDB != null)
+                                scheduleManager.DeleteSchedule(scheduleDB);
+                        }
                     }
+                    eventModel.Schedules.Clear();
+                    Session["Event"] = eventModel;
                 }
-                eventModel.Schedules.Clear();
-                Session["Event"] = eventModel;
             }
 
             return PartialView("_cartResources", new List<ResourceCart>());
