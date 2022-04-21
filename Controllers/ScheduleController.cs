@@ -16,31 +16,21 @@ using BExIS.Web.Shell.Areas.RBM.Models.Booking;
 using BExIS.Web.Shell.Areas.RBM.Models.Resource;
 using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
 using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
-using System.Web;
 using System.Web.Mvc;
 //using System.Web.Script.Serialization;
-using Telerik.Web.Mvc;
 using Vaiona.Web.Mvc.Models;
-using System.Text;
 using BExIS.Rbm.Entities.ResourceConstraint;
 using BExIS.Rbm.Entities.BookingManagementTime;
 using System.Linq.Expressions;
-using System.Web.Routing;
 using Vaiona.Web.Extensions;
-using System.Web.Services;
 using System.Data;
 using BExIS.Security.Entities.Authorization;
 using BExIS.Dlm.Entities.Party;
 using BExIS.Dlm.Services.Party;
 using BExIS.Modules.RBM.UI.Helper;
 using BExIS.Security.Services.Objects;
-using System.Configuration;
-using System.Web.Configuration;
-using Vaiona.Utils.Cfg;
 using Vaiona.Persistence.Api;
 
 namespace BExIS.Modules.RBM.UI.Controllers
@@ -2068,8 +2058,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
 
 #endregion
-
-
 
         #region Delete Event
 

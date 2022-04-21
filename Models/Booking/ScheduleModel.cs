@@ -347,6 +347,11 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             previousObject.Activities.ForEach(r => copyListActivities.Add(new ActivityEventModel(r, newIndex)));
             Activities = copyListActivities;
 
+            //create for every resource attribute  object in list a new object
+            List<ResourceAttributeValue> copyResourceAttributeValue = new List<ResourceAttributeValue>();
+            previousObject.ResourceAttributeValues.ToList().ForEach(r => copyResourceAttributeValue.Add(r));
+            ResourceAttributeValues = copyResourceAttributeValue;
+
             ByPerson = previousObject.ByPerson;
             Contact = previousObject.Contact;
             ScheduleQuantity = previousObject.ScheduleQuantity;
