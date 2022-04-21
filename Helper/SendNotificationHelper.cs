@@ -52,30 +52,29 @@ namespace BExIS.Web.Shell.Areas.RBM.Helpers
 
             string message = "";
             message += "<p>The following booking has been " + bookingAction + "</p>";
-            message += "<table><tr><td>Booking name:</td><td>" + model.Name + "</td></tr>";
-            if (model.Description != "")
-                message += "<tr><td>Booking description:</td><td>" + model.Description + "</td></tr></table>";
-            message += "<p>Booked Resources:</p>";
-            message += "<table>";
+            message += "<b>Booking name: </b>" + model.Name + "</br>";
+            if (!String.IsNullOrEmpty(model.Description))
+                message += "<b>Booking description: </b> " + model.Description + "</br>";
+            message += "<p><b>Booked Resources:</b></p>";
             using (var userManager = new UserManager())
             using (var partyManager = new PartyManager())
             {
-
                 foreach (ScheduleEventModel schedule in model.Schedules)
                 {
-
-                    message += "<tr><td>   </td><td>Resource:</td><td>" + schedule.ResourceName + "</td></tr>";
-                    message += "<tr><td>   </td><td>Start date:</td><td>" + schedule.ScheduleDurationModel.StartDate.ToString("dd.MM.yyyy") + " </td></tr>";
-                    message += "<tr><td>   </td><td>End date:</td><td>" + schedule.ScheduleDurationModel.EndDate.ToString("dd.MM.yyyy") + "</td></tr>";
-                    message += "<tr><td>   </td><td>Reserved by:</td><td>" + schedule.ByPerson + "</td></tr>";
-                    message += "<tr><td>   </td><td>Contact person:</td><td>" + schedule.ContactName + "( " + schedule.Contact.MobileNumber + ")</td></tr>";
-                    message += "<tr><td>   </td><td>Reserved for:</td><td></td></tr>";
-                    message += "<tr><td>   </td><td></td><td><ul>";
+                    message += "<b>Resource: </b>" + schedule.ResourceName + "</br>";
+                    message += "<b>Start date: </b>" + schedule.ScheduleDurationModel.StartDate.ToString("dd.MM.yyyy") + "</br>";
+                    message += "<b>End date: </b>" + schedule.ScheduleDurationModel.EndDate.ToString("dd.MM.yyyy") + "</br>";
+                    message += "<b>Reserved by: </b>" + schedule.ByPerson + "</br>";
+                    message += "<b>Contact person: </b>" + schedule.ContactName + " ( #" + schedule.Contact.MobileNumber + ")</br>";
+                    message += "<b>Reserved for: </b>";
 
 
                     foreach (PersonInSchedule person in schedule.ForPersons)
                     {
-                        message += "<li>" + person.UserFullName + "</li>";
+                        if (schedule.ForPersons.IndexOf(person) == schedule.ForPersons.Count - 1)
+                            message += person.UserFullName;
+                        else
+                            message += person.UserFullName + ", ";
 
                         var user = userManager.FindByIdAsync(person.UserId).Result;
 
@@ -86,14 +85,12 @@ namespace BExIS.Web.Shell.Areas.RBM.Helpers
 
                     }
 
+                    message += "</br></br>";
 
-                    message += "</ul></td></tr>";
                 }
             }
-            message += "</table>";
 
             receiverBCC.Add(ConfigurationManager.AppSettings["SystemEmail"].ToString()); // Allways send BCC to SystemEmail 
-            
 
             var emailService = new EmailService();
             emailService.Send(
