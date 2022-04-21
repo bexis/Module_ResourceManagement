@@ -3,58 +3,43 @@
 
 @model List<SelectResourceForEventModel>
 
-@{
-    GridPagerStyles pagerStyles = GridPagerStyles.PageSizeDropDown;
-    pagerStyles |= GridPagerStyles.NextPreviousAndDropDown;
+@section scripts
+{
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
 }
 
 <div>
-@(Html.Telerik().Grid(Model)
-        .Name("Grid_Resource")
-        .NoRecordsTemplate("No results.")
-        .HtmlAttributes(new { style = "height:100% !important;" })
-        .DataKeys(keys =>
-        {
-            keys.Add(r => r.Id);
-        })
-        .Columns(columns =>
-        {
-           
-        columns.Bound(r => r.Name);
-        columns.Bound(r => r.ResourceQuantity).Width("10%").Filterable(false).Title("Max.");
-        columns.Template(
-                @<text>
-                                <span title="Select resource"class="bx bx-next bx-button function small" onclick="addResourceToCart('' + @item.Id + '')"/>
-                                <button type="button" title="Show more details" class="bx-function bx-info fa fa-info" onclick="OnClickShowDetails('' + @item.Id + '')"/>
-                </text>
-                            ).Title(" ")
-                             .ClientTemplate(" <span title = \"Select resource\" class=\"bx bx-next bx-button function small\" onclick=\"addResourceToCart(\'\' + <#= Id #> + \'\')\"/>"
-                                + "<button type = \"button\" title=\"Show more details\" class=\"bx-function bx-info fa fa-info\" onclick=\"OnClickShowDetails(\'\' + <#= Id #> + \'\')\"/>"
-            )
+    <table id="resourcesTable" class="display" width="100%">
+        <thead>
+            <tr>
+                <th>
+                    Name
+                </th>
 
-
-
-        .Width(80)
-        .Title(" ");
-            //columns.Bound(r => r.AvailableQuantity).Width(30);
-            //columns.Bound(r => r.Description).Width(80);
-
-
-        })
-                                .ClientEvents(clientEvents => clientEvents
-                                  .OnDataBound("onDataBound")
-                                )
-                                        .DataBinding(dataBinding => dataBinding
-                                            .Ajax()
-
-                                            .OperationMode(GridOperationMode.Client)
-                                        )
-                                .Filterable()
-                                .Sortable()
-
-                                )
-                                <br />
-
+                <th>
+                    Max
+                </th>              
+                <th>
+                    Actions
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.ResourceQuantity</td>
+                    <td>
+                        <span title="Select resource" class="bx bx-next bx-button function small" onclick="addResourceToCart('' + @item.Id + '')" />
+                        <button type="button" title="Show more details" class="bx-function bx-info fa fa-info" onclick="OnClickShowDetails('' + @item.Id + '')" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <br />
 </div>
 
 @(Html.Telerik().Window()
@@ -84,9 +69,7 @@
     }
 
     $(document).ready(function () {
-        refreshGrid();
-        resetAllTelerikIconTitles();
-        addTooltips();
+        $('#resourcesTable').DataTable();
 
     });
 
@@ -97,7 +80,7 @@
             $('#Content_Show').html(data);
             var window = $('#Window_Details').data('tWindow');
             window.center().open();
-            
+
         });
     }
 
@@ -192,4 +175,4 @@
 
 
 
-   </script>
+</script>
