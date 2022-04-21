@@ -3,51 +3,58 @@
 
 @model List<ActivityEventModel>
 
-<div >
-@(Html.Telerik().Grid(Model)
-        .Name("Grid_Activities")
-        .HtmlAttributes(new { style = "width:500px" })
-        .DataKeys(keys =>
-        {
-            keys.Add(r => r.Id);
-        })
-        .Columns(columns =>
-        {
-            columns.Bound(r => r.Index).Hidden().HtmlAttributes(new { name = "scheduleIndex" });
-            columns.Bound(r => r.Name).Width(100);
-           // columns.Bound(r => r.Description).Width(100);
-            columns.Template(
-                         @<text>
-                                <div id="checkboxesUserSelect">
-                                    @Html.CheckBox("selected_activity_" + item.Id,item.IsSelected, new { id = @item.Id, index=@item.Index, OnChange = "changeActivitySelection(this)" })
-                                </div>
-                         </text>
-                        ).Title("Select")
-                        .Width(40)
-                        .ClientTemplate(
-                            @Html.CheckBox("<#= UserId #>", new { id = "UserId", OnChange = "changeUserSelection(this)" }).ToHtmlString()
-                        ).Width(30);
-        })
-                                                 .ClientEvents(clientEvents => clientEvents
-                                                  .OnDataBound("onDataBound")
-                                                )
-                                                                                        .Filterable()
-                                                                                        .Sortable(sortable => sortable
-                                                                                            .OrderBy(orderby => orderby
-                                                                                                .Add(r => r.Id).Descending()))
-        //.Scrollable()
-                                                                                )
-<br />
+@section scripts
+{
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+}
+
+<div>
+    <br />
+    <table id="activitiesTable" class="display" width="100%">
+        <thead>
+            <tr>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Description
+                </th>
+                <th>
+                    Action
+                </th>
+                <th style="display: none;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Description</td>
+                    <td>
+                        <div id="checkboxesUserSelect">
+                            @Html.CheckBox("selected_activity_" + item.Id, item.IsSelected, new { id = @item.Id, index = @item.Index, OnChange = "changeActivitySelection(this)" })
+                        </div>
+                    </td>
+                    <td style="display: none;" name="scheduleIndex">@item.Index</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <br />
     <div class="bx-rpm-submit bx-rpm-buttons">
-            <button class="bx-button action" name="AddUsersToSchedule" onclick="addSelectedActivities()">Add activities to schedule</button>
+        <button class="bx-button action" name="AddUsersToSchedule" onclick="addSelectedActivities()">Add activities to schedule</button>
     </div>
 </div>
 <script type="text/javascript">
 
-    function onDataBound() {
-        resetAllTelerikIconTitles();
-        addTooltips();
-    }
+    $(document).ready(function () {
+
+        $('#activitiesTable').dataTable({
+            "paging": false
+        });
+    });
 
     function addSelectedActivities() {
 
