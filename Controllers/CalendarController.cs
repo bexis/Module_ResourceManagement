@@ -78,6 +78,34 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return Json(scheduleObjectList.ToArray(), JsonRequestBehavior.AllowGet);
         }
 
+
+        // Get all schedules filtered by date and optional by user
+        [WebMethod]
+        public JsonResult GetAllSchedulesStory(string st, string ed, bool byUser = false)
+        {
+
+            List<Schedule> scheduleList = new List<Rbm.Entities.Booking.Schedule>();
+            scheduleList = GetAllScheduleFiltered(byUser);
+
+            List<CalendarItemsStoryModel> scheduleObjectList = new List<CalendarItemsStoryModel>();
+            foreach (Schedule s in scheduleList)
+            {
+                using (IUnitOfWork uow = this.GetUnitOfWork())
+                {
+                    if (s.Resource == null) break;
+
+                    var duration = uow.GetReadOnlyRepository<TimeDuration>().Get(s.Resource.Duration.Id);
+
+                    if (duration == null) break;
+                    var timeUnit = duration.TimeUnit;
+
+                    scheduleObjectList.Add(new CalendarItemsStoryModel(s.Resource.Name, s.Resource.Color, timeUnit, s.StartDate, s.EndDate, s.BookingEvent.Id, s.Resource.Quantity, s.Quantity, s.ByPerson.Person.DisplayName));
+                }
+            }
+
+            return Json(scheduleObjectList.ToArray(), JsonRequestBehavior.AllowGet);
+        }
+
         #endregion
 
         #region List view

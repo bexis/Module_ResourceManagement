@@ -128,8 +128,46 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         }
     }
 
+    public class CalendarItemsStoryModel
+    {
+        public long eventId { get; set; }
+        public string title { get; set; }
+        public string start { get; set; }
+        public string end { get; set; }
+        public string color { get; set; }
+        public bool allDay { get; set; }
 
-    public class CalendarItemsModel
+
+        public CalendarItemsStoryModel(string resourceName, string resourceColor, SystemDefinedUnit timeUnit, DateTime startDate, DateTime endDate, long eId, long rQuantity, long sQuantity, string byPerson)
+        {
+            eventId = eId;
+            if (rQuantity > 0)
+            {
+                title = resourceName + " (" + sQuantity + "/" + rQuantity + ")";
+            }
+            else
+            {
+                title = resourceName;
+            }
+
+            title = title + " (" + byPerson + ")";
+
+            color = resourceColor;
+            start = startDate.ToString("yyyy-MM-dd");
+            end = endDate.ToString("yyyy-MM-dd");
+
+
+            if (timeUnit == SystemDefinedUnit.day || timeUnit == SystemDefinedUnit.week || timeUnit == SystemDefinedUnit.year)
+                allDay = true;
+            else
+                allDay = false;
+
+        }
+    }
+
+
+
+        public class CalendarItemsModel
     {
         public long eventId { get; set; }
         public string title { get; set; }
