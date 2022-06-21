@@ -16,6 +16,7 @@ else
     <div id="history_no" class="btn btn-default history_list">Show with history</div>
 }
 
+<br />
 
 <table id="resources_table" class="display contenttable" data-date-column-start="6" data-date-column-end="7" style="width:100%">
     <thead>
@@ -138,11 +139,14 @@ else
 
         var oTable = $("#resources_table").DataTable({
             "autoWidth": false,
+            dom: 'Bfrtip',
             ordering: true,
             order: [[6, "asc"]], // order by startDate
             paging: false,
             responsive: true,
-
+            buttons: [
+                'csv'
+            ],
             columnDefs: [
                 {
                     targets: 1,

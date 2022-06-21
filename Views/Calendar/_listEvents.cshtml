@@ -163,10 +163,14 @@ jQuery.fn.dataTable.render.ellipsis = function ( cutoff, wordbreak, escapeHtml )
 
         var bookingTable = $("#booking_table").DataTable({
             "autoWidth": false,
+            dom: 'Bfrtip',
             ordering: true,
             order: [[2, "asc"]], // order by startDate
             paging: false,
             responsive: true,
+            buttons: [
+                'csv'
+            ],
             "columns": [
                 { "width": "30%" },
                 { "width": "40%" },
