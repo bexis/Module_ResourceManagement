@@ -146,9 +146,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         ModelState.AddModelError("Errors", "Parent resource structure can not be themselves.");
                     }
                 }
-
-
-
                 if (ModelState.IsValid)
                 {
                     rs.Name = model.Name;

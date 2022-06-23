@@ -30,7 +30,32 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult Notification()
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Notification Manager", this.Session.GetTenant());
-            return View("NotificationManager");
+            List<NotificationModel> model = new List<NotificationModel>();
+
+            using (var nManager = new NotificationManager())
+            using (var permissionManager = new EntityPermissionManager())
+            using (var entityTypeManager = new EntityManager())
+            {
+                List<Notification> data = nManager.GetAllNotifications().ToList();
+
+                //get id from loged in user
+                long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+                //get entity type id
+                long entityTypeId = entityTypeManager.FindByName("Notification").Id;
+
+                foreach (Notification n in data)
+                {
+                    NotificationModel temp = new NotificationModel(n);
+
+                    //get permission from logged in user
+                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, n.Id, RightType.Write);
+                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, n.Id, RightType.Delete);
+
+                    model.Add(temp);
+                }
+            }
+
+                return View("NotificationManager", model);
         }
 
         public ActionResult CreateNotification()

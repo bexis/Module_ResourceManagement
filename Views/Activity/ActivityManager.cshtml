@@ -115,18 +115,15 @@
             var window = $('#Window_Creation').data('tWindow');
             window.center().open();
         });
-
     }
   
     function Window_Creation_OnClose() {
-
         $('#Content_Creation').empty();
     }
 
     function Window_Details_OnClose() {
         $('#Content_Creation').empty();
     }
-
 
     function OnClickEdit(id) {
 
@@ -149,6 +146,7 @@
 
     function OnClickDelete(id) {
         $.get('@Url.Action("Delete", "Activity", new RouteValueDictionary { { "area", "RBM" } })', { id: id }, function (data) {
+           
         });
     }
 
@@ -161,6 +159,8 @@
     function activityEdit_onSuccess(data) {
         if (data.success) {
             $('#Window_Edit').data('tWindow').close();
+            window.location.reload();
+
         }
     }
 

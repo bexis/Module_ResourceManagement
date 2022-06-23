@@ -242,7 +242,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                     //End -> add security ------------------------------------------
 
-                    return View("ResourceManager");
+                    return RedirectToAction("Resource");
                 }
                 else
                     return View("EditResource", model);
