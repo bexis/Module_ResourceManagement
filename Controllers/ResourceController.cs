@@ -40,7 +40,30 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult Resource()
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Manage Resources", this.Session.GetTenant());
-            return View("ResourceManager");
+            List<ResourceManagerModel> model = new List<ResourceManagerModel>();
+            using (var rManager = new ResourceManager())
+            using (var permissionManager = new EntityPermissionManager())
+            using (var entityTypeManager = new EntityManager())
+            {
+                IQueryable<SingleResource> data = rManager.GetAllResources();
+
+                long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+                Entity entity = entityTypeManager.FindByName("SingleResource");
+
+                foreach (SingleResource r in data)
+                {
+                    ResourceManagerModel temp = new ResourceManagerModel(r);
+                    temp.InUse = rManager.IsResourceInSet(r.Id);
+
+                    //get permission from logged in user
+                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity.Id }, r.Id, RightType.Write);
+                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity.Id }, r.Id, RightType.Delete);
+
+                    model.Add(temp);
+                }
+            }
+            
+            return View("ResourceManager", model);
         }
 
         #region Create and Save Resource
@@ -759,42 +782,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 temp.AddRange(GetAllAttributes(rs.Parent));
 
             return temp;
-        }
-
-        #endregion
-
-        #region Resource Manager
-
-        [GridAction]
-        public ActionResult Resource_Select()
-        {
-            using (var rManager = new ResourceManager())
-            using (var permissionManager = new EntityPermissionManager())
-            using (var entityTypeManager = new EntityManager())
-            {
-                IQueryable<SingleResource> data = rManager.GetAllResources();
-                List<ResourceManagerModel> resources = new List<ResourceManagerModel>();
-
-                long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
-                Entity entity = entityTypeManager.FindByName("SingleResource");
-
-                foreach (SingleResource r in data)
-                {
-                    ResourceManagerModel temp = new ResourceManagerModel(r);
-                    temp.InUse = rManager.IsResourceInSet(r.Id);
-
-                    //get permission from logged in user
-                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity.Id}, r.Id, RightType.Write);
-                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity.Id }, r.Id, RightType.Delete);
-
-                    resources.Add(temp);
-                }
-
-                //ResourceManagerModel temp = new ResourceManagerModel();
-                //data.ToList().ForEach(r => resources.Add(temp.Convert(r)));
-
-                return View("ResourceManager", new GridModel<ResourceManagerModel> { Data = resources });
-            }
         }
 
         #endregion

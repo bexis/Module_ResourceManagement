@@ -22,12 +22,39 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult Activity()
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Manage Activities", Session.GetTenant());
-            return View("ActivityManager");
+            List<ActivityModel> model = new List<ActivityModel>();
+
+            using (var rManager = new ActivityManager())
+            using (var permissionManager = new EntityPermissionManager())
+            using (var entityTypeManager = new EntityManager())
+            {
+                List<Activity> data = rManager.GetAllActivities().ToList();
+
+                // get id from loged in user
+                long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+
+                // get entity type id
+                long entityTypeId = entityTypeManager.FindByName("Activity").Id;
+
+                foreach (Activity a in data)
+                {
+                    ActivityModel temp = new ActivityModel(a);
+                    // temp.InUse = rManager.IsInEvent(a.Id);
+
+                    // get permission from logged in user
+                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long> { entityTypeId }, a.Id, RightType.Read);
+                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long> { entityTypeId }, a.Id, RightType.Delete);
+
+                    model.Add(temp);
+                }
+            }
+                return View("ActivityManager", model);
         }
 
         public ActionResult CreateActivity()
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Create Activity", Session.GetTenant());
+
             return PartialView("_createActivity", new ActivityModel());
         }
 
@@ -136,40 +163,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
             }
 
             return View("ActivityManager");
-        }
-
-        [GridAction]
-        public ActionResult Activity_Select()
-        {
-            using (var rManager = new ActivityManager())
-            using (var permissionManager = new EntityPermissionManager())
-            using (var entityTypeManager = new EntityManager())
-            {
-                List<Activity> data = rManager.GetAllActivities().ToList();
-                List<ActivityModel> activities = new List<ActivityModel>();
-
-                // get id from loged in user
-                long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
-
-                // get entity type id
-                long entityTypeId = entityTypeManager.FindByName("Activity").Id;
-
-                foreach (Activity a in data)
-                {
-                    ActivityModel temp = new ActivityModel(a);
-                    // temp.InUse = rManager.IsInEvent(a.Id);
-
-                    // get permission from logged in user
-                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long> { entityTypeId }, a.Id, RightType.Read);
-                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long> { entityTypeId }, a.Id, RightType.Delete);
-
-                    activities.Add(temp);
-                }
-
-                // data.ToList().ForEach(r => activities.Add(new ActivityModel(r)));
-
-                return View("ActivityManager", new GridModel<ActivityModel> { Data = activities });
-            }
         }
     }
 }

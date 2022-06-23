@@ -29,7 +29,32 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult ResourceStructure()
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Manage Resource Structures", this.Session.GetTenant());
-            return View("ResourceStructureManager");
+            List<ResourceStructureManagerModel> model = new List<ResourceStructureManagerModel>();
+
+            using (var rsManager = new ResourceStructureManager())
+            using (var permissionManager = new EntityPermissionManager())
+            using (var entityTypeManager = new EntityManager())
+            {
+                IQueryable<ResourceStructure> data = rsManager.GetAllResourceStructures();
+
+                //get id from loged in user
+                long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+                //get entity type id
+                long entityTypeId = entityTypeManager.FindByName("ResourceStructure").Id;
+
+                foreach (ResourceStructure rs in data)
+                {
+                    ResourceStructureManagerModel temp = new ResourceStructureManagerModel(rs);
+                    temp.InUse = rsManager.IsResourceStructureInUse(rs.Id);
+
+                    //get permission from logged in user
+                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, rs.Id, RightType.Write);
+                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, rs.Id, RightType.Delete);
+
+                    model.Add(temp);
+                }
+            }
+                return View("ResourceStructureManager", model);
         }
 
         public ActionResult Create()
@@ -203,40 +228,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
             return RedirectToAction("ResourceStructure", "ResourceStructure");
         }
 
-        [GridAction]
-        public ActionResult ResourceStructure_Select()
-        {
-            using (var rsManager = new ResourceStructureManager())
-            using (var permissionManager = new EntityPermissionManager())
-            using (var entityTypeManager = new EntityManager())
-            {
-                IQueryable<ResourceStructure> data = rsManager.GetAllResourceStructures();
-
-                //List<ResourceStructureModel> resourceStructures = new List<ResourceStructureModel>();
-                List<ResourceStructureManagerModel> resourceStructures = new List<ResourceStructureManagerModel>();
-
-                //get id from loged in user
-                long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
-                //get entity type id
-                long entityTypeId = entityTypeManager.FindByName("ResourceStructure").Id;
-
-                foreach (ResourceStructure rs in data)
-                {
-                    ResourceStructureManagerModel temp = new ResourceStructureManagerModel(rs);
-                    temp.InUse = rsManager.IsResourceStructureInUse(rs.Id);
-
-                    //get permission from logged in user
-                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, rs.Id, RightType.Write);
-                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, rs.Id, RightType.Delete);
-
-                    resourceStructures.Add(temp);
-                }
-
-
-                return View("ResourceStructureManager", new GridModel<ResourceStructureManagerModel> { Data = resourceStructures });
-            }
-        }
-
         public ActionResult ChooseParentResourceStructure(long id)
         {
             List<ResourceStructureParentChoosingModel> model = new List<ResourceStructureParentChoosingModel>();
@@ -320,7 +311,34 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult ResourceStructureAttribute()
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Manage Resource Structure Attributes", this.Session.GetTenant());
-            return View("ResourceStructureAttributeManager");
+            List<ResourceStructureAttributeModel> model = new List<ResourceStructureAttributeModel>();
+
+            using (var rsManager = new ResourceStructureManager())
+            using (var rsaManager = new ResourceStructureAttributeManager())
+            using (var permissionManager = new EntityPermissionManager())
+            using (var entityTypeManager = new EntityManager())
+            {
+                IQueryable<ResourceStructureAttribute> rsaList = rsaManager.GetAllResourceStructureAttributes();
+
+                foreach (ResourceStructureAttribute a in rsaList)
+                {
+                    ResourceStructureAttributeModel rsaModel = new ResourceStructureAttributeModel(a);
+                    if (rsaManager.IsAttributeInUse(a.Id))
+                        rsaModel.InUse = true;
+
+                    //get id from loged in user
+                    long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
+                    //get entity type id
+                    long entityTypeId = entityTypeManager.FindByName("ResourceStructureAttribute").Id;
+
+                    //get permission from logged in user
+                    rsaModel.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, a.Id, RightType.Write);
+                    rsaModel.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, a.Id, RightType.Delete);
+                    model.Add(rsaModel);
+                }
+            }
+
+                return View("ResourceStructureAttributeManager", model);
         }
 
         //create with usage to resource structure
@@ -544,37 +562,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     list.Add(rsaModel);
                 }
                 return View("_chooseResourceStructureAttributes", new GridModel<ResourceStructureAttributeModel> { Data = list });
-            }
-        }
-
-        [GridAction]
-        public ActionResult ResourceStructureAttributesAllManager_Select()
-        {
-            using (var rsManager = new ResourceStructureManager())
-            using (var rsaManager = new ResourceStructureAttributeManager())
-            using (var permissionManager = new EntityPermissionManager())
-            using (var entityTypeManager = new EntityManager())
-            {
-                IQueryable<ResourceStructureAttribute> rsaList = rsaManager.GetAllResourceStructureAttributes();
-                List<ResourceStructureAttributeModel> list = new List<ResourceStructureAttributeModel>();
-
-                foreach (ResourceStructureAttribute a in rsaList)
-                {
-                    ResourceStructureAttributeModel rsaModel = new ResourceStructureAttributeModel(a);
-                    if (rsaManager.IsAttributeInUse(a.Id))
-                        rsaModel.InUse = true;
-
-                    //get id from loged in user
-                    long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
-                    //get entity type id
-                    long entityTypeId = entityTypeManager.FindByName("ResourceStructureAttribute").Id;
-
-                    //get permission from logged in user
-                    rsaModel.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, a.Id, RightType.Write);
-                    rsaModel.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, a.Id, RightType.Delete);
-                    list.Add(rsaModel);
-                }
-                return View("ResourceStructureAttributeManager", new GridModel<ResourceStructureAttributeModel> { Data = list });
             }
         }
 
