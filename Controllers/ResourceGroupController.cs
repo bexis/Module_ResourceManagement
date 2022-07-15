@@ -20,7 +20,16 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult ResourceGroup()
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Manage Resource Group", this.Session.GetTenant());
-            return View("ResourceGroupManager");
+            List<ResourceGroupManagerModel> model = new List<ResourceGroupManagerModel>();
+
+            using (ResourceManager rManager = new ResourceManager())
+            {
+                IQueryable<ResourceGroup> data = rManager.GetAllResourceGroups();
+                ResourceGroupManagerModel temp = new ResourceGroupManagerModel();
+                data.ToList().ForEach(r => model.Add(new ResourceGroupManagerModel(r)));
+
+            }
+            return View("ResourceGroupManager",model);
         }
 
         public ActionResult Create()
@@ -164,35 +173,20 @@ namespace BExIS.Modules.RBM.UI.Controllers
             
         }
 
-        [GridAction]
-        public ActionResult ResourceGroup_Select()
-        {
-            using (ResourceManager rManager = new ResourceManager())
-            {
-                IQueryable<ResourceGroup> data = rManager.GetAllResourceGroups();
-                List<ResourceGroupManagerModel> model = new List<ResourceGroupManagerModel>();
+        //[GridAction]
+        //public ActionResult Resource_Select()
+        //{
+        //   using( ResourceManager rManager = new ResourceManager()){
+        //        //Resource rsss = resourceManager.GetResourceById(1);
+        //        IQueryable<SingleResource> data = rManager.GetAllResources();
 
-                ResourceGroupManagerModel temp = new ResourceGroupManagerModel();
-                data.ToList().ForEach(r => model.Add(new ResourceGroupManagerModel(r)));
+        //        List<ResourceManagerModel> resources = new List<ResourceManagerModel>();
 
-                return View("ResourceManager", new GridModel<ResourceGroupManagerModel> { Data = model });
-            } 
-        }
+        //        data.ToList().ForEach(r => resources.Add(new ResourceManagerModel(r)));
 
-        [GridAction]
-        public ActionResult Resource_Select()
-        {
-           using( ResourceManager rManager = new ResourceManager()){
-                //Resource rsss = resourceManager.GetResourceById(1);
-                IQueryable<SingleResource> data = rManager.GetAllResources();
-
-                List<ResourceManagerModel> resources = new List<ResourceManagerModel>();
-
-                data.ToList().ForEach(r => resources.Add(new ResourceManagerModel(r)));
-
-                return View("ResourceManager", new GridModel<ResourceManagerModel> { Data = resources });
-            } 
-        }
+        //        return View("ResourceManager", new GridModel<ResourceManagerModel> { Data = resources });
+        //    } 
+        //}
 
     }
 }

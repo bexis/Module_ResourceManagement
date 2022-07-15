@@ -3,71 +3,61 @@
 
 @model List<ResourceStructureAttributeModel>
 
-@(Html.Telerik().Grid(Model)
-        .Name("Grid_ResourceStructureAttribute")
-        .HtmlAttributes(new { style = "width:700px" })
-        .DataKeys(keys =>
+
+
+<table id="rsaTable" class="display" width="100%">
+    <thead>
+        <tr>
+            <th>
+                Attribute Id
+            </th>
+
+            <th>
+                Attribute Name
+            </th>
+
+            <th>
+                Attribute Description
+            </th>
+            <th>
+                Select
+            </th>
+            <th>
+                Add
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
         {
-            keys.Add(r => r.AttributeId);
-        })
-        .Columns(columns =>
-        {
+            <tr>
+                <td>@item.AttributeId
+                <p name="rsId" hidden>@item.rsID</p></td>
+                <td>@item.AttributeName</td>
+                <td>@item.AttributeDescription</td>
+                <td>
+                    @Html.CheckBox("<#= AttributeId #>", new { id = "AttributeId" }).ToHtmlString()
+                </td>
+                <td>
+                    @Html.ActionLink(" ", "AddResourceAttributeUsage", "ResourceStructure", new { rsId = "<#= rsID #>", rsaId = "<#= AttributeId #>" }, new { @class = "bx bx-grid-function bx-add" }).ToHtmlString()
 
-            columns.Bound(r => r.rsID).HtmlAttributes(new { name = "rsId" }).Hidden();
-            columns.Bound(r => r.AttributeId).Width(50);
-            columns.Bound(r => r.AttributeName).Width(100);
-            columns.Bound(r => r.AttributeDescription).Width(200);
-            columns.Template(
-                         @<text>
-                                <div id="checkboxes">
-                                    @Html.CheckBox("" + item.AttributeId)
-                                </div>
-                         </text>
-                        ).Title(" ")
-                        .Width(80)
-                        .ClientTemplate(
-                            @Html.CheckBox("<#= AttributeId #>", new { id = "AttributeId" }).ToHtmlString()
-                        ).Width(30);
-            columns.Template(
-             @<text>
-                                <div class="fa-plus-circle:before ">
-                                    @Html.ActionLink(" ", "AddResourceAttributeUsages", "ResourceStructure", new { rsId = item.rsID, rsaId = item.AttributeId }, new { @class = "bx bx-grid-function bx-add" })
-                                </div>
-                                <b>@item.rsID</b>
-                                <b>@item.AttributeId</b>
-                         </text>
-            ).Title("Add")
-            .Width(80)
-            .ClientTemplate(
-                @Html.ActionLink(" ", "AddResourceAttributeUsage", "ResourceStructure", new { rsId = "<#= rsID #>", rsaId = "<#= AttributeId #>" }, new { @class = "bx bx-grid-function bx-add" }).ToHtmlString()
-
-            ).Width(50);
-        })
-        .ClientEvents(clientEvents => clientEvents
-            .OnDataBound("onDataBound")
-        )
-                .DataBinding(dataBinding => dataBinding
-                    .Ajax()
-                    .Select("ResourceStructureAttributesAll_Select", "ResourceStructure", (long)ViewData["RSID"])
-                )
-        .Filterable()
-        .Sortable(sortable => sortable
-            .OrderBy(orderby => orderby
-                .Add(r => r.AttributeId).Descending()))
-        //.Scrollable(t => t.Height(250))
-)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 
-    <div class="bx-rpm-submit bx-rpm-buttons">
-        <button name="AddResourcesToSet" class="t-button action" onclick="addSelectedResources()">Add attributes to structure</button>
-    </div>
+<div class="bx-rpm-submit bx-rpm-buttons">
+    <button name="AddResourcesToSet" class="t-button action" onclick="addSelectedResources()">Add attributes to structure</button>
+</div>
 
 <script type="text/javascript">
 
-    function onDataBound() {
-        resetAllTelerikIconTitles();
-        addTooltips();
-    }
+    $(document).ready(function () {
+        $('#rsaTable').DataTable();
+
+    });
 
     function addSelectedResources() {
 
@@ -88,10 +78,6 @@
         var window = $('#Window_Choose').data('tWindow');
         window.close();
         refreshGrid();
-    }
-
-    function refreshGrid() {
-        $(".t-grid .t-refresh").trigger('click');
     }
 
 </script>

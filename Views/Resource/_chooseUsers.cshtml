@@ -3,56 +3,37 @@
 
 @model List<PersonInConstraint>
 
-@{
-    GridPagerStyles pagerStyles = GridPagerStyles.Numeric;
-    pagerStyles |= GridPagerStyles.NextPreviousAndDropDown;
-}
 
-<div>
-    @(Html.Telerik().Grid(Model)
-                .Name("Grid_Users")
-                .HtmlAttributes(new { style = "width:500px" })
-                .DataKeys(keys =>
-                {
-                    keys.Add(r => r.UserId);
-                })
-                .Columns(columns =>
-                {
-                    columns.Bound(r => r.Index).Hidden().HtmlAttributes(new { name = "constraintIndex" });
-        //columns.Bound(r => r.ConstraintType).Hidden().HtmlAttributes(new { name = "constraintType" });
-        columns.Bound(r => r.UserFullName).Width(50);
-                    columns.Template(
-                                @<text>
-                                    <div id="checkboxesUserSelect">
-                                        @Html.CheckBox("selected_userId_" + item.UserId, item.IsSelected, new { id = @item.UserId, OnChange = "changeUserSelection(this)" })
-                                    </div>
-                                </text>
-                                       ).Title(" ")
-                                       .Width(40)
-                                       .ClientTemplate(
-                                           @Html.CheckBox("<#= UserId #>", new { id = "UserId", OnChange = "changeUserSelection(this)" }).ToHtmlString()
-                                       ).Width(30)
-                          .ClientTemplate(
-                              @Html.CheckBox("IsContact").ToHtmlString()
-                          ).Width(30);
+<table id="personTable" class="display" width="100%">
+    <thead>
+        <tr>
+            <th>
+                UserFullName
+            </th>
 
+            <th>
+                Select
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.UserFullName
+                <p name="constraintIndex" hidden>@item.Index</p>
+                </td>
+                
+                <td>
+                    <div id="checkboxesUserSelect">
+                        @Html.CheckBox("selected_userId_" + item.UserId, item.IsSelected, new { id = @item.UserId, OnChange = "changeUserSelection(this)" })
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
-                       })
-                         .ClientEvents(clientEvents => clientEvents
-                         .OnDataBound("onDataBound")
-                                                               )
-                         .Filterable()
-                         .Sortable(sortable => sortable
-                         .OrderBy(orderby => orderby
-                         .Add(r => r.UserId).Descending()))
-                          .Pageable(paging =>
-                                                   paging
-                                                       .Style(pagerStyles)
-                                                       .PageSize(10)
-                                                       .Position(GridPagerPosition.Bottom)
-                                                       )
-                                                                                               //.Scrollable()
-    )
     <br />
     <div class="bx-rpm-submit bx-rpm-buttons">
         <button class="bx-button action" name="AddUsersToSchedule" onclick="AddSelectedUsers()">Add users to constraint</button>
@@ -60,10 +41,10 @@
 </div>
 <script type="text/javascript">
 
-    function onDataBound() {
-        resetAllTelerikIconTitles();
-        addTooltips();
-    }
+    $(document).ready(function () {
+        $('#personTable').DataTable();
+
+    });
 
     function changeUserSelection(e) {
 

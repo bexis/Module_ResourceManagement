@@ -231,10 +231,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
             ViewData["RSID"] = id;
             
 
-            //ResourceStructureManager rsManager = new ResourceStructureManager();
-            //ResourceStructure resourceStructure = rsManager.GetResourceStructureById(id);
-            //ResourceStructureModel model = new ResourceStructureModel(resourceStructure);
-            //model.FillRSM();
             return PartialView("_chooseResourceStructure", model);
         }
 
@@ -251,32 +247,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                 return RedirectToAction("Edit", new { id = resourceStructure.Id });
                 // return View("_editResourceStructure", new ResourceStructureModel(resourceStructure));
-            }
-        }
-
-        [GridAction]
-        public ActionResult ResourceStructureParent_Select(long rsId)
-        {
-            using (ResourceStructureManager rsManager = new ResourceStructureManager())
-            {
-                IQueryable<ResourceStructure> data = rsManager.GetAllResourceStructures();
-
-                //List<ResourceStructureModel> resourceStructures = new List<ResourceStructureModel>();
-                List<ResourceStructureParentChoosingModel> resourceStructures = new List<ResourceStructureParentChoosingModel>();
-
-                foreach (ResourceStructure rs in data)
-                {
-                    if (rs.Id != rsId)
-                    {
-                        ResourceStructureParentChoosingModel temp = new ResourceStructureParentChoosingModel(rs);
-                        temp.Locked = this.CheckParentPossibility(rsId, rs.Id);
-                        temp.RsId = rsId;
-                        temp.ParentId = rs.Id;
-                        resourceStructures.Add(temp);
-                    }
-                }
-
-                return View("_chooseResourceStructure", new GridModel<ResourceStructureParentChoosingModel> { Data = resourceStructures });
             }
         }
 
@@ -539,27 +509,26 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             ViewData["RSID"] = id;
 
-            return PartialView("_chooseResourceStructureAttributes");
-        }
+            List<ResourceStructureParentChoosingModel> model = new List<ResourceStructureParentChoosingModel>();
 
-      
-        [GridAction]
-        public ActionResult ResourceStructureAttributesAll_Select(long id)
-        {
             using (ResourceStructureManager rsManager = new ResourceStructureManager())
-            using (ResourceStructureAttributeManager rsaManager = new ResourceStructureAttributeManager())
             {
-                IQueryable<ResourceStructureAttribute> rsaList = rsaManager.GetAllResourceStructureAttributes();
-                List<ResourceStructureAttributeModel> list = new List<ResourceStructureAttributeModel>();
+                IQueryable<ResourceStructure> data = rsManager.GetAllResourceStructures();
 
-                foreach (ResourceStructureAttribute a in rsaList)
+                foreach (ResourceStructure rs in data)
                 {
-                    ResourceStructureAttributeModel rsaModel = new ResourceStructureAttributeModel(a);
-                    rsaModel.rsID = id;
-                    list.Add(rsaModel);
+                    if (rs.Id != id)
+                    {
+                        ResourceStructureParentChoosingModel temp = new ResourceStructureParentChoosingModel(rs);
+                        temp.Locked = this.CheckParentPossibility(id, rs.Id);
+                        temp.RsId = id;
+                        temp.ParentId = rs.Id;
+                        model.Add(temp);
+                    }
                 }
-                return View("_chooseResourceStructureAttributes", new GridModel<ResourceStructureAttributeModel> { Data = list });
             }
+
+                return PartialView("_chooseResourceStructureAttributes", model);
         }
 
         #endregion
@@ -575,22 +544,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 rsaManager.DeleteResourceAttributeUsage(usage);
 
                 return RedirectToAction("Edit", new { id = rsId });
-            }
-        }
-
-        [GridAction]
-        public ActionResult ResourceStructureUsages_Select(long id)
-        {
-            using (ResourceStructureManager rsm = new ResourceStructureManager())
-            {
-                ResourceStructure resourceStructure = rsm.GetResourceStructureById(id);
-
-                List<ResourceStructureAttributeUsageModel> list = new List<ResourceStructureAttributeUsageModel>();
-                foreach (ResourceAttributeUsage usage in resourceStructure.ResourceAttributeUsages)
-                {
-                    list.Add(new ResourceStructureAttributeUsageModel(usage.Id));
-                }
-                return View("_showResourceStructureAttributes", new GridModel<ResourceStructureAttributeUsageModel> { Data = list });
             }
         }
 

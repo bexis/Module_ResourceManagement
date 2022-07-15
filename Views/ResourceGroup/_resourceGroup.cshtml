@@ -1,54 +1,49 @@
 ﻿@using Telerik.Web.Mvc.UI
 @using BExIS.Web.Shell.Areas.RBM.Models.Resource;
 @using BExIS.Rbm.Entities.Resource;
-
 @model ResourceGroupModel
-<span class="bx-button function" onclick="AddToSet()">AddToSet</span><br /><br />
-@(Html.Telerik().Grid(Model.Resources)
-        .Name("Grid_ResourcesInSet")
-        .DataKeys(keys =>
-        {
-            keys.Add(r => r.Id);
-        })
-       //.ToolBar(command =>
-       //          {
-       //              command.Custom().Name("AddToSet")
-       //                  .Text("Add to Group")
-       //                  .Action("ChooseResourceToGroup", "ResourceGroup", new { id = Model.Id })
 
-       //                  .Ajax(true).ButtonType(GridButtonType.ImageAndText)
-       //                  .ImageHtmlAttributes(new { @class = "t-icon t-add" });
-       //          })
-        .Columns(columns =>
-        {
+<span class="bx-button function" onclick="AddToSet()">AddToSet</span>
+<br />
+<br />
+<table id="resourceTable" class="display" width="100%">
+    <thead>
+        <tr>
+            <th>
+                Id
+            </th>
+
+            <th>
+                Name
+            </th>
+            <th>
+                ResourceStructureName
+            </th>
+            <th>
+                Description
+            </th>
            
-            columns.Bound(r => r.Id).Width(40);
-            columns.Bound(r => r.Name).Width(100);
-            columns.Bound(r => r.ResourceStructureName).Width(100);
-            columns.Bound(r => r.Description).Width(200);
-            columns.Template(
-                        @<text>
-                                
-                                     @Html.ActionLink(" ", "RemoveResourceFromGroup", "ResourceGroup", new { setId = Model.Id, resourceId = item.Id }, new { @class = "bx bx-grid-function bx-trash", onclick = "return confirm('Are you sure you want to delete the Resource from this group" + "?')" })
-                               
-                        </text>
-                        ).Title(" ")
-                        .Width(50)
-                        .ClientTemplate(
-                            @Html.ActionLink(" ", "RemoveResourceFromGroup", "ResourceGroup", new { Id = "<#= Id #>" }, new { @class = "bx bx-grid-function bx-trash", onclick = "return confirm('Are you sure you want to delete the Resource from this group" + "?')" }).ToHtmlString()
-                        );
+            <th>
+                Actions
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Resources)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Name</td>
+                <td>@item.ResourceStructureName</td>
+                <td>@item.Description</td>
+                <td>
+                    @Html.ActionLink(" ", "RemoveResourceFromGroup", "ResourceGroup", new { setId = Model.Id, resourceId = item.Id }, new { @class = "bx bx-grid-function bx-trash", onclick = "return confirm('Are you sure you want to delete the Resource from this group" + "?')" })
 
-        })
-                                                                                             .ClientEvents(clientEvents => clientEvents
-                                                                                             .OnDataBound("onDataBound")
-                                                                                          )
-
-                                                 .Filterable()
-                                                 .Sortable(sortable => sortable
-                                                     .OrderBy(orderby => orderby
-                                                         .Add(r => r.Id).Descending()))
-                                                 .Scrollable()
-                                         )
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @(Html.Telerik().Window()
     .Name("Window_Creation")
@@ -70,11 +65,10 @@
 
 <script type="text/javascript">
 
-    function onDataBound() {
-        resetAllTelerikIconTitles();
-        addTooltips();
-    }
+    $(document).ready(function () {
+        $('#resourceTable').DataTable();
 
+    });
 
     function AddToSet() {
 
@@ -88,30 +82,4 @@
             window.center().open();
         });
     }
-
-    @*function OnCommand(e) {
-
-        if (e.name == "AddToSet") {
-
-            var id = '@Model.Id';
-
-            $.get('@Url.Action("ChooseResourceToGroup", "ResourceGroup", new RouteValueDictionary { { "area", "RBM" } })', {id:id}, function (data) {
-
-                $('#Content_Creation').html(data);
-
-                var window = $('#Window_Creation').data('tWindow');
-                window.center().open();
-            });
-        }
-    }*@
-
-    function Window_Creation_OnClose() {
-        refreshGrid();
-    }
-
-    function refreshGrid() {
-        $(".t-grid .t-refresh").trigger('click');
-    }
-
-
 </script> 

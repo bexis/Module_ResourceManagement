@@ -1,34 +1,40 @@
-﻿@using Telerik.Web.Mvc.UI
-@using BExIS.Web.Shell.Areas.RBM.Models.Resource;
+﻿@using BExIS.Web.Shell.Areas.RBM.Models.Resource;
 
 @model List<ResourceGroupManagerModel>
 
-@(Html.Telerik().Grid(Model)
-        .Name("Grid_ResourceGroups")
-        .DataKeys(keys =>
+<table id="resourceGroupTable" class="display" width="100%">
+    <thead>
+        <tr>
+            <th>
+                Select
+            </th>
+            <th>
+                Id
+            </th>
+            <th>
+                Name
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
         {
-            keys.Add(r => r.Id);
-        })
-       
-        .Columns(columns =>
-        {
-            columns.Template(
-                        @<text>
-                                <div class="t-button t-button-icontext t-button-bare">
-                                    <div id="chooseResourceGroup" class="t-icon t-add" onclick="ChooseResource(@item.Id, '@item.Name')"></div>
-                                </div>
-                        </text>
-                        ).Title("Choose Resource Group")
-                        .Width(50);
-                        
-            columns.Bound(r => r.Id).Width(50);
-            columns.Bound(r => r.Name).Width(100);       
-            
-        })
-                    .Filterable()
-                    .Sortable(sortable => sortable
-                        .OrderBy(orderby => orderby
-                            .Add(r => r.Id).Descending()))
-                    .Scrollable()
-                    
-                                  )
+            <tr>
+                <td>
+                    <div class="t-button t-button-icontext t-button-bare">
+                        <div id="chooseResourceGroup" class="t-icon t-add" onclick="ChooseResource(@item.Id, '@item.Name')"></div>
+                    </div>
+                </td>
+                <td>@item.Id</td>
+                <td>@item.Name</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function () {
+        $('#resourceGroupTable').DataTable();
+
+    });
+</script>
