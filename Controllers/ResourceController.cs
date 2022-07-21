@@ -31,6 +31,7 @@ using BExIS.Modules.RBM.UI.Helper;
 using BExIS.Security.Services.Objects;
 using BExIS.Dlm.Services.Party;
 using BExIS.Dlm.Entities.Party;
+using BExIS.Rbm.Services.Booking;
 
 namespace BExIS.Modules.RBM.UI.Controllers
 {
@@ -44,6 +45,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
             using (var rManager = new ResourceManager())
             using (var permissionManager = new EntityPermissionManager())
             using (var entityTypeManager = new EntityManager())
+            using (var scheduleManager = new ScheduleManager())
             {
                 IQueryable<SingleResource> data = rManager.GetAllResources();
 
@@ -53,7 +55,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 foreach (SingleResource r in data)
                 {
                     ResourceManagerModel temp = new ResourceManagerModel(r);
-                    temp.InUse = rManager.IsResourceInSet(r.Id);
+
+                    //use "inUse" not longer for check if resource is in set. use is to check if resource is booked
+                    //temp.InUse = rManager.IsResourceInSet(r.Id);
+
+                    temp.InUse = scheduleManager.IsResourceBooked(r.Id);
+
 
                     //get permission from logged in user
                     temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity.Id }, r.Id, RightType.Write);

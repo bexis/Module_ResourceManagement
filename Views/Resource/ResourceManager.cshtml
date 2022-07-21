@@ -54,14 +54,14 @@
                           @if (item.InUse)
                           {
                               <span class="bx bx-grid-function bx-show" onclick="OnClickShowDetails('' + @item.Id + '')"></span>
-                              <div class="bx bx-grid-function bx-edit bx-disabled" disabled="disabled" title='Edit Resource "@item.Name"'></div>
+                              <div class="bx bx-grid-function bx-edit" onclick="OnClickEdit('' + @item.Id + '')" title='Edit Resource "@item.Name"'></div>
                               <div class="bx bx-grid-function bx-trash bx-disabled" disabled="disabled" title='Delete Resource "@item.Name"'></div>
                           }
                           else
                           {
                               <span class="bx bx-grid-function bx-show" onclick="OnClickShowDetails('' + @item.Id + '')"></span>
                               <div class="bx bx-grid-function bx-edit" onclick="OnClickEdit('' + @item.Id + '')" title='Edit Resource "@item.Name"'></div>
-                              <div class="bx bx-grid-function bx-trash bx-disabled" disabled="disabled" title='Delete Resource "@item.Name"'></div>
+                              <div class="bx bx-grid-function bx-trash" title='Delete Resource "@item.Name"' onclick="OnClickDelete('' + @item.Id + '')"></div>
 
                           }
                       </td>

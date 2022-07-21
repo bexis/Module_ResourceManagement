@@ -192,6 +192,12 @@ namespace BExIS.Rbm.Services.Booking
             return ScheduleRepo.Query(a => (eventIds.Contains(a.BookingEvent.Id)) && ((startDate.Date >= a.StartDate.Date && startDate.Date <= a.EndDate.Date) || (endDate.Date >= a.StartDate.Date && endDate.Date <= a.EndDate.Date))).ToList();
         }
 
+        public bool IsResourceBooked(long id)
+        {
+            var count = ScheduleRepo.Query(a=>a.Resource.Id == id).ToList().Count();
+            return count > 0;
+        }
+
         #endregion
     }
 }
