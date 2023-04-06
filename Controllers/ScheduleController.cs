@@ -1552,11 +1552,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                 //remove resource schedule from cart, too
                 List<ResourceCart> cartModel = (List<ResourceCart>)Session["ResourceCart"];
-                var inCart = cartModel.Where(a => a.Index == Convert.ToInt32(index)).Count() == 1;
-                if (inCart)
+                if (cartModel != null)
                 {
-                    cartModel.RemoveAt(i);
-                    Session["ResourceCart"] = cartModel;
+                    var inCart = cartModel.Where(a => a.Index == Convert.ToInt32(index)).Count() == 1;
+                    if (inCart)
+                    {
+                        cartModel.RemoveAt(i);
+                        Session["ResourceCart"] = cartModel;
+                    }
                 }
 
                 if (model.Schedules[i].ScheduleId != 0)
