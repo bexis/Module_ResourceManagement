@@ -613,6 +613,19 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         sError = true;
                     }
 
+                    //check mobile number
+                    var contactPerson = s.ForPersons.Where(a => a.IsContactPerson).FirstOrDefault();
+                    if (contactPerson != null)
+                    {
+                        if(String.IsNullOrEmpty(contactPerson.MobileNumber))
+                        {
+                            ModelState.AddModelError("MobileNumberMissing_" + s.Index, "Mobile number for contact person is missing. Please add the number to your BExIS account and try again.");
+                            isError = true;
+                            sError = true;
+                        }
+                    }
+                   
+
                     //check achtivities
                     if (s.WithActivity)
                     {
@@ -1128,7 +1141,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     a.Index = int.Parse(index);
 
                 });
+                
                 return PartialView("_scheduleUsers", tempSchedule.ForPersons);
+
             }
             else
                 return new EmptyResult();
