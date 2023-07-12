@@ -365,7 +365,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         #region Create/Edit Event
         public ActionResult Create()
         {
-            ViewBag.Title = PresentationModel.GetViewTitleForTenant("BExIS - Book Resources I", this.Session.GetTenant());
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Book Resources I", this.Session.GetTenant());
             Session["ResourceCart"] = null;
             Session["Event"] = null;
             Session["FilterResults"] = null;
@@ -377,7 +377,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult CreateEvent()
         {
-            ViewBag.Title = PresentationModel.GetViewTitleForTenant("BExIS - Book Resources II", this.Session.GetTenant());
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Book Resources II", this.Session.GetTenant());
             using (var partyManager = new PartyManager())
             using (var rManager = new ResourceManager())
             using (UserManager userManager = new UserManager())
@@ -1071,7 +1071,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult Edit(long id)
         {
-            ViewBag.Title = PresentationModel.GetViewTitleForTenant("BExIS - Edit Resources", this.Session.GetTenant());
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Edit Resources", this.Session.GetTenant());
             return View("EditEvent", id);
         }
 
@@ -2007,7 +2007,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
         //
         public ActionResult Show(long id)
         {
-            ViewBag.Title = PresentationModel.GetViewTitleForTenant("BExIS - Show reservation", this.Session.GetTenant());
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Show reservation", this.Session.GetTenant());
 
             Session["ScheduleUsers"] = null;
             //Session["ScheduleActivities"] = null;
