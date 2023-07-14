@@ -1546,6 +1546,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         tempSchedule.Activities.ForEach(r => copyListActivities.Add(new ActivityEventModel(r, s.Index)));
                         s.Activities = copyListActivities;
                     }
+
+                    if(s.ResourceHasFiles)
+                    {
+                        if(s.Files.FirstOrDefault().Name == tempSchedule.Files.FirstOrDefault().Name)
+                        {
+                            s.FileConfirmation = true;
+                        }
+                    }
                     
                     s.ScheduleQuantity = tempSchedule.ScheduleQuantity;
                     s.ScheduleDurationModel = new ScheduleDurationModel(tempSchedule.ScheduleDurationModel, s.Index); ;
