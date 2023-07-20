@@ -1141,7 +1141,35 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     a.Index = int.Parse(index);
 
                 });
-                
+
+                using (var userManager = new UserManager())
+                {
+                    User user = userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
+
+                    //get event admin groups: format= "groupname:resource structure attribute value"
+                    string[] eventAdminGroups = Helper.Settings.get("EventAdminGroups").ToString().Split(',');
+                    Dictionary<string, string> adminGroupsDictionary = new Dictionary<string, string>();
+                    if (eventAdminGroups != null && eventAdminGroups.Length > 0)
+                    {
+                        foreach (string group in eventAdminGroups)
+                        {
+                            string[] groupPair = group.Split(':');
+                            adminGroupsDictionary.Add(groupPair[0], groupPair[1]);
+                        }
+                    }
+
+                    if (adminGroupsDictionary.Keys.Any(s => user.Groups.Select(a => a.Name).Contains(s)))
+                    {
+                        tempSchedule.ForPersons.ToList().ForEach(a => a.ShowMobileNr = true);
+                    }
+
+                    if (user.FullName == tempSchedule.ByPerson)
+                    {
+                        tempSchedule.ForPersons.ToList().ForEach(a => a.ShowMobileNr = true);
+                    }
+                }
+
+
                 return PartialView("_scheduleUsers", tempSchedule.ForPersons);
 
             }
@@ -1339,6 +1367,33 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             BookingEventModel sEventM = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(scheduleIndex)).FirstOrDefault();
+            using (var userManager = new UserManager())
+            {
+                User user = userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
+
+                //get event admin groups: format= "groupname:resource structure attribute value"
+                string[] eventAdminGroups = Helper.Settings.get("EventAdminGroups").ToString().Split(',');
+                Dictionary<string, string> adminGroupsDictionary = new Dictionary<string, string>();
+                if (eventAdminGroups != null && eventAdminGroups.Length > 0)
+                {
+                    foreach (string group in eventAdminGroups)
+                    {
+                        string[] groupPair = group.Split(':');
+                        adminGroupsDictionary.Add(groupPair[0], groupPair[1]);
+                    }
+                }
+
+                if (adminGroupsDictionary.Keys.Any(s => user.Groups.Select(a => a.Name).Contains(s)))
+                {
+                    tempSchedule.ForPersons.ToList().ForEach(a => a.ShowMobileNr = true);
+                }
+
+                if(user.FullName == tempSchedule.ByPerson)
+                {
+                    tempSchedule.ForPersons.ToList().ForEach(a => a.ShowMobileNr = true);
+                }
+            }
+
 
             return PartialView("_showUsers", tempSchedule.ForPersons);
         }

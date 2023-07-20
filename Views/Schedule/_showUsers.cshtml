@@ -6,11 +6,22 @@
  <ul id="userList">
 @for (int i = 0; i < Model.Count(); i++)
 {
-<li id="@Model[i].UserId" class="fullName" style="font-size:10px;">@Model[i].UserFullName <input type="hidden" name="user" value="@Model[i].UserId"  />
-         @if(Model[i].IsContactPerson)
-         {
-            <b> (Is Contact, Mobil: @Model[i].MobileNumber)</b>
-         }
-    <span id="removeUser" class="bx bx-trash" onclick="RemoveUserFromSchedule(@Model[i].UserId, @Model[i].Index)"></span></li>
+<li id="@Model[i].UserId" class="fullName" style="font-size:10px;">
+    @Model[i].UserFullName <input type="hidden" name="user" value="@Model[i].UserId" />
+@if (Model[i].IsContactPerson)
+{
+    <b> (Is Contact</b>
+    if (Model[i].ShowMobileNr)
+    {
+        <b>, Mobil: @Model[i].MobileNumber)</b>
+    }
+    else
+    {
+        <b>)</b>
+    }
+
+}
+<span id="removeUser" class="bx bx-trash" onclick="RemoveUserFromSchedule(@Model[i].UserId, @Model[i].Index)"></span>
+</li>
 }
 </ul>
