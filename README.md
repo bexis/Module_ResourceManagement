@@ -36,8 +36,8 @@ Resource booking management module: This is a calendar-based tool to manage any 
 ### Settings <a name="settings"></a>
 
 - **BookingMailReceiver:** Mail receiver comma separated.
-- **BookingMailReceiverCC**:** Mail receiver CC comma separated.
-- **BookingMailReceiverBCC**:** Mail receiver BCC comma separated.
+- **BookingMailReceiverCC:** Mail receiver CC comma separated.
+- **BookingMailReceiverBCC:** Mail receiver BCC comma separated.
 - **BookingMailSender:** No in use.
 - **BookingMailSubject:** Subject of the reservation mail.
 - **AlumniGroup:** Name of the alumni group. Members of this group are not displayed when booking.
