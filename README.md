@@ -35,12 +35,12 @@ Resource booking management module: This is a calendar-based tool to manage any 
 
 ### Settings <a name="settings"></a>
 
-BookingMailReceiver: Mail receiver comma separated.
-BookingMailReceiverCC: Mail receiver CC comma separated.
-BookingMailReceiverBCC: Mail receiver BCC comma separated.
-BookingMailSender: No in use.
-BookingMailSubject: Subject of the reservation mail.
-AlumniGroup: Name of the alumni group. Members of this group are not displayed when booking.
-AccountPartyTypes: name of account party type. Is considered for the email address.
-EventAdminGroups: Setting admin group to edit and delete events and schedules, Groupname:resource attribute value. So you are able to give different rights to group depending on the classification with resource attribute value
-OverNightResource: Name of the over night resource. If you have a resource which is bookable over night then for this resource the enddate need to subtract  -1 for the validation. This is needed to make the resource bookable on the next day after the night.
+- **BookingMailReceiver:** Mail receiver comma separated.
+- **BookingMailReceiverCC**:** Mail receiver CC comma separated.
+- **BookingMailReceiverBCC**:** Mail receiver BCC comma separated.
+- **BookingMailSender:** No in use.
+- **BookingMailSubject:** Subject of the reservation mail.
+- **AlumniGroup:** Name of the alumni group. Members of this group are not displayed when booking.
+- **AccountPartyTypes:** name of account party type. Is considered for the email address.
+- **EventAdminGroups:** Setting admin group to edit and delete events and schedules, Groupname:resource attribute value. So you are able to give different rights to group depending on the classification with resource attribute value
+- **OverNightResource:** Name of the over night resource. If you have a resource which is bookable over night then for this resource the enddate need to subtract  -1 for the validation. This is needed to make the resource bookable on the next day after the night.
