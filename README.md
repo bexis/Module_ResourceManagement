@@ -42,5 +42,5 @@ Resource booking management module: This is a calendar-based tool to manage any 
 - **BookingMailSubject:** Subject of the reservation mail.
 - **AlumniGroup:** Name of the alumni group. Members of this group are not displayed when booking.
 - **AccountPartyTypes:** name of account party type. Is considered for the email address.
-- **EventAdminGroups:** Setting admin group to edit and delete events and schedules, Groupname:resource attribute value. So you are able to give different rights to group depending on the classification with resource attribute value
+- **EventAdminGroups:** Setting admin group to edit and delete events and schedules and to see the moble number in all schedules. Groupname:resource attribute value. So you are able to give different rights to group depending on the classification with resource attribute value
 - **OverNightResource:** Name of the over night resource. If you have a resource which is bookable over night then for this resource the enddate need to subtract  -1 for the validation. This is needed to make the resource bookable on the next day after the night.
