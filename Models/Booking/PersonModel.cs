@@ -47,9 +47,11 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         //define if user has edit rights for the schedule
         public bool EditAccess { get; set; }
 
+        public bool ShowMobileNr { get; set; }
+
         public PersonInSchedule()
         {
-
+            ShowMobileNr = false;
         }
 
         public PersonInSchedule(long id, User user, bool isContactPerson)
@@ -60,6 +62,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
             IsSelected = false;
             EditAccess = true;
             EditMode = true;
+            ShowMobileNr = false;
         }
 
         public PersonInSchedule(PersonInSchedule personInSchedule, int newIndex)
