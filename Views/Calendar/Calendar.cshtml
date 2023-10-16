@@ -32,6 +32,7 @@
     <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js" type="text/javascript"></script>
 }
 
+<div id="Spinner" style=""><span class="fa fa-spinner fa-pulse"></span> Fetching Data</div>
 <div class="editor-field">
     <div id="displayView" class="btn-group" data-toggle="buttons">
         <label class="btn btn-default  active">
@@ -43,6 +44,7 @@
     </div>
 
 </div>
+
 <div id="date_filter" style="display: none;">
     <span id="date-label-from" class="date-label">From: </span><input style="margin-right: -0.9em;" class="date_range_filter date" type="text" id="datepicker_from" autocomplete="off" />
     <span id="date-label-to" class="date-label">To: <input style="margin-right: -0.9em;" class="date_range_filter date" type="text" id="datepicker_to" autocomplete="off" />
@@ -55,6 +57,7 @@
     border-width: 2px;
     margin-top: 20px;
 ">
+
     <div id='calendar' style="max-height:800px"></div>
     <div id="eventList"></div>
     <div id="scheduleList"></div>
@@ -114,6 +117,7 @@
     }
 
     function getFunction(type, byUser = false) {
+        $('#Spinner').show();
         return function (start, end, timezone, callback) {
             var o = { st: start, ed: end, byUser: byUser};
 
@@ -125,6 +129,7 @@
                 data: JSON.stringify(o),
                 contentType: 'application/json; charset=utf-8',
                 success: function (doc) {
+
                     var events = [];
                     $.each(doc, function (key, value) {
                         var val = $.parseJSON(value[0]);
@@ -145,7 +150,7 @@
                             eventId: val['eventId']
                         });
                     });
-
+                    $('#Spinner').hide();
                     callback(events);
                     //console.log(events);
                 }
