@@ -15,7 +15,16 @@
                 @Html.DisplayFor(m => m[j].UserFullName)
                 @if (Model[j].IsContactPerson)
                 {
-                    <b> (Is Contact,  Mobil: @Model[j].MobileNumber)</b>
+                    <b> (Is Contact</b>
+                    if (Model[j].ShowMobileNr == true)
+                    {
+                        <b>, Mobil: @Model[j].MobileNumber)</b>
+                    }
+                    else
+                            {
+                                <b>)</b>
+                            }
+
                 }
                 @if (Model[j].EditMode && Model[j].EditAccess)
                 {
@@ -29,17 +38,26 @@
         for (int j = 0; j < 3; j++)
         {
 
-            <li class="fullName" style="font-size:12px;">
-                @Html.DisplayFor(m => m[j].UserFullName)
-                @if (Model[j].IsContactPerson)
-                {
-                    <b> (Is Contact,  Mobil: @Model[j].MobileNumber)</b>
-                }
-                @if (Model[j].EditMode && Model[j].EditAccess)
-                {
-                    <span id="removeUser" class="bx bx-trash" onclick="RemoveUserFromSchedule(@Model[j].UserId, @Model[j].Index)"></span>
-                }
-            </li>
+<li class="fullName" style="font-size:12px;">
+    @Html.DisplayFor(m => m[j].UserFullName)
+    @if (Model[j].IsContactPerson)
+    {
+        <b> (Is Contact</b>
+        if (Model[j].ShowMobileNr == true)
+        {
+            <b>, Mobil: @Model[j].MobileNumber)</b>
+        }
+        else
+        {
+            <b>)</b>
+        }
+
+    }
+    @if (Model[j].EditMode && Model[j].EditAccess)
+    {
+        <span id="removeUser" class="bx bx-trash" onclick="RemoveUserFromSchedule(@Model[j].UserId, @Model[j].Index)"></span>
+    }
+</li>
         }
         <li><a href="#" class="bx bx-link" onclick="ShowAllUsers(@Model[0].Index)">show all</a></li>
     }
