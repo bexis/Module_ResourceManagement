@@ -203,6 +203,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     // Todo: maybe their is a more performant way to get the info for the ContactName
                     var schedule = uow.GetReadOnlyRepository<Schedule>().Get(s.Id);
                     ScheduleEventModel tempSchedule = new ScheduleEventModel(schedule);
+                    string maxQuantity = "";
+                    if (s.Resource.Quantity == 0)
+                        maxQuantity = "no limitation";
+                    else
+                        maxQuantity = s.Resource.Quantity.ToString();
 
                     model.Add(new ScheduleListModel(
                         booking.Id,
@@ -211,7 +216,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         resource.Name,
                         s.StartDate,
                         s.EndDate,
-                        "(" +  s.Quantity + "/" + s.Resource.Quantity + ")",
+                        s.Quantity + "/" + maxQuantity,
                         forperson,
                         s.Activities,
                         tempSchedule.ContactName

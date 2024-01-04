@@ -388,7 +388,7 @@ namespace BExIS.Modules.RBM.UI.Helper
 
                 operationManager.Create("RBM", "Schedule", "*", ResourceBooking);
                 operationManager.Create("RBM", "Calendar", "*", ResourceBooking);
-                operationManager.Create("RBM", " NotificationBlackboard", "*", NotificationBlackboard);
+                operationManager.Create("RBM", "NotificationBlackboard", "*", NotificationBlackboard);
 
 
 
