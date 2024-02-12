@@ -11,6 +11,7 @@ using System.Net.Mail;
 using System.Web;
 using System.Web.Configuration;
 using Vaiona.Utils.Cfg;
+using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Web.Shell.Areas.RBM.Helpers
 {
@@ -42,13 +43,14 @@ namespace BExIS.Web.Shell.Areas.RBM.Helpers
         public static void SendBookingNotification(BookingAction bookingAction, BookingEventModel model)
         {
             //get receiver and sender from the settings file
-            var receiver = Modules.RBM.UI.Helper.Settings.get("BookingMailReceiver").ToString().Split(',').ToList();
-            var receiverCC = Modules.RBM.UI.Helper.Settings.get("BookingMailReceiverCC").ToString().Split(',').ToList();
-            var receiverBCC = Modules.RBM.UI.Helper.Settings.get("BookingMailReceiverBCC").ToString().Split(',').ToList();
+            var settings = ModuleManager.GetModuleSettings("rbm");
+            var receiver = settings.GetValueByKey("BookingMailReceiver").ToString().Split(',').ToList();
+            var receiverCC = settings.GetValueByKey("BookingMailReceiverCC").ToString().Split(',').ToList();
+            var receiverBCC = settings.GetValueByKey("BookingMailReceiverBCC").ToString().Split(',').ToList();
 
-            var sender = Modules.RBM.UI.Helper.Settings.get("BookingMailSender").ToString();
+            //var sender = Modules.RBM.UI.Helper.Settings.get("BookingMailSender").ToString();
 
-            var subject = Modules.RBM.UI.Helper.Settings.get("BookingMailSubject").ToString() + ": " + bookingAction;
+            var subject = settings.GetValueByKey("BookingMailSubject").ToString() + ": " + bookingAction;
 
             string message = "";
             message += "<p>The following booking has been " + bookingAction + "</p>";

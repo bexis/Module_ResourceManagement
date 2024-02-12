@@ -20,6 +20,7 @@ using Vaiona.Web.Extensions;
 using BExIS.Security.Entities.Authorization;
 using BExIS.Modules.RBM.UI.Helper;
 using BExIS.Security.Services.Objects;
+using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.RBM.UI.Controllers
 {
@@ -168,7 +169,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                         //get admin groups: format= "groupname:resource structure attribute value"
                         // give rights to group if fetch to notification
-                        string[] eventAdminGroups = Helper.Settings.get("EventAdminGroups").ToString().Split(',');
+                        var settings = ModuleManager.GetModuleSettings("rbm");
+                        string[] eventAdminGroups = settings.GetValueByKey("EventAdminGroups").ToString().Split(',');
                         Dictionary<string, string> adminGroupsDictionary = new Dictionary<string, string>();
                         if (eventAdminGroups != null && eventAdminGroups.Length > 0)
                         {

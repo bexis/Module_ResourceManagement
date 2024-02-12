@@ -1,0 +1,78 @@
+{
+  "id": "rbm",
+  "name": "Resource Booking",
+  "description": "...",
+  "entries": [
+    {
+      "key": "help",
+      "title": "Help URL",
+      "value": "",
+      "type": "String",
+      "description": "URL to the manual. If empty, it links to the latest manual from BEXIS2"
+    },
+    {
+      "key": "BookingMailReceiver",
+      "title": "Booking Mail Receiver",
+      "value": "",
+      "description": "",
+      "type": "String",
+      "options": []
+    },
+    {
+      "key": "BookingMailReceiverCC",
+      "title": "Booking Mail Receiver CC",
+      "value": "",
+      "description": "",
+      "type": "String",
+      "options": []
+    },
+    {
+      "key": "BookingMailReceiverBCC",
+      "title": "Booking Mail Receiver BCC",
+      "value": "",
+      "description": "",
+      "type": "String",
+      "options": []
+    },
+    {
+      "key": "BookingMailSubject",
+      "title": "Booking Mail Subject",
+      "value": "Fieldbook reservation",
+      "description": "",
+      "type": "String",
+      "options": []
+    },
+    {
+      "key": "AlumniGroup",
+      "title": "Alumni group",
+      "value": "alumni",
+      "description": "",
+      "type": "String",
+      "options": []
+    },
+    {
+      "key": "AccountPartyTypes",
+      "title": "Account party type",
+      "value": "Person",
+      "description": "Setting to define party type name",
+      "type": "String",
+      "options": []
+    },
+    {
+      "key": "EventAdminGroups",
+      "title": "Event admin groups",
+      "value": "FB_Edit_HAI:Hainich-Dün,FB_Edit_SCH:Schorfheide-Chorin,FB_Edit_ALB:Schwäbische Alb",
+      "description": "Setting admin group to edit and delete events and schedules, Groupname:resource attribute value so you are able to give different rights to group depending on the classification with resource attribute value",
+      "type": "String",
+      "options": []
+    },
+    {
+      "key": "OverNightResource",
+      "title": "Over night resource",
+      "value": "Sleeping place",
+      "description": "Setting to specify resource for specific validation.",
+      "type": "String",
+      "options": []
+    }
+  ]
+}

@@ -14,7 +14,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BExIS.Rbm.Services</RootNamespace>
     <AssemblyName>BExIS.Rbm.Services</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
@@ -51,12 +51,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Vaiona.Entities">
-      <HintPath>..\..\..\..\..\Libraries\Vaiona\Vaiona.Entities.dll</HintPath>
-    </Reference>
-    <Reference Include="Vaiona.Persistence.Api">
-      <HintPath>..\..\..\..\..\Libraries\Vaiona\Vaiona.Persistence.Api.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BookingManagementTime\TimeManager.cs" />
@@ -76,7 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\Components\AAA\BExIS.Security.Entities\BExIS.Security.Entities.csproj">
-      <Project>{c230693b-d780-438b-b26c-82257642dd5c}</Project>
+      <Project>{C230693B-D780-438B-B26C-82257642DD5C}</Project>
       <Name>BExIS.Security.Entities</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\..\Components\AAA\BExIS.Security.Services\BExIS.Security.Services.csproj">
@@ -90,6 +84,14 @@
     <ProjectReference Include="..\..\..\..\..\Components\DLM\BExIS.Dlm.Services\BExIS.Dlm.Services.csproj">
       <Project>{c4ca0a99-0af3-4372-a9b7-b9073599bd8b}</Project>
       <Name>BExIS.Dlm.Services</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\Components\Vaiona\Vaiona.Entities\Vaiona.Entities.csproj">
+      <Project>{0815d220-3625-4e23-bbbc-8152345637fe}</Project>
+      <Name>Vaiona.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\Components\Vaiona\Vaiona.Persistence.Api\Vaiona.Persistence.Api.csproj">
+      <Project>{640bf81d-354a-4bf0-85fc-f0ad587cf8a2}</Project>
+      <Name>Vaiona.Persistence.Api</Name>
     </ProjectReference>
     <ProjectReference Include="..\BExIS.Rbm.Entities\BExIS.Rbm.Entities.csproj">
       <Project>{c9f05c1a-c8a0-47b1-a0da-50af41992767}</Project>

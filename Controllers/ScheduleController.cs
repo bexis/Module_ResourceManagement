@@ -32,6 +32,7 @@ using BExIS.Dlm.Services.Party;
 using BExIS.Modules.RBM.UI.Helper;
 using BExIS.Security.Services.Objects;
 using Vaiona.Persistence.Api;
+using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.RBM.UI.Controllers
 {
@@ -748,7 +749,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 if (ModelState.IsValid)
                 {
                     //get event admin groups: format= "groupname:resource structure attribute value"
-                    string[] eventAdminGroups = Helper.Settings.get("EventAdminGroups").ToString().Split(',');
+                    var settings = ModuleManager.GetModuleSettings("rbm");
+                    string[] eventAdminGroups = settings.GetValueByKey("EventAdminGroups").ToString().Split(',');
                     Dictionary<string, string> adminGroupsDictionary = new Dictionary<string, string>();
                     if (eventAdminGroups != null && eventAdminGroups.Length > 0)
                     {
@@ -1147,7 +1149,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     User user = userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
 
                     //get event admin groups: format= "groupname:resource structure attribute value"
-                    string[] eventAdminGroups = Helper.Settings.get("EventAdminGroups").ToString().Split(',');
+                    var settings = ModuleManager.GetModuleSettings("rbm");
+                    string[] eventAdminGroups = settings.GetValueByKey("EventAdminGroups").ToString().Split(',');
                     Dictionary<string, string> adminGroupsDictionary = new Dictionary<string, string>();
                     if (eventAdminGroups != null && eventAdminGroups.Length > 0)
                     {
@@ -1182,7 +1185,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             // retreive list of all users 
             DataTable result = null;
-            string groupName = Helper.Settings.get("AlumniGroup").ToString();
+
+            var settings = ModuleManager.GetModuleSettings("rbm");
+            string groupName = settings.GetValueByKey("AlumniGroup").ToString();
+
             var query = "SELECT partyid, userid FROM public.partyusers Left join users on partyusers.userid = users.id where users.id not in (select userref from users_groups where groupref = (SELECT id FROM groups WHERE name = '"+ groupName +"'))";
 
             result = retrieve(query);
@@ -1198,7 +1204,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
             using (UserManager userManager = new UserManager())
             {
                 //get party type where you store the first and-lastname of the persons
-                var accountPartyTypesStr = Helper.Settings.get("AccountPartyTypes");
+
+                var accountPartyTypesStr = settings.GetValueByKey("AccountPartyTypes");
                 var partyType = partyTypeManager.PartyTypes.Where(p => p.Title == accountPartyTypesStr.ToString()).FirstOrDefault();
 
                 //get all parties with person party type
@@ -1372,7 +1379,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 User user = userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
 
                 //get event admin groups: format= "groupname:resource structure attribute value"
-                string[] eventAdminGroups = Helper.Settings.get("EventAdminGroups").ToString().Split(',');
+                var settings = ModuleManager.GetModuleSettings("rbm");
+                string[] eventAdminGroups = settings.GetValueByKey("EventAdminGroups").ToString().Split(',');
                 Dictionary<string, string> adminGroupsDictionary = new Dictionary<string, string>();
                 if (eventAdminGroups != null && eventAdminGroups.Length > 0)
                 {
@@ -2267,7 +2275,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             DateTime endDate = endDateUI;
             //get resourcename for specific validation
-            string overNightResourceName = Helper.Settings.get("OverNightResource").ToString();
+            var settings = ModuleManager.GetModuleSettings("rbm");
+            string overNightResourceName = settings.GetValueByKey("OverNightResource").ToString();
 
             //if there is a resource name in settings compair the settings name with the schedule resource
             bool daysCase = false;
