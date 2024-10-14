@@ -323,7 +323,7 @@ namespace BExIS.Modules.RBM.UI.Helper
                         var resource = rManager.CreateResource(rs_item.name, rs_item.description, rs_item.quantity, rs_item.color, rs_item.withActivity, rs_item.resourceStructure, duration);
 
                         //add entity rights
-                        permissionManager.Create(adminGroup,
+                        permissionManager.CreateAsync (adminGroup,
                                        entityManager.FindByName("SingleResource"),
                                        resource.Id,
                                        rights
