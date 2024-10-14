@@ -63,8 +63,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
 
                     //get permission from logged in user
-                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity.Id }, r.Id, RightType.Write);
-                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity.Id }, r.Id, RightType.Delete);
+                    temp.EditAccess = permissionManager.HasEffectiveRightsAsync(userId, entity.Id, r.Id, RightType.Write).Result;
+                    temp.DeleteAccess = permissionManager.HasEffectiveRightsAsync(userId, entity.Id, r.Id, RightType.Delete).Result;
 
                     model.Add(temp);
                 }
@@ -244,7 +244,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                         //31 is the sum from all rights:  Read = 1,  Write = 4, Delete = 8, Grant = 16
                         int rights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete + (int)RightType.Grant;
-                        pManager.Create(user, entityType, resource.Id, rights);
+                        pManager.CreateAsync(user, entityType, resource.Id, rights);
                     }
 
                     //End -> add security ------------------------------------------
@@ -649,7 +649,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 {
                     Type entityType = entityTypeManager.FindByName("SingleResource").EntityType;
                     //delete security 
-                    permissionManager.Delete(entityType, id);
+                    permissionManager.DeleteAsync(entityType, id);
                 }
             }
 

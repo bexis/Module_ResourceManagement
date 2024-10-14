@@ -49,8 +49,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     NotificationModel temp = new NotificationModel(n);
 
                     //get permission from logged in user
-                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, n.Id, RightType.Write);
-                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, n.Id, RightType.Delete);
+                    temp.EditAccess = permissionManager.HasEffectiveRightsAsync(userId, entityTypeId, n.Id, RightType.Write).Result;
+                    temp.DeleteAccess = permissionManager.HasEffectiveRightsAsync(userId, entityTypeId, n.Id, RightType.Delete).Result;
 
                     model.Add(temp);
                 }
@@ -197,8 +197,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                     var group = groupManager.FindByNameAsync(g).Result;
                                     if (group != null)
                                     {
-                                        if (pManager.GetRights(group.Id, entityType.Id, notification.Id) == 0)
-                                            pManager.Create(group.Id, entityType.Id, notification.Id, fullRights);
+                                        if (pManager.GetRightsAsync(group.Id, entityType.Id, notification.Id).Result == 0)
+                                            pManager.CreateAsync(group.Id, entityType.Id, notification.Id, fullRights);
                                     }
                                 }
                             }
@@ -208,8 +208,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         using (var groupManager = new GroupManager())
                         {
                             var adminGroup = groupManager.FindByNameAsync("administrator").Result;
-                            if (pManager.GetRights(adminGroup.Id, entityType.Id, notification.Id) == 0)
-                                pManager.Create(adminGroup.Id, entityType.Id, notification.Id, fullRights);
+                            if (pManager.GetRightsAsync(adminGroup.Id, entityType.Id, notification.Id).Result == 0)
+                                pManager.CreateAsync(adminGroup.Id, entityType.Id, notification.Id, fullRights);
 
                         }
 
@@ -217,7 +217,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                          var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                          userTask.Wait();
                          var user = userTask.Result;
-                         pManager.Create(user, entityType, notification.Id, fullRights);
+                         pManager.CreateAsync(user, entityType, notification.Id, fullRights);
                         
 
                         //End -> add security ------------------------------------------
@@ -385,7 +385,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 {
                     Type entityType = entityTypeManager.FindByName("Notification").EntityType;
                     //delete security 
-                    permissionManager.Delete(entityType, id);
+                    permissionManager.DeleteAsync (entityType, id);
                 }
             }
 
@@ -444,8 +444,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     NotificationModel temp = new NotificationModel(n);
 
                     //get permission from logged in user
-                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, n.Id, RightType.Write);
-                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, n.Id, RightType.Delete);
+                    temp.EditAccess = permissionManager.HasEffectiveRightsAsync(userId, entityTypeId, n.Id, RightType.Write).Result;
+                    temp.DeleteAccess = permissionManager.HasEffectiveRightsAsync(userId, entityTypeId, n.Id, RightType.Delete).Result;
 
                     notifications.Add(temp);
                 }

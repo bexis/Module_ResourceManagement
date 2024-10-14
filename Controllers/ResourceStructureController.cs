@@ -48,8 +48,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     temp.InUse = rsManager.IsResourceStructureInUse(rs.Id);
 
                     //get permission from logged in user
-                    temp.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, rs.Id, RightType.Write);
-                    temp.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, rs.Id, RightType.Delete);
+                    temp.EditAccess = permissionManager.HasEffectiveRightsAsync(userId, entityTypeId, rs.Id, RightType.Write).Result;
+                    temp.DeleteAccess = permissionManager.HasEffectiveRightsAsync(userId, entityTypeId, rs.Id, RightType.Delete).Result;
 
                     model.Add(temp);
                 }
@@ -90,7 +90,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                     //31 is the sum from all rights:  Read = 1, Write = 4, Delete = 8, Grant = 16
                     int rights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete + (int)RightType.Grant;
-                    pManager.Create(user, entityType, rS.Id, rights);
+                    pManager.CreateAsync(user, entityType, rS.Id, rights);
 
 
                     //End -> add security ------------------------------------------
@@ -218,7 +218,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 {
                     Type entityType = entityTypeManager.FindByName("ResourceStructure").EntityType;
                     //delete security 
-                    permissionManager.Delete(entityType, id);
+                    permissionManager.DeleteAsync(entityType, id);
                 }
             }
 
@@ -299,8 +299,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     long entityTypeId = entityTypeManager.FindByName("ResourceStructureAttribute").Id;
 
                     //get permission from logged in user
-                    rsaModel.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, a.Id, RightType.Write);
-                    rsaModel.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entityTypeId }, a.Id, RightType.Delete);
+                    rsaModel.EditAccess = permissionManager.HasEffectiveRightsAsync(userId, entityTypeId, a.Id, RightType.Write).Result;
+                    rsaModel.DeleteAccess = permissionManager.HasEffectiveRightsAsync(userId, entityTypeId, a.Id, RightType.Delete).Result;
                     model.Add(rsaModel);
                 }
             }
@@ -384,7 +384,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                                 Entity entityType = entityTypeManager.FindByName("ResourceStructureAttribute");
 
-                                pManager.Create(user, entityType, rsa.Id, 31);
+                                pManager.CreateAsync(user, entityType, rsa.Id, 31);
                             }
 
                             //End -> add security ------------------------------------------
@@ -494,7 +494,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     {
                         Type entityType = entityTypeManager.FindByName("Notification").EntityType;
                         //delete security 
-                        permissionManager.Delete(entityType, id);
+                        permissionManager.DeleteAsync (entityType, id);
                     }
                 }
                 else

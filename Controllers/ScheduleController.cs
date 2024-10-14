@@ -827,8 +827,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                         var group = groupManager.FindByNameAsync(g).Result;
                                         if (group != null)
                                         {
-                                            if (permissionManager.GetRights(group.Id, entityTypeEvent.Id, eEvent.Id) == 0)
-                                                permissionManager.Create(group.Id, entityTypeEvent.Id, eEvent.Id, fullRights);
+                                            if (permissionManager.GetRightsAsync(group.Id, entityTypeEvent.Id, eEvent.Id).Result == 0)
+                                                permissionManager.CreateAsync(group.Id, entityTypeEvent.Id, eEvent.Id, fullRights);
                                         }
                                     }
                                 }
@@ -837,8 +837,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                             //rights on event for logdedin user
                             var userIdLoggedIn = UserHelper.GetUserId(HttpContext.User.Identity.Name);
 
-                            if (permissionManager.GetRights(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id) == 0)
-                                permissionManager.Create(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id, fullRights);
+                            if (permissionManager.GetRightsAsync(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id).Result == 0)
+                                permissionManager.CreateAsync(userIdLoggedIn, entityTypeEvent.Id, eEvent.Id, fullRights);
 
 
                             List<Notification> notifications = new List<Notification>();
@@ -922,8 +922,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                         if (group != null)
                                         {
                                             //rights on schedule
-                                            if (permissionManager.GetRights(group.Id, entityTypeSchedule.Id, newSchedule.Id) == 0)
-                                                permissionManager.Create(group.Id, entityTypeSchedule.Id, newSchedule.Id, fullRights);
+                                            if (permissionManager.GetRightsAsync(group.Id, entityTypeSchedule.Id, newSchedule.Id).Result == 0)
+                                                permissionManager.CreateAsync(group.Id, entityTypeSchedule.Id, newSchedule.Id, fullRights);
                                         }
                                     }
                                 }
@@ -931,8 +931,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 //add rights to logged in user if not exsit
                                 //rights on schedule 31 is the sum from all rights:  Read = 1, Write = 4, Delete = 8, Grant = 16
 
-                                if (permissionManager.GetRights(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id) == 0)
-                                    permissionManager.Create(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id, fullRights);
+                                if (permissionManager.GetRightsAsync(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id).Result == 0)
+                                    permissionManager.CreateAsync(userIdLoggedIn, entityTypeSchedule.Id, newSchedule.Id, fullRights);
 
                                 //Add rights to the schedule and event for all user reserved for
                                 foreach (PersonInSchedule user in schedule.ForPersons)
@@ -942,12 +942,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                     {
                                         //rights on schedule 15 is the sum from this rights:  Read = 1, Download = 2, Write = 4, Delete = 8
                                         int schedulesRights = (int)RightType.Read + (int)RightType.Write + (int)RightType.Delete;
-                                        if (permissionManager.GetRights(us.Id, entityTypeSchedule.Id, newSchedule.Id) == 0)
-                                            permissionManager.Create(us.Id, entityTypeSchedule.Id, newSchedule.Id, schedulesRights);
+                                        if (permissionManager.GetRightsAsync(us.Id, entityTypeSchedule.Id, newSchedule.Id).Result == 0)
+                                            permissionManager.CreateAsync(us.Id, entityTypeSchedule.Id, newSchedule.Id, schedulesRights);
                                         //rights on event, Read = 1, Write = 4
                                         int eventRights = (int)RightType.Read + (int)RightType.Write;
-                                        if (permissionManager.GetRights(us.Id, entityTypeEvent.Id, eEvent.Id) == 0)
-                                            permissionManager.Create(us.Id, entityTypeEvent.Id, eEvent.Id, eventRights);
+                                        if (permissionManager.GetRightsAsync(us.Id, entityTypeEvent.Id, eEvent.Id).Result == 0)
+                                            permissionManager.CreateAsync(us.Id, entityTypeEvent.Id, eEvent.Id, eventRights);
                                     }
                                 }
                             }
@@ -2098,14 +2098,14 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                 //Check permission for BookingEvent
                 Entity entity = entityTypeManager.FindByName("BookingEvent");
-                model.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity.Id }, id, RightType.Write);
-                model.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity.Id }, id, RightType.Delete);
+                model.EditAccess = permissionManager.HasEffectiveRightsAsync(userId, entity.Id, id, RightType.Write).Result;
+                model.DeleteAccess = permissionManager.HasEffectiveRightsAsync(userId, entity.Id , id, RightType.Delete).Result;
 
 
                 //Check permission for Schedule
                 Entity entity2 = entityTypeManager.FindByName("Schedule");
-                model.Schedules.ForEach(a => a.EditAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity2.Id }, a.ScheduleId, RightType.Write));
-                model.Schedules.ForEach(a => a.DeleteAccess = permissionManager.HasEffectiveRight(userId, new List<long>() { entity2.Id }, a.ScheduleId, RightType.Delete));
+                model.Schedules.ForEach(a => a.EditAccess = permissionManager.HasEffectiveRightsAsync(userId, entity2.Id, a.ScheduleId, RightType.Write).Result);
+                model.Schedules.ForEach(a => a.DeleteAccess = permissionManager.HasEffectiveRightsAsync(userId, entity2.Id , a.ScheduleId, RightType.Delete).Result);
 
                 //Set Edit access 
                 foreach (var s in model.Schedules)
