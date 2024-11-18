@@ -1612,9 +1612,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                     if(s.ResourceHasFiles)
                     {
-                        if(s.Files.FirstOrDefault().Name == tempSchedule.Files.FirstOrDefault().Name)
+                        if (tempSchedule.Files.Count > 0)
                         {
-                            s.FileConfirmation = true;
+                            if (s.Files.FirstOrDefault().Name == tempSchedule.Files.FirstOrDefault().Name)
+                            {
+                                s.FileConfirmation = true;
+                            }
                         }
                     }
                     
