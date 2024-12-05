@@ -30,8 +30,10 @@ namespace BExIS.Web.Shell.Areas.RBM.Helpers
             List<string> receiverBCC = new List<string>();
             receiverBCC.Add(ConfigurationManager.AppSettings["SystemEmail"]);
 
-            var emailService = new EmailService();
-            emailService.Send(subject, message, receiver, null, receiverBCC, null);
+            using (var emailService = new EmailService())
+            {
+                emailService.Send(subject, message, receiver, null, receiverBCC, null);
+            }
         }
 
         /// <summary>
@@ -94,14 +96,16 @@ namespace BExIS.Web.Shell.Areas.RBM.Helpers
 
             receiverBCC.Add(ConfigurationManager.AppSettings["SystemEmail"].ToString()); // Allways send BCC to SystemEmail 
 
-            var emailService = new EmailService();
-            emailService.Send(
-               subject,
-               message,
-               receiver.Distinct().ToList(), 
-               receiverCC, 
-               receiverBCC 
-               );
+            using (var emailService = new EmailService())
+            {
+                emailService.Send(
+                           subject,
+                           message,
+                           receiver.Distinct().ToList(),
+                           receiverCC,
+                           receiverBCC
+                           );
+            }
         }
 
     }
