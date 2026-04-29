@@ -24,6 +24,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
 {
     public class ResourceStructureController : Controller
     {
+        private readonly UserManager _userManager;
+
+        public ResourceStructureController(UserManager userManager)
+        {
+            _userManager = userManager;
+        }
         #region ResourceStructure
 
         public ActionResult ResourceStructure()
@@ -32,9 +38,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<ResourceStructureManagerModel> model = new List<ResourceStructureManagerModel>();
 
             using (var rsManager = new ResourceStructureManager())
-            using (var permissionManager = new EntityPermissionManager())
             using (var entityTypeManager = new EntityManager())
             {
+                EntityPermissionManager permissionManager = new EntityPermissionManager();
                 IQueryable<ResourceStructure> data = rsManager.GetAllResourceStructures();
 
                 //get id from loged in user
@@ -68,10 +74,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult Create(CreateResourceStructureModel model)
         {
             using (ResourceStructureManager rsManager = new ResourceStructureManager())
-            using (var pManager = new EntityPermissionManager())
             using (var entityTypeManager = new EntityManager())
-            using (UserManager userManager = new UserManager())
             {
+                EntityPermissionManager pManager = new EntityPermissionManager();
                 //check name
                 ResourceStructure temp = rsManager.GetResourceStructureByName(StringHelper.CutSpaces(model.Name));
                 if (temp != null)
@@ -82,7 +87,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     ResourceStructure rS = rsManager.Create(model.Name, model.Description, null, null);
 
                     //Start -> add security ----------------------------------------
-                    var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                    var userTask = _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                     userTask.Wait();
                     var user = userTask.Result;
 
@@ -208,9 +213,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult Delete(long id)
         {
             using (var rsManager = new ResourceStructureManager())
-            using (var permissionManager = new EntityPermissionManager())
             using(var entityTypeManager = new EntityManager())
             {
+                EntityPermissionManager permissionManager = new EntityPermissionManager();
                 ResourceStructure resourceStructure = rsManager.GetResourceStructureById(id);
                 bool deleted = rsManager.Delete(resourceStructure);
 
@@ -282,9 +287,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             using (var rsManager = new ResourceStructureManager())
             using (var rsaManager = new ResourceStructureAttributeManager())
-            using (var permissionManager = new EntityPermissionManager())
             using (var entityTypeManager = new EntityManager())
             {
+                EntityPermissionManager permissionManager = new EntityPermissionManager();
                 IQueryable<ResourceStructureAttribute> rsaList = rsaManager.GetAllResourceStructureAttributes();
 
                 foreach (ResourceStructureAttribute a in rsaList)
@@ -374,11 +379,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         {
                             //Start -> add security ----------------------------------------
 
-                            using (EntityPermissionManager pManager = new EntityPermissionManager())
                             using (var entityTypeManager = new EntityManager())
-                            using (UserManager userManager = new UserManager())
                             {
-                                var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                                EntityPermissionManager pManager = new EntityPermissionManager();
+                                var userTask = _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                                 userTask.Wait();
                                 var user = userTask.Result;
 
@@ -482,9 +486,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult DeleteResourceStructureAttribute(long id)
         {
             using (var rsaManager = new ResourceStructureAttributeManager())
-            using (var permissionManager = new EntityPermissionManager())
             using (var entityTypeManager = new EntityManager())
             {
+                EntityPermissionManager permissionManager = new EntityPermissionManager();
                 ResourceStructureAttribute rsa = rsaManager.GetResourceStructureAttributesById(id);
                 if (rsa != null)
                 {

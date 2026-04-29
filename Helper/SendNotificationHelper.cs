@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net.Mail;
 using System.Web;
 using System.Web.Configuration;
+using Vaiona.IoC;
 using Vaiona.Utils.Cfg;
 using Vaiona.Web.Mvc.Modularity;
 
@@ -17,6 +18,12 @@ namespace BExIS.Web.Shell.Areas.RBM.Helpers
 {
     public class SendNotificationHelper
     {
+        private readonly UserManager _userManager;
+
+        public SendNotificationHelper(UserManager userManager)
+        {
+            _userManager = userManager;
+        }
         public enum BookingAction
         {
             created,
@@ -60,7 +67,9 @@ namespace BExIS.Web.Shell.Areas.RBM.Helpers
             if (!String.IsNullOrEmpty(model.Description))
                 message += "<b>Booking description: </b> " + model.Description + "</br>";
             message += "<p><b>Booked Resources:</b></p>";
-            using (var userManager = new UserManager())
+
+            var userManager = IoCFactory.Container.Resolve<UserManager>();
+
             using (var partyManager = new PartyManager())
             {
                 foreach (ScheduleEventModel schedule in model.Schedules)
@@ -80,7 +89,9 @@ namespace BExIS.Web.Shell.Areas.RBM.Helpers
                         else
                             message += person.UserFullName + ", ";
 
-                        var user = userManager.FindByIdAsync(person.UserId).Result;
+                        var userTask = userManager.FindByIdAsync(person.UserId);
+                        userTask.Wait();
+                        var user = userTask.Result;
 
                         if (user != null)
                         {

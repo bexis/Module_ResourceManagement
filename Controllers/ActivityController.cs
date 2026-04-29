@@ -19,15 +19,21 @@ namespace BExIS.Modules.RBM.UI.Controllers
 {
     public class ActivityController : Controller
     {
+        private readonly UserManager _userManager;
+        public ActivityController(UserManager userManager)
+        {
+            _userManager = userManager;
+        }
+
         public ActionResult Activity()
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Manage Activities", Session.GetTenant());
             List<ActivityModel> model = new List<ActivityModel>();
 
             using (var rManager = new ActivityManager())
-            using (var permissionManager = new EntityPermissionManager())
             using (var entityTypeManager = new EntityManager())
             {
+                EntityPermissionManager permissionManager = new EntityPermissionManager();
                 List<Activity> data = rManager.GetAllActivities().ToList();
 
                 // get id from loged in user
@@ -75,12 +81,11 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     Activity a = aManager.CreateActivity(model.Name, model.Description, model.Disable);
 
                     // Start -> add security ----------------------------------------
-                    using (EntityPermissionManager pManager = new EntityPermissionManager())
                     using (SubjectManager subManager = new SubjectManager())
                     using (var entityTypeManager = new EntityManager())
-                    using (UserManager userManager = new UserManager())
                     {
-                        var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                        EntityPermissionManager pManager = new EntityPermissionManager();
+                        var userTask = _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                         userTask.Wait();
                         var user = userTask.Result;
 

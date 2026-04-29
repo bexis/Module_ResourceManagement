@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using Vaiona.IoC;
 
 namespace BExIS.Modules.RBM.UI.Helper
 {
@@ -12,18 +13,14 @@ namespace BExIS.Modules.RBM.UI.Helper
     {
         public static long GetUserId(string userName)
         {
-            using (UserManager userManager = new UserManager())
-            {
-                return userManager.FindByNameAsync(userName).Result.Id;
-            }
+            var userManager = IoCFactory.Container.Resolve<UserManager>();
+            return userManager.FindByNameAsync(userName).Result.Id;
         }
 
         public static Security.Entities.Subjects.User GetUser(string userName)
         {
-            using (UserManager userManager = new UserManager())
-            {
-                return userManager.FindByNameAsync(userName).Result;
-            }
+            var userManager = IoCFactory.Container.Resolve<UserManager>();
+            return userManager.FindByNameAsync(userName).Result;
         }
 
 

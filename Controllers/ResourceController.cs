@@ -37,16 +37,22 @@ namespace BExIS.Modules.RBM.UI.Controllers
 {
     public class ResourceController : Controller
     {
+        private readonly UserManager _userManager;
+
+        public ResourceController(UserManager userManager)
+        {
+            _userManager = userManager;
+        }
         // GET: /RBM/Resource/
         public ActionResult Resource()
         {
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Manage Resources", this.Session.GetTenant());
             List<ResourceManagerModel> model = new List<ResourceManagerModel>();
             using (var rManager = new ResourceManager())
-            using (var permissionManager = new EntityPermissionManager())
             using (var entityTypeManager = new EntityManager())
             using (var scheduleManager = new ScheduleManager())
             {
+                EntityPermissionManager permissionManager = new EntityPermissionManager();
                 IQueryable<SingleResource> data = rManager.GetAllResources();
 
                 long userId = UserHelper.GetUserId(HttpContext.User.Identity.Name);
@@ -231,11 +237,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                     //Start -> add security ----------------------------------------
 
-                    using (var pManager = new EntityPermissionManager())
                     using (var entityTypeManager = new EntityManager())
-                    using (UserManager userManager = new UserManager())
                     {
-                        var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                        EntityPermissionManager pManager = new EntityPermissionManager();
+                        var userTask = _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                         userTask.Wait();
                         var user = userTask.Result;
 
@@ -634,9 +639,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             using (var rManager = new ResourceManager())
             using (var valueManager = new ResourceStructureAttributeManager())
-            using (var permissionManager = new EntityPermissionManager())
             using (var entityTypeManager = new EntityManager())
             {
+                EntityPermissionManager permissionManager = new EntityPermissionManager();
                 SingleResource resource = rManager.GetResourceById(id);
 
                 //Delete values before delete resource
@@ -1119,7 +1124,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         private Person UpdatePerson(List<PersonInConstraint> forPersons)
         {
-            using (UserManager userManager = new UserManager())
             using (var pManager = new PersonManager())
             {
                 Person newPerson = new Person();
@@ -1136,7 +1140,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         List<User> users = new List<User>();
                         foreach (PersonInConstraint p in forPersons)
                         {
-                            users.Add(userManager.FindByIdAsync(p.UserId).Result);
+                            users.Add(_userManager.FindByIdAsync(p.UserId).Result);
                         }
                          
                         if (person.Self is IndividualPerson)
@@ -1167,19 +1171,19 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         {
                             //PersonGroup pG = (PersonGroup)person;
                             //pManager.DeletePersonGroup(pG);
-                            newPerson = pManager.CreateIndividualPerson(userManager.FindByIdAsync(forPersons[0].UserId).Result);
+                            newPerson = pManager.CreateIndividualPerson(_userManager.FindByIdAsync(forPersons[0].UserId).Result);
                         }
                         else if (person.Self is IndividualPerson)
                         {
                             IndividualPerson iPerson = pManager.GetIndividualPersonById(forPersons[0].Id);
-                            iPerson.Person = userManager.FindByIdAsync(forPersons[0].UserId).Result;
+                            iPerson.Person = _userManager.FindByIdAsync(forPersons[0].UserId).Result;
 
                             newPerson = pManager.UpdateIndividualPerson(iPerson);
                         }
                     }
                     else
                     {
-                        newPerson = pManager.CreateIndividualPerson(userManager.FindByIdAsync(forPersons[0].UserId).Result);
+                        newPerson = pManager.CreateIndividualPerson(_userManager.FindByIdAsync(forPersons[0].UserId).Result);
                     }
                 }
 
@@ -1193,7 +1197,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             using (var partyManager = new PartyManager())
             using (var partyTypeManager = new PartyTypeManager())
-            using (UserManager userManager = new UserManager())
             {
 
                 //get party type person
@@ -1204,7 +1207,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 List<PersonInConstraint> personListSelected = new List<PersonInConstraint>();
                 List<PersonInConstraint> personList = new List<PersonInConstraint>();
                 ResourceConstraintModel tempConstraint = model.ResourceConstraints.Where(a => a.Index == int.Parse(index)).FirstOrDefault();
-                var users = userManager.Users;
+                var users = _userManager.Users;
 
                 foreach (var user in users)
                 {
@@ -1258,10 +1261,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
             EditResourceModel model = (EditResourceModel)Session["Resource"];
             ResourceConstraintModel tempConstraint = model.ResourceConstraints.Where(p=>p.Index == int.Parse(index)).FirstOrDefault();
 
-            using (UserManager userManager = new UserManager())
             using (var pManager = new PersonManager())
             {
-                User user = userManager.FindByIdAsync(Convert.ToInt64(userId)).Result;
+                User user = _userManager.FindByIdAsync(Convert.ToInt64(userId)).Result;
 
                 if (selected == "true")
                 {
