@@ -26,6 +26,18 @@ namespace BExIS.Modules.RBM.UI.Controllers
 {
     public class NotificationController : Controller
     {
+        private readonly GroupManager _groupManager;
+        private readonly UserManager _userManager;
+
+        public NotificationController(GroupManager groupManager)
+        {
+            _groupManager = groupManager;
+        }
+        public NotificationController(UserManager userManager)
+        {
+            _userManager = userManager;
+        }
+
         #region Notification Management
 
         public ActionResult Notification()
@@ -34,9 +46,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
             List<NotificationModel> model = new List<NotificationModel>();
 
             using (var nManager = new NotificationManager())
-            using (var permissionManager = new EntityPermissionManager())
             using (var entityTypeManager = new EntityManager())
             {
+                EntityPermissionManager permissionManager = new EntityPermissionManager();
                 List<Notification> data = nManager.GetAllNotifications().ToList();
 
                 //get id from loged in user
@@ -77,10 +89,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult Save(EditNotificationModel model)
         {
             using (NotificationManager nManager = new NotificationManager())
-            using (EntityPermissionManager pManager = new EntityPermissionManager())
             using (EntityManager entityTypeManager = new EntityManager())
-            using (UserManager userManager = new UserManager())
             {
+                EntityPermissionManager pManager = new EntityPermissionManager();
                 Dictionary<long, List<string>> dictionary = (Dictionary<long, List<string>>)Session["ResourceFilter"];
                 if (ModelState.IsValid && dictionary != null)
                 {
@@ -190,31 +201,27 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                                 .Where(pair => values.Contains(pair.Value))
                                                 .Select(pair => pair.Key)
                                                 .ToList();
-                            using (var groupManager = new GroupManager())
-                            {
+
                                 foreach (var g in adminGroups)
                                 {
-                                    var group = groupManager.FindByNameAsync(g).Result;
+                                    var group = _groupManager.FindByNameAsync(g).Result;
                                     if (group != null)
                                     {
                                         if (pManager.GetRightsAsync(group.Id, entityType.Id, notification.Id).Result == 0)
                                             pManager.CreateAsync(group.Id, entityType.Id, notification.Id, fullRights);
                                     }
                                 }
-                            }
                         }
 
                         //rights to bexcis admin group
-                        using (var groupManager = new GroupManager())
-                        {
-                            var adminGroup = groupManager.FindByNameAsync("administrator").Result;
+
+                            var adminGroup = _groupManager.FindByNameAsync("administrator").Result;
                             if (pManager.GetRightsAsync(adminGroup.Id, entityType.Id, notification.Id).Result == 0)
                                 pManager.CreateAsync(adminGroup.Id, entityType.Id, notification.Id, fullRights);
 
-                        }
 
                          //rights to user that has create the notification
-                         var userTask = userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+                         var userTask = _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
                          userTask.Wait();
                          var user = userTask.Result;
                          pManager.CreateAsync(user, entityType, notification.Id, fullRights);
@@ -374,9 +381,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult Delete(long id)
         {
             using (var nManager = new NotificationManager())
-            using (var permissionManager = new EntityPermissionManager())
             using (var entityTypeManager = new EntityManager())
             {
+                EntityPermissionManager permissionManager = new EntityPermissionManager();
                 Notification notification = nManager.GetNotificationById(id);
 
                 bool deleted = nManager.DeleteNotification(notification);
@@ -428,9 +435,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
         public ActionResult Notification_Select()
         {
             using (var nManager = new NotificationManager())
-            using (var permissionManager = new EntityPermissionManager())
             using (var entityTypeManager = new EntityManager())
             {
+                EntityPermissionManager permissionManager = new EntityPermissionManager();
                 List<Notification> data = nManager.GetAllNotifications().ToList();
                 List<NotificationModel> notifications = new List<NotificationModel>();
 

@@ -38,6 +38,17 @@ namespace BExIS.Modules.RBM.UI.Controllers
 {
     public class ScheduleController : Controller
     {
+        private readonly UserManager _userManager;
+        private readonly GroupManager _groupManager;
+
+        public ScheduleController(GroupManager groupManager)
+        {
+            _groupManager = groupManager;
+        }
+        public ScheduleController(UserManager userManager)
+        {
+            _userManager = userManager;
+        }
         #region Create Event -- Filter Resources
 
         //internal usage to store seleced resources schedules in a session
@@ -210,7 +221,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                 using (var srManager = new ResourceManager())
                 using (var pManager = new PersonManager())
-                using (UserManager userManager = new UserManager())
                 {
                     int index = 0;
                     if (model.Count() == 0)
@@ -381,7 +391,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Book Resources II", this.Session.GetTenant());
             using (var partyManager = new PartyManager())
             using (var rManager = new ResourceManager())
-            using (UserManager userManager = new UserManager())
             {
                 List<ResourceCart> cart = (List<ResourceCart>)Session["ResourceCart"];
                 if (cart == null)
@@ -426,7 +435,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                                 //add as default resvered by user as reserved for user
 
-                                var userTask = userManager.FindByIdAsync(rc.ByPersonUserId);
+                                var userTask = _userManager.FindByIdAsync(rc.ByPersonUserId);
                                 userTask.Wait();
                                 var user = userTask.Result;
 
@@ -761,13 +770,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
                        }
                     }
 
-                    using (UserManager userManager = new UserManager())
                     using (var scheduleManager = new ScheduleManager())
                     using (var personManager = new PersonManager())
                     using (var eventManager = new BookingEventManager())
-                    using (var permissionManager = new EntityPermissionManager())
                     using (var entityTypeManager = new EntityManager())
                     {
+                        EntityPermissionManager permissionManager = new EntityPermissionManager();
                         try
                         {
                             // get event min und max date from schedules
@@ -822,15 +830,12 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                                 foreach (var g in adminGroups)
                                 {
-                                    using (var groupManager = new GroupManager())
-                                    {
-                                        var group = groupManager.FindByNameAsync(g).Result;
+                                        var group = _groupManager.FindByNameAsync(g).Result;
                                         if (group != null)
                                         {
                                             if (permissionManager.GetRightsAsync(group.Id, entityTypeEvent.Id, eEvent.Id).Result == 0)
                                                 permissionManager.CreateAsync(group.Id, entityTypeEvent.Id, eEvent.Id, fullRights);
                                         }
-                                    }
                                 }
                             }
 
@@ -849,7 +854,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                                 //get user who has created the event/schedule
                                 IndividualPerson createdBy = new IndividualPerson();
-                                User created = userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
+                                User created = _userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
                                 createdBy = personManager.CreateIndividualPerson(created);
 
                                 Schedule newSchedule = new Schedule();
@@ -872,7 +877,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 {
                                     foreach (PersonInSchedule user in schedule.ForPersons)
                                     {
-                                        User u = userManager.FindByIdAsync(user.UserId).Result;
+                                        User u = _userManager.FindByIdAsync(user.UserId).Result;
 
                                         if (user.IsContactPerson == true)
                                         {
@@ -887,7 +892,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 }
                                 else
                                 {
-                                    User u = userManager.FindByIdAsync(schedule.ForPersons[0].UserId).Result;
+                                    User u = _userManager.FindByIdAsync(schedule.ForPersons[0].UserId).Result;
                                     person = personManager.CreateIndividualPerson(u);
                                 }
 
@@ -916,16 +921,13 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
 
                                     //give rights to group if group exsits
-                                    using (var groupManager = new GroupManager())
-                                    {
-                                        var group = groupManager.FindByNameAsync(adminGroupSchedule).Result;
+                                        var group = _groupManager.FindByNameAsync(adminGroupSchedule).Result;
                                         if (group != null)
                                         {
                                             //rights on schedule
                                             if (permissionManager.GetRightsAsync(group.Id, entityTypeSchedule.Id, newSchedule.Id).Result == 0)
                                                 permissionManager.CreateAsync(group.Id, entityTypeSchedule.Id, newSchedule.Id, fullRights);
                                         }
-                                    }
                                 }
 
                                 //add rights to logged in user if not exsit
@@ -937,7 +939,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                                 //Add rights to the schedule and event for all user reserved for
                                 foreach (PersonInSchedule user in schedule.ForPersons)
                                 {
-                                    User us = userManager.FindByIdAsync(user.UserId).Result;
+                                    User us = _userManager.FindByIdAsync(user.UserId).Result;
                                     if (us.Id != userIdLoggedIn)
                                     {
                                         //rights on schedule 15 is the sum from this rights:  Read = 1, Download = 2, Write = 4, Delete = 8
@@ -1035,9 +1037,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
         public ActionResult OpenEdit(string id)
         {
-            using (var permissionManager = new EntityPermissionManager())
             using (var subjectManager = new SubjectManager())
             {
+                EntityPermissionManager permissionManager = new EntityPermissionManager();
                 BookingEventModel model = (BookingEventModel)Session["Event"];
                 if (model != null)
                 {
@@ -1144,9 +1146,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
                 });
 
-                using (var userManager = new UserManager())
-                {
-                    User user = userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
+                    User user = _userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
 
                     //get event admin groups: format= "groupname:resource structure attribute value"
                     var settings = ModuleManager.GetModuleSettings("rbm");
@@ -1170,8 +1170,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
                     {
                         tempSchedule.ForPersons.ToList().ForEach(a => a.ShowMobileNr = true);
                     }
-                }
-
 
                 return PartialView("_scheduleUsers", tempSchedule.ForPersons);
 
@@ -1201,7 +1199,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
 
             using (var partyManager = new PartyManager())
             using (var partyTypeManager = new PartyTypeManager())
-            using (UserManager userManager = new UserManager())
             {
                 //get party type where you store the first and-lastname of the persons
 
@@ -1272,9 +1269,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
             //    sEventUser = new List<PersonInSchedule>();
 
             using (var partyManager = new PartyManager())
-            using (UserManager userManager = new UserManager())
             {
-                var userTask = userManager.FindByIdAsync(Convert.ToInt64(userId));
+                var userTask = _userManager.FindByIdAsync(Convert.ToInt64(userId));
                 userTask.Wait();
                 var user = userTask.Result;
 
@@ -1374,9 +1370,8 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             BookingEventModel sEventM = (BookingEventModel)Session["Event"];
             ScheduleEventModel tempSchedule = sEventM.Schedules.Where(a => a.Index == int.Parse(scheduleIndex)).FirstOrDefault();
-            using (var userManager = new UserManager())
-            {
-                User user = userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
+
+                User user = _userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result;
 
                 //get event admin groups: format= "groupname:resource structure attribute value"
                 var settings = ModuleManager.GetModuleSettings("rbm");
@@ -1400,9 +1395,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
                 {
                     tempSchedule.ForPersons.ToList().ForEach(a => a.ShowMobileNr = true);
                 }
-            }
-
-
             return PartialView("_showUsers", tempSchedule.ForPersons);
         }
 
@@ -1838,7 +1830,6 @@ namespace BExIS.Modules.RBM.UI.Controllers
         {
             BookingEventModel sEventM = (BookingEventModel)Session["Event"];
             using (ResourceManager srManager = new ResourceManager())
-            using (UserManager userManager = new UserManager())
             {
                 foreach (AlternateEventResource r in model)
                 {
@@ -1848,7 +1839,7 @@ namespace BExIS.Modules.RBM.UI.Controllers
                         ScheduleEventModel tempSchedule = new ScheduleEventModel(sr);
                         tempSchedule.ScheduleDurationModel.StartDate = r.StartDate;
                         tempSchedule.ScheduleDurationModel.EndDate = r.EndDate;
-                        var userTask = userManager.FindByIdAsync(Convert.ToInt64(r.ContactUserId));
+                        var userTask = _userManager.FindByIdAsync(Convert.ToInt64(r.ContactUserId));
                         userTask.Wait();
                         var user = userTask.Result;
                         var person = new PersonInSchedule(0, user, true);
@@ -2087,10 +2078,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
             //Session["ScheduleActivities"] = null;
             Session["Event"] = null;
 
-            using (var permissionManager = new EntityPermissionManager())
             using (var entityTypeManager = new EntityManager())
             using (var eManager = new BookingEventManager())
             {
+                EntityPermissionManager permissionManager = new EntityPermissionManager();
                 BookingEvent e = eManager.GetBookingEventById(id);
                 
                 BookingEventModel model = new BookingEventModel(e);

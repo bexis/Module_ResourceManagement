@@ -23,6 +23,17 @@ namespace BExIS.Modules.RBM.UI.Helper
 {
     public class RbmSeedDataGenerator : IDisposable
     {
+        private readonly GroupManager _groupManager;
+
+        public RbmSeedDataGenerator(GroupManager groupManager)
+        {
+            _groupManager = groupManager;
+        }
+
+        public RbmSeedDataGenerator()
+        {
+
+        }
         public void Dispose()
         {
             //throw new NotImplementedException();
@@ -292,12 +303,11 @@ namespace BExIS.Modules.RBM.UI.Helper
                 rs_new.Add(new newResourceStructure() { name = "Metal detector (Magna Trak 100) (ALB)", color = "#7e95bf", description = "Metal detector (Magna Trak 100) in Schwäbische Alb", duration = 1, quantity = 1, withActivity = false, resourceStructure = rs, type = "Equipment", explo = "Schwäbische Alb" });
 
                 //get/create admin group for entity rights
-                using (var groupManager = new GroupManager())
-                using (var permissionManager = new EntityPermissionManager())
                 using (var entityManager = new EntityManager())
                 using (var valueManager = new ResourceStructureAttributeManager())
                 {
-                    var adminGroup = groupManager.Groups.Where(r => r.Name == "administrator").FirstOrDefault();
+                    EntityPermissionManager permissionManager = new EntityPermissionManager();
+                    var adminGroup = _groupManager.FindByNameAsync("administrator").Result;
                     if (adminGroup == null)
                     {
                         // create new group
@@ -310,7 +320,7 @@ namespace BExIS.Modules.RBM.UI.Helper
                             IsValid = true
                         };
 
-                        groupManager.CreateAsync(adminGroup).Wait();
+                        _groupManager.CreateAsync(adminGroup).Wait();
                     }
 
                     //create right type

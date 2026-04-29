@@ -1,29 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using R = BExIS.Rbm.Entities.Resource;
-using E = BExIS.Rbm.Entities.Booking;
+﻿using BExIS.Dlm.Entities.DataStructure;
+using BExIS.Dlm.Entities.Party;
+using BExIS.Dlm.Services.Party;
 using BExIS.Rbm.Entities.Booking;
-using BExIS.Rbm.Services.Booking;
-using BExIS.Web.Shell.Areas.RBM.Models.Resource;
-using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
-using BExIS.Rbm.Entities.ResourceStructure;
-using BExIS.Dlm.Entities.DataStructure;
-using BExIS.Rbm.Services.Resource;
+using BExIS.Rbm.Entities.BookingManagementTime;
 using BExIS.Rbm.Entities.Resource;
+using BExIS.Rbm.Entities.ResourceStructure;
+using BExIS.Rbm.Services.Booking;
+using BExIS.Rbm.Services.Resource;
 using BExIS.Security.Entities.Subjects;
 using BExIS.Security.Services.Subjects;
+using BExIS.Web.Shell.Areas.RBM.Models.Resource;
+using BExIS.Web.Shell.Areas.RBM.Models.ResourceStructure;
+using Microsoft.AspNet.Identity;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using BExIS.Rbm.Entities.BookingManagementTime;
-using BExIS.Dlm.Services.Party;
-using BExIS.Dlm.Entities.Party;
+using System.Linq;
+using System.Web;
 using Vaiona.Persistence.Api;
+using E = BExIS.Rbm.Entities.Booking;
+using R = BExIS.Rbm.Entities.Resource;
 
 namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 {
     public class BookingEventModel
     {
+        private readonly UserManager _userManager;
+
+        public BookingEventModel(UserManager userManager)
+        {
+            _userManager = userManager;
+        }
+
         public DateTime startDate;
         public DateTime endDate;
 
@@ -58,7 +66,6 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
         public BookingEventModel(List<ResourceCart> cart)
         {
-            using (var userManager = new UserManager())
             using (var rManager = new ResourceManager())
             {
                 Schedules = new List<ScheduleEventModel>();
@@ -80,9 +87,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
 
                     //add as default resvered by user as reserved for user
-                    var userTask = userManager.FindByIdAsync(rc.ByPersonUserId);
-                    userTask.Wait();
-                    var user = userTask.Result;
+                    var user = _userManager.FindByIdAsync(rc.ByPersonUserId).Result;
 
                     PersonInSchedule byPerson = new PersonInSchedule(0, user, false);
                     byPerson.IsContactPerson = true;
