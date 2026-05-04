@@ -41,12 +41,9 @@ namespace BExIS.Modules.RBM.UI.Controllers
         private readonly UserManager _userManager;
         private readonly GroupManager _groupManager;
 
-        public ScheduleController(GroupManager groupManager)
+        public ScheduleController(GroupManager groupManager, UserManager userManager)
         {
             _groupManager = groupManager;
-        }
-        public ScheduleController(UserManager userManager)
-        {
             _userManager = userManager;
         }
         #region Create Event -- Filter Resources

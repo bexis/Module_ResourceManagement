@@ -29,13 +29,10 @@ namespace BExIS.Modules.RBM.UI.Controllers
         private readonly GroupManager _groupManager;
         private readonly UserManager _userManager;
 
-        public NotificationController(GroupManager groupManager)
-        {
-            _groupManager = groupManager;
-        }
-        public NotificationController(UserManager userManager)
+        public NotificationController(UserManager userManager, GroupManager groupManager)
         {
             _userManager = userManager;
+            _groupManager = groupManager;
         }
 
         #region Notification Management
