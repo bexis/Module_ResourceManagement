@@ -26,7 +26,6 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 {
     public class BookingEventModel
     {
-        private readonly UserManager _userManager;
 
         public DateTime startDate;
         public DateTime endDate;
@@ -58,11 +57,11 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         {
             Schedules = new List<ScheduleEventModel>();
             DeletedSchedules = new List<long>();
-            _userManager = IoCFactory.Container.Resolve<UserManager>();
         }
 
         public BookingEventModel(List<ResourceCart> cart)
         {
+            var userManager = IoCFactory.Container.Resolve<UserManager>();
             using (var rManager = new ResourceManager())
             {
                 Schedules = new List<ScheduleEventModel>();
@@ -84,7 +83,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
 
 
                     //add as default resvered by user as reserved for user
-                    var user = _userManager.FindByIdAsync(rc.ByPersonUserId).Result;
+                    var user = userManager.FindByIdAsync(rc.ByPersonUserId).Result;
 
                     PersonInSchedule byPerson = new PersonInSchedule(0, user, false);
                     byPerson.IsContactPerson = true;
