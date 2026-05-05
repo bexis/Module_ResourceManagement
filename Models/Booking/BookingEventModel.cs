@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
+using Vaiona.IoC;
 using Vaiona.Persistence.Api;
 using E = BExIS.Rbm.Entities.Booking;
 using R = BExIS.Rbm.Entities.Resource;
@@ -27,9 +28,9 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
     {
         private readonly UserManager _userManager;
 
-        public BookingEventModel(UserManager userManager)
+        public BookingEventModel()
         {
-            _userManager = userManager;
+            _userManager = IoCFactory.Container.Resolve<UserManager>();
         }
 
         public DateTime startDate;
