@@ -28,11 +28,6 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
     {
         private readonly UserManager _userManager;
 
-        public BookingEventModel()
-        {
-            _userManager = IoCFactory.Container.Resolve<UserManager>();
-        }
-
         public DateTime startDate;
         public DateTime endDate;
 
@@ -63,6 +58,7 @@ namespace BExIS.Web.Shell.Areas.RBM.Models.Booking
         {
             Schedules = new List<ScheduleEventModel>();
             DeletedSchedules = new List<long>();
+            _userManager = IoCFactory.Container.Resolve<UserManager>();
         }
 
         public BookingEventModel(List<ResourceCart> cart)
