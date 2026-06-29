@@ -44,6 +44,12 @@
 
     <!-- Mapping Entity Associations -->
 
+	  <many-to-one name="DataContainer"
+             class="BExIS.Dlm.Entities.DataStructure.DataContainer, BExIS.Dlm.Entities"
+             not-null="false"
+             column="DataContainerRef"
+             lazy="false" />
+
     <many-to-one name="Resource" class="BExIS.Rbm.Entities.Resource.Resource" column="ResourceRef" index="idx_RBM_ResourceConstraints_ResourceRef"/>
 
     <many-to-one name="ForTimeInterval" class="BExIS.Rbm.Entities.BookingManagementTime.TimeInterval" column="ForTimeInterval" cascade="all-delete-orphan"/>
